@@ -1,0 +1,22 @@
+{
+  "name": "researchproject-websitebuilder",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "npm run dev -w pwa"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VandeVeldeMelissa/ResearchProject-WebsiteBuilder.git"
+  },
+  "keywords": [],
+  "author": "Melissa Van de Velde",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VandeVeldeMelissa/ResearchProject-WebsiteBuilder/issues"
+  },
+  "homepage": "https://github.com/VandeVeldeMelissa/ResearchProject-WebsiteBuilder#readme",
+  "workspaces": [
+    "pwa"
+  ]
+}
