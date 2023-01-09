@@ -12,7 +12,8 @@
     "@unocss/reset": "^0.48.3",
     "konva": "^8.4.0",
     "vue": "^3.2.45",
-    "vue-konva": "^3.0.2"
+    "vue-konva": "^3.0.2",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
