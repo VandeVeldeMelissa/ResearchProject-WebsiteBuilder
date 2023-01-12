@@ -290,46 +290,22 @@ export default {
 		})
 
 		const updateTransformer = () => {
-			console.log('update transformer')
-			//get node from transformer:
-			// const transformerNode = transformer.value?.getNode()
-			// console.log('transformerNode: ')
-			// console.log(transformerNode)
-			//get stage from transformer:
-			console.log('transformer: ')
-			console.log(transformer.value)
-			console.log('transformer node: ')
-			console.log(transformer.value?.getNode())
 			const transformerNode = transformer.value?.getNode()
-
 			const transformerStage = transformerNode.getStage()
-			console.log('transformerStage: ')
-			console.log(transformerStage)
-
-			console.log('selectedShapeName: ')
-			console.log(selectedShapeName.value) //is equal to name of the selected object
 			const selectedNode = transformerStage.findOne(
 				(node: { name: () => string }) => {
 					return node.name() === selectedShapeName.value
 				},
 			)
-			console.log('selectedNode: ')
-			console.log(selectedNode)
 
-			//TODO: FIX THIS!
-			//if selectedNode is already attached to transformer, do nothing:
 			if (selectedNode === transformerNode?.node()) {
 				console.log('already selected')
 				return
 			}
 
 			if (selectedNode) {
-				// attach to another node
-				console.log('attach')
 				transformerNode.nodes([selectedNode])
 			} else {
-				// remove transformer
-				console.log('detach')
 				transformerNode.nodes([])
 			}
 		}
@@ -337,7 +313,6 @@ export default {
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
-				console.log('click empty canvas')
 				selectedShapeName.value = ''
 				updateTransformer()
 				return
@@ -346,7 +321,6 @@ export default {
 			// clicked on transformer - do nothing
 			const clickedOnTransformer = e.target.getParent().className === 'Transformer'
 			if (clickedOnTransformer) {
-				console.log('click transformer')
 				return
 			}
 
@@ -357,10 +331,8 @@ export default {
 			})
 
 			if (text) {
-				console.log('click text')
 				selectedShapeName.value = name
 			} else {
-				console.log('click other')
 				selectedShapeName.value = ''
 			}
 			updateTransformer()
@@ -371,18 +343,14 @@ export default {
 		})
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
-			console.log('transform end')
-			const text = e.target
-			console.log(text)
-			const textId = text.id.toString()
-			console.log('textId: ' + textId)
-			const textIndex = parseInt(textId) - 1
-			console.log('textIndex: ' + textIndex)
-			textList.value[textIndex].x = text.x()
-			textList.value[textIndex].y = text.y()
-			textList.value[textIndex].rotation = text.rotation()
-			textList.value[textIndex].scaleX = text.scaleX()
-			textList.value[textIndex].scaleY = text.scaleY()
+			const text = textList.value.find((r) => r.name === selectedShapeName.value)
+			if (text) {
+				text.x = e.target.x()
+				text.y = e.target.y()
+				text.rotation = e.target.rotation()
+				text.scaleX = e.target.scaleX()
+				text.scaleY = e.target.scaleY()
+			}
 		}
 
 		return {
