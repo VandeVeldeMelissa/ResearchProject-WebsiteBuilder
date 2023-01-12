@@ -193,10 +193,9 @@ import {
 	ChevronDown,
 } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import stage from 'konva'
-import layer from 'konva'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
+import VueKonva from 'vue-konva'
 
 export default {
 	components: {
@@ -224,8 +223,7 @@ export default {
 
 		const layer = ref<Konva.Layer>()
 		const stage = ref<Konva.Stage>()
-
-		const transformer: Ref<Konva.Transformer | undefined> = ref<Konva.Transformer>()
+		const transformer = ref()
 
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
@@ -298,15 +296,19 @@ export default {
 			// console.log('transformerNode: ')
 			// console.log(transformerNode)
 			//get stage from transformer:
-			const transformerStage = transformer.value?.getStage()
+			console.log('transformer: ')
+			console.log(transformer.value)
+			console.log('transformer node: ')
+			console.log(transformer.value?.getNode())
+			const transformerNode = transformer.value?.getNode()
+
+			const transformerStage = transformerNode.getStage()
 			console.log('transformerStage: ')
 			console.log(transformerStage)
 
 			console.log('selectedShapeName: ')
 			console.log(selectedShapeName.value) //is equal to name of the selected object
-			//Search for the selected node in the stage: the name of the shape should be equal to selectedShapeName:
-			console.log(transformerStage?.parent?.children)
-			const selectedNode = transformerStage!.parent!.findOne(
+			const selectedNode = transformerStage.findOne(
 				(node: { name: () => string }) => {
 					return node.name() === selectedShapeName.value
 				},
@@ -314,21 +316,22 @@ export default {
 			console.log('selectedNode: ')
 			console.log(selectedNode)
 
-			//TODO: FIX THIS SO TRANSFORMER BECOMES VISIBLE!
+			//TODO: FIX THIS!
 			//if selectedNode is already attached to transformer, do nothing:
-			// if (transformer.value?.nodes().includes(selectedNode)) {
-			// 	console.log('already selected')
-			// 	return
-			// }
-			// if (selectedNode) {
-			// 	// attach to another node
-			// 	console.log('attach')
-			// 	transformer.value?.nodes([selectedNode])
-			// } else {
-			// 	// remove transformer
-			// 	console.log('detach')
-			// 	transformer.value?.nodes([])
-			// }
+			if (selectedNode === transformerNode?.node()) {
+				console.log('already selected')
+				return
+			}
+
+			if (selectedNode) {
+				// attach to another node
+				console.log('attach')
+				transformerNode.nodes([selectedNode])
+			} else {
+				// remove transformer
+				console.log('detach')
+				transformerNode.nodes([])
+			}
 		}
 
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
