@@ -1,5 +1,5 @@
 export default interface Text {
-	id: number
+	id: string
 	x: number
 	y: number
 	text: string
@@ -18,4 +18,8 @@ export default interface Text {
 	shadowOffsetY: number
 	shadowOpacity: number
 	opacity: number
+    rotation: number
+    scaleX: number
+    scaleY: number
+    name: string
 }

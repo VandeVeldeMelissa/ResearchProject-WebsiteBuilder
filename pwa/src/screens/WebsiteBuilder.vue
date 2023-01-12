@@ -113,33 +113,20 @@
 				</button>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<!-- CANVAS WITH KONVA -->
-			<v-stage ref="stage" :config="configKonva">
+			<v-stage
+				ref="stage"
+				:config="configKonva"
+				@mousedown="handleStageMouseDown"
+				@touchstart="handleStageMouseDown"
+			>
 				<v-layer ref="layer">
 					<v-text
 						v-for="item in textList"
 						:key="item.id"
-						:config="{
-							x: item.x,
-							y: item.y,
-							text: item.text,
-							draggable: true,
-							fontFamily: item.fontFamily,
-							fontSize: item.fontSize,
-							fontStyle: item.fontStyle,
-							textDecoration: item.textDecoration,
-							align: item.align,
-							fill: item.fill,
-							stroke: item.stroke,
-							strokeWidth: item.strokeWidth,
-							shadowColor: item.shadowColor,
-							shadowBlur: item.shadowBlur,
-							shadowOffsetX: item.shadowOffsetX,
-							shadowOffsetY: item.shadowOffsetY,
-							shadowOpacity: item.shadowOpacity,
-							opacity: item.opacity,
-						}"
+						:config="item"
+						@transformend="handleTransformEnd"
 					></v-text>
+					<v-transformer ref="transformer" />
 				</v-layer>
 			</v-stage>
 			<div class="w-8 bg-slate-100"></div>
@@ -188,7 +175,7 @@
 </template>
 
 <script lang="ts">
-import { Ref, ref, watch } from 'vue'
+import { Ref, ref, watch, computed } from 'vue'
 import {
 	Plus,
 	Type,
@@ -233,6 +220,13 @@ export default {
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
 
+		const selectedShapeName: Ref<string> = ref('')
+
+		const layer = ref<Konva.Layer>()
+		const stage = ref<Konva.Stage>()
+
+		const transformer: Ref<Konva.Transformer | undefined> = ref<Konva.Transformer>()
+
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: window.innerHeight - 72 - 32,
@@ -264,8 +258,10 @@ export default {
 		}
 
 		const addTextElementToCanvas = () => {
+			// textName = "text" + id ex. text1, text2...
+			const textName = 'Text' + (textList.value.length + 1)
 			textList.value.push({
-				id: textList.value.length + 1,
+				id: (textList.value.length + 1).toString(),
 				x: configKonva.value.width / 2,
 				y: configKonva.value.height / 2,
 				text: 'Double click to change this text.',
@@ -284,7 +280,106 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0,
 				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				name: textName,
 			})
+		}
+
+		onMounted(() => {
+			console.log(transformer.value)
+		})
+
+		const updateTransformer = () => {
+			console.log('update transformer')
+			//get node from transformer:
+			// const transformerNode = transformer.value?.getNode()
+			// console.log('transformerNode: ')
+			// console.log(transformerNode)
+			//get stage from transformer:
+			const transformerStage = transformer.value?.getStage()
+			console.log('transformerStage: ')
+			console.log(transformerStage)
+
+			console.log('selectedShapeName: ')
+			console.log(selectedShapeName.value) //is equal to name of the selected object
+			//Search for the selected node in the stage: the name of the shape should be equal to selectedShapeName:
+			console.log(transformerStage?.parent?.children)
+			const selectedNode = transformerStage!.parent!.findOne(
+				(node: { name: () => string }) => {
+					return node.name() === selectedShapeName.value
+				},
+			)
+			console.log('selectedNode: ')
+			console.log(selectedNode)
+
+			//TODO: FIX THIS SO TRANSFORMER BECOMES VISIBLE!
+			//if selectedNode is already attached to transformer, do nothing:
+			// if (transformer.value?.nodes().includes(selectedNode)) {
+			// 	console.log('already selected')
+			// 	return
+			// }
+			// if (selectedNode) {
+			// 	// attach to another node
+			// 	console.log('attach')
+			// 	transformer.value?.nodes([selectedNode])
+			// } else {
+			// 	// remove transformer
+			// 	console.log('detach')
+			// 	transformer.value?.nodes([])
+			// }
+		}
+
+		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+			// clicked on stage - clear selection
+			if (e.target === e.target.getStage()) {
+				console.log('click empty canvas')
+				selectedShapeName.value = ''
+				updateTransformer()
+				return
+			}
+
+			// clicked on transformer - do nothing
+			const clickedOnTransformer = e.target.getParent().className === 'Transformer'
+			if (clickedOnTransformer) {
+				console.log('click transformer')
+				return
+			}
+
+			// find clicked text by its name
+			const name = e.target.name()
+			const text = textList.value.find((text) => {
+				return text.name === name
+			})
+
+			if (text) {
+				console.log('click text')
+				selectedShapeName.value = name
+			} else {
+				console.log('click other')
+				selectedShapeName.value = ''
+			}
+			updateTransformer()
+		}
+
+		watch(selectedShapeName, () => {
+			console.log(selectedShapeName.value)
+		})
+
+		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+			console.log('transform end')
+			const text = e.target
+			console.log(text)
+			const textId = text.id.toString()
+			console.log('textId: ' + textId)
+			const textIndex = parseInt(textId) - 1
+			console.log('textIndex: ' + textIndex)
+			textList.value[textIndex].x = text.x()
+			textList.value[textIndex].y = text.y()
+			textList.value[textIndex].rotation = text.rotation()
+			textList.value[textIndex].scaleX = text.scaleX()
+			textList.value[textIndex].scaleY = text.scaleY()
 		}
 
 		return {
@@ -296,6 +391,11 @@ export default {
 			toggleIsPageSelectorOpen,
 			addTextElementToCanvas,
 			textList,
+			handleTransformEnd,
+			handleStageMouseDown,
+			transformer,
+			layer,
+			stage,
 		}
 	},
 }

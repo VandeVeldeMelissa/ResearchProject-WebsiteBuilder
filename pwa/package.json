@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@unocss/reset": "^0.48.3",
-    "konva": "^8.4.0",
     "lucide-vue-next": "^0.104.0",
     "vite-plugin-fonts": "^0.7.0",
     "vue": "^3.2.45",
