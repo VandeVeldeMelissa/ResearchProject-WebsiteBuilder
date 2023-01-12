@@ -243,7 +243,6 @@ export default {
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
 			selectedPage.value = page
-			console.log(page)
 		}
 
 		window.addEventListener('resize', () => {
@@ -285,28 +284,24 @@ export default {
 			})
 		}
 
-		onMounted(() => {
-			console.log(transformer.value)
-		})
-
 		const updateTransformer = () => {
-			const transformerNode = transformer.value?.getNode()
-			const transformerStage = transformerNode.getStage()
-			const selectedNode = transformerStage.findOne(
-				(node: { name: () => string }) => {
-					return node.name() === selectedShapeName.value
-				},
-			)
+			if (selectedShapeName.value !== '') {
+				const transformerNode = transformer.value?.getNode()
+				const transformerStage = transformerNode.getStage()
+				const selectedNode = transformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === transformerNode?.node()) {
+					return
+				}
 
-			if (selectedNode === transformerNode?.node()) {
-				console.log('already selected')
-				return
-			}
-
-			if (selectedNode) {
-				transformerNode.nodes([selectedNode])
-			} else {
-				transformerNode.nodes([])
+				if (selectedNode) {
+					transformerNode.nodes([selectedNode])
+				} else {
+					transformerNode.nodes([])
+				}
 			}
 		}
 
@@ -337,10 +332,6 @@ export default {
 			}
 			updateTransformer()
 		}
-
-		watch(selectedShapeName, () => {
-			console.log(selectedShapeName.value)
-		})
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
 			const text = textList.value.find((r) => r.name === selectedShapeName.value)
