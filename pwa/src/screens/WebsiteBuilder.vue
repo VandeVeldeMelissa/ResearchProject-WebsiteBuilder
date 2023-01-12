@@ -1,7 +1,7 @@
 <template>
 	<div class="bg-slate-100">
 		<header
-			class="border-b-0.5 font-poppins h-18 flex justify-between border-neutral-300 mb-8 bg-white"
+			class="border-b-0.5 font-poppins h-18 mb-8 flex justify-between border-neutral-300 bg-white"
 		>
 			<div
 				class="border-r-0.5 h-18 flex w-14 items-center justify-center border-neutral-300 text-3xl font-bold"
@@ -19,7 +19,7 @@
 							><ChevronDown
 						/></span>
 					</button>
-	
+
 					<ul
 						class="z-2 absolute mt-2 w-full rounded bg-white ring-1 ring-gray-300 drop-shadow-sm"
 						v-if="isPageSelectorOpen"
@@ -65,7 +65,7 @@
 			</div>
 		</header>
 		<main class="font-poppins flex bg-white">
-			<aside class="border-r-0.5 w-14 border-neutral-300 bg-white p-3 -mt-8">
+			<aside class="border-r-0.5 -mt-8 w-14 border-neutral-300 bg-white p-3">
 				<button
 					class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 				>
@@ -116,12 +116,34 @@
 			<!-- CANVAS WITH KONVA -->
 			<v-stage ref="stage" :config="configKonva">
 				<v-layer ref="layer">
-					<!--Add object here-->
-					<v-circle :config="configCircle"></v-circle>
+					<v-text
+						v-for="item in textList"
+						:key="item.id"
+						:config="{
+							x: item.x,
+							y: item.y,
+							text: item.text,
+							draggable: true,
+							fontFamily: item.fontFamily,
+							fontSize: item.fontSize,
+							fontStyle: item.fontStyle,
+							textDecoration: item.textDecoration,
+							align: item.align,
+							fill: item.fill,
+							stroke: item.stroke,
+							strokeWidth: item.strokeWidth,
+							shadowColor: item.shadowColor,
+							shadowBlur: item.shadowBlur,
+							shadowOffsetX: item.shadowOffsetX,
+							shadowOffsetY: item.shadowOffsetY,
+							shadowOpacity: item.shadowOpacity,
+							opacity: item.opacity,
+						}"
+					></v-text>
 				</v-layer>
 			</v-stage>
 			<div class="w-8 bg-slate-100"></div>
-			<aside class="border-l-0.5 w-3/12 border-neutral-300 bg-white p-4 -mt-8">
+			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4">
 				<div class="mb-4 flex justify-between rounded">
 					<button class="border-b-2 border-blue-600 px-4 py-1">Elements</button>
 					<button
@@ -184,10 +206,10 @@ import {
 	ChevronDown,
 } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import * as Konva from 'konva'
-import Layer from 'konva/lib/Layer'
-import Stage from 'konva/lib/Stage'
-import Text from 'konva/lib/shapes/Text'
+import stage from 'konva'
+import layer from 'konva'
+import Konva from 'konva'
+import Text from '../interfaces/interface.text'
 
 export default {
 	components: {
@@ -209,10 +231,11 @@ export default {
 	setup() {
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
+		const textList: Ref<Text[]> = ref([])
 
 		const configKonva = ref({
-			width: window.innerWidth * 0.75 - 56 - 2*32,
-			height: window.innerHeight - 72 -32,
+			width: window.innerWidth * 0.75 - 56 - 2 * 32,
+			height: window.innerHeight - 72 - 32,
 		})
 
 		const configCircle = {
@@ -241,16 +264,27 @@ export default {
 		}
 
 		const addTextElementToCanvas = () => {
-			// const text = new Text({
-			// 	x: configKonva.value.width / 2,
-			// 	y: configKonva.value.height / 2,
-			// 	text: 'Hello World',
-			// 	fontSize: 30,
-			// 	fontFamily: 'Calibri',
-			// 	fill: 'black',
-			// })
-			// layer.add(text)
-			// layer.draw()
+			textList.value.push({
+				id: textList.value.length + 1,
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				text: 'Double click to change this text.',
+				draggable: true,
+				fontFamily: 'Arial',
+				fontSize: 21,
+				fontStyle: 'normal',
+				textDecoration: '',
+				align: 'left',
+				fill: 'black',
+				stroke: '',
+				strokeWidth: 0,
+				shadowColor: '',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0,
+				opacity: 1,
+			})
 		}
 
 		return {
@@ -261,6 +295,7 @@ export default {
 			selectedPage,
 			toggleIsPageSelectorOpen,
 			addTextElementToCanvas,
+			textList,
 		}
 	},
 }
