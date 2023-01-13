@@ -126,7 +126,12 @@
 						:config="item"
 						@transformend="handleTransformEnd"
 					></v-text>
-					<v-transformer ref="transformer" />
+					<v-transformer ref="transformer" :config="{
+						rotationSnaps: [0, 90, 180, 270],
+						rotationSnapTolerance: 5,
+						anchorStroke: '#2563EB',
+						borderStroke: '#2563EB'
+					}" />
 				</v-layer>
 			</v-stage>
 			<div class="w-8 bg-slate-100"></div>
@@ -285,8 +290,8 @@ export default {
 		}
 
 		const updateTransformer = () => {
+			const transformerNode = transformer.value?.getNode()
 			if (selectedShapeName.value !== '') {
-				const transformerNode = transformer.value?.getNode()
 				const transformerStage = transformerNode.getStage()
 				const selectedNode = transformerStage.findOne(
 					(node: { name: () => string }) => {
@@ -302,6 +307,8 @@ export default {
 				} else {
 					transformerNode.nodes([])
 				}
+			} else {
+				transformerNode.nodes([])
 			}
 		}
 
