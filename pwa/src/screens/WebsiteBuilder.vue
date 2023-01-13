@@ -130,7 +130,8 @@
 						rotationSnaps: [0, 90, 180, 270],
 						rotationSnapTolerance: 5,
 						anchorStroke: '#2563EB',
-						borderStroke: '#2563EB'
+						borderStroke: '#2563EB',
+						borderDash: [3, 3],
 					}" />
 				</v-layer>
 			</v-stage>
