@@ -65,55 +65,73 @@
 			</div>
 		</header>
 		<main class="font-poppins flex bg-white">
-			<aside class="border-r-0.5 -mt-8 w-14 border-neutral-300 bg-white p-3 flex flex-col justify-between">
+			<aside
+				class="border-r-0.5 -mt-8 flex w-14 flex-col justify-between border-neutral-300 bg-white p-3"
+			>
 				<div>
 					<button
 						class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Cursor"
 					>
 						<MousePointer2 />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add text"
 					>
 						<Type />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add image"
 					>
 						<Image />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add line"
 					>
 						<Spline />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add square"
 					>
 						<Square />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add triangle"
 					>
 						<Triangle />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add circle"
 					>
 						<Circle />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add hexagon"
 					>
 						<Hexagon />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add arrow"
 					>
 						<ArrowBigRight />
 					</button>
 				</div>
-				<button class="mt-5 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600 mb-2" @click="deleteShape" v-if="selectedShapeName != ''"><Trash2/></button>
+				<button
+					class="mt-5 mb-2 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600 relative"
+					@click="deleteShape"
+					v-if="selectedShapeName != ''"
+					title="Delete shape"
+				>
+					<Trash2 />
+				</button>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
 			<v-stage
@@ -204,7 +222,7 @@ import {
 	Globe,
 	Eye,
 	ChevronDown,
-	Trash2
+	Trash2,
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -270,10 +288,10 @@ export default {
 
 		const addTextElementToCanvas = () => {
 			textListNumber.value++
-			const textName = 'Text-' + (textListNumber.value).toString()
+			const textName = 'Text-' + textListNumber.value.toString()
 			updateTransformer()
 			textList.value.push({
-				id: (textListNumber).toString(),
+				id: textListNumber.toString(),
 				x: configKonva.value.width / 2,
 				y: configKonva.value.height / 2,
 				text: 'Double click to change this text.',
@@ -363,7 +381,7 @@ export default {
 
 		const deleteShape = () => {
 			const shape = selectedShapeName.value.split('-')[0]
-			switch(shape) {
+			switch (shape) {
 				case 'Text':
 					textList.value = textList.value.filter((text) => {
 						return text.name !== selectedShapeName.value
@@ -379,7 +397,7 @@ export default {
 		onMounted(() => {
 			window.addEventListener('keydown', whickKeyIsBeingPressed)
 		})
-		
+
 		const whickKeyIsBeingPressed = (e: KeyboardEvent) => {
 			//console.log(e.key)
 			if (e.key === 'Backspace' && selectedShapeName.value !== '') {
