@@ -65,52 +65,55 @@
 			</div>
 		</header>
 		<main class="font-poppins flex bg-white">
-			<aside class="border-r-0.5 -mt-8 w-14 border-neutral-300 bg-white p-3">
-				<button
-					class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<MousePointer2 />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Type />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Image />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Spline />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Square />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Triangle />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Circle />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Hexagon />
-				</button>
-				<button
-					class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<ArrowBigRight />
-				</button>
+			<aside class="border-r-0.5 -mt-8 w-14 border-neutral-300 bg-white p-3 flex flex-col justify-between">
+				<div>
+					<button
+						class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<MousePointer2 />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Type />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Image />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Spline />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Square />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Triangle />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Circle />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<Hexagon />
+					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<ArrowBigRight />
+					</button>
+				</div>
+				<button class="mt-5 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600 mb-2" @click="deleteShape" v-if="selectedShapeName != ''"><Trash2/></button>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
 			<v-stage
@@ -125,14 +128,18 @@
 						:key="item.id"
 						:config="item"
 						@transformend="handleTransformEnd"
+						@dragend="handleTransformEnd"
 					></v-text>
-					<v-transformer ref="transformer" :config="{
-						rotationSnaps: [0, 90, 180, 270],
-						rotationSnapTolerance: 5,
-						anchorStroke: '#2563EB',
-						borderStroke: '#2563EB',
-						borderDash: [3, 3],
-					}" />
+					<v-transformer
+						ref="transformer"
+						:config="{
+							rotationSnaps: [0, 90, 180, 270],
+							rotationSnapTolerance: 5,
+							anchorStroke: '#2563EB',
+							borderStroke: '#2563EB',
+							borderDash: [3, 3],
+						}"
+					/>
 				</v-layer>
 			</v-stage>
 			<div class="w-8 bg-slate-100"></div>
@@ -181,7 +188,7 @@
 </template>
 
 <script lang="ts">
-import { Ref, ref, watch, computed } from 'vue'
+import { Ref, ref, watch, computed, onMounted } from 'vue'
 import {
 	Plus,
 	Type,
@@ -197,11 +204,10 @@ import {
 	Globe,
 	Eye,
 	ChevronDown,
+	Trash2
 } from 'lucide-vue-next'
-import { onMounted } from 'vue'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
-import VueKonva from 'vue-konva'
 
 export default {
 	components: {
@@ -219,16 +225,18 @@ export default {
 		Globe,
 		Eye,
 		ChevronDown,
+		Trash2,
 	},
 	setup() {
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
+		let textListNumber: Ref<number> = ref(0)
 
 		const selectedShapeName: Ref<string> = ref('')
 
-		const layer = ref<Konva.Layer>()
-		const stage = ref<Konva.Stage>()
+		const layer = ref()
+		const stage = ref()
 		const transformer = ref()
 
 		const configKonva = ref({
@@ -261,10 +269,11 @@ export default {
 		}
 
 		const addTextElementToCanvas = () => {
-			// textName = "text" + id ex. text1, text2...
-			const textName = 'Text' + (textList.value.length + 1)
+			textListNumber.value++
+			const textName = 'Text-' + (textListNumber.value).toString()
+			updateTransformer()
 			textList.value.push({
-				id: (textList.value.length + 1).toString(),
+				id: (textListNumber).toString(),
 				x: configKonva.value.width / 2,
 				y: configKonva.value.height / 2,
 				text: 'Double click to change this text.',
@@ -352,6 +361,32 @@ export default {
 			}
 		}
 
+		const deleteShape = () => {
+			const shape = selectedShapeName.value.split('-')[0]
+			switch(shape) {
+				case 'Text':
+					textList.value = textList.value.filter((text) => {
+						return text.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateTransformer()
+					break
+				default:
+					console.log('Shape not found')
+			}
+		}
+
+		onMounted(() => {
+			window.addEventListener('keydown', whickKeyIsBeingPressed)
+		})
+		
+		const whickKeyIsBeingPressed = (e: KeyboardEvent) => {
+			//console.log(e.key)
+			if (e.key === 'Backspace' && selectedShapeName.value !== '') {
+				deleteShape()
+			}
+		}
+
 		return {
 			configKonva,
 			configCircle,
@@ -366,6 +401,8 @@ export default {
 			transformer,
 			layer,
 			stage,
+			deleteShape,
+			selectedShapeName,
 		}
 	},
 }
