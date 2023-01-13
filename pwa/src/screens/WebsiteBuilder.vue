@@ -17,6 +17,8 @@
 						<span>Page: {{ selectedPage }}</span>
 						<span class="grid h-5 w-5 place-content-center text-2xl"
 							><ChevronDown
+								class="transition-all ease-in"
+								:class="isPageSelectorOpen ? 'rotate-0' : 'rotate-90'"
 						/></span>
 					</button>
 
@@ -125,7 +127,7 @@
 					</button>
 				</div>
 				<button
-					class="mt-5 mb-2 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600 relative"
+					class="relative mt-5 mb-2 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600"
 					@click="deleteShape"
 					v-if="selectedShapeName != ''"
 					title="Delete shape"
@@ -161,7 +163,7 @@
 				</v-layer>
 			</v-stage>
 			<div class="w-8 bg-slate-100"></div>
-			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4">
+			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
 				<div class="mb-4 flex justify-between rounded">
 					<button class="border-b-2 border-blue-600 px-4 py-1">Elements</button>
 					<button
@@ -175,38 +177,260 @@
 						Templates
 					</button>
 				</div>
-				<button
-					class="flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-					@click="addTextElementToCanvas"
-				>
-					<div class="flex gap-x-2"><Plus />Add text</div>
-					<Type />
-				</button>
-				<button
-					class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<div class="flex gap-x-2"><Plus />Add image</div>
-					<Image />
-				</button>
-				<button
-					class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<div class="flex gap-x-2"><Plus />Add line</div>
-					<Spline />
-				</button>
-				<button
-					class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-				>
-					<div class="flex gap-x-2"><Plus />Add shape</div>
-					<Square />
-				</button>
+				<div v-if="selectedShapeName == ''">
+					<button
+						class="flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addTextElementToCanvas"
+					>
+						<div class="flex gap-x-2"><Plus />Add text</div>
+						<Type />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add image</div>
+						<Image />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add line</div>
+						<Spline />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add shape</div>
+						<Square />
+					</button>
+				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Text'">
+					<h3 class="mb-1 text-base font-semibold">Font</h3>
+					<div class="mb-2.5 grid grid-cols-3 gap-x-2.5 gap-y-2.5">
+						<select class="col-span-3 w-full rounded bg-slate-100 px-2 py-1.5">
+							<option value="Andalé Mono">Andalé Mono</option>
+							<option value="Arial" selected>Arial</option>
+							<option value="Baskerville">Baskerville</option>
+							<option value="Calibri">Calibri</option>
+							<option value="Comic Sans MS">Comic Sans MS</option>
+							<option value="Courier">Courier</option>
+							<option value="Georgia">Georgia</option>
+							<option value="Gill Sans">Gill Sans</option>
+							<option value="Helvetica">Helvetica</option>
+							<option value="Impact">Impact</option>
+							<option value="Lucida Console">Lucida Console</option>
+							<option value="Monaco">Monaco</option>
+							<option value="Palatino">Palatino</option>
+							<option value="Tahoma">Tahoma</option>
+							<option value="Trebuchet MS">Trebuchet MS</option>
+							<option value="Times New Roman">Times New Roman</option>
+							<option value="Verdana">Verdana</option>
+						</select>
+						<select class="col-span-2 rounded bg-slate-100 px-2 py-1.5">
+							<option value="Light">Light</option>
+							<option value="Regular" selected>Regular</option>
+							<option value="Bold">Bold</option>
+						</select>
+						<input
+							class="col-span-1 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInput.fontSize"
+						/>
+					</div>
+					<button
+						:class="
+							isBold
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
+						@click="isBold = !isBold"
+					>
+						<Bold stroke-width="3" />
+					</button>
+					<button
+						:class="
+							isItalic
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 py-1.5 px-3 transition-colors"
+						@click="isItalic = !isItalic"
+					>
+						<Italic />
+					</button>
+					<button
+						:class="
+							isUnderline
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
+						@click="isUnderline = !isUnderline"
+					>
+						<Underline />
+					</button>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Align text</h3>
+					<button
+						:class="
+							alignText == 'left'
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
+						@click="alignText = 'left'"
+					>
+						<AlignLeft />
+					</button>
+					<button
+						:class="
+							alignText == 'center'
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 py-1.5 px-3 transition-colors"
+						@click="alignText = 'center'"
+					>
+						<AlignCenter />
+					</button>
+					<button
+						:class="
+							alignText == 'right'
+								? 'bg-blue-600 text-white hover:bg-blue-700'
+								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+						"
+						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
+						@click="alignText = 'right'"
+					>
+						<AlignRight />
+					</button>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color" v-model="userInput.textColor" />
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInput.textColor"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInput.textColorOpacity"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
+						<input
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInput.textBorder"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInput.textBorderColor"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInput.textBorderColor"
+						/>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-7 items-center gap-y-4 mt-3"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInput.textShadowX"
+						/>
+						<label for="Blur" class="col-span-2">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInput.textShadowBlur"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInput.textShadowY"
+						/>
+						<label for="Spread" class="col-span-2">Spread</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Spread"
+							v-model="userInput.textShadowSpread"
+						/>
+						<div class="flex items-center gap-x-1 col-span-7">
+							<input class="bg-white" type="color" v-model="userInput.textShadowColor" />
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInput.textShadowColor"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInput.textShadowColorOpacity"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</aside>
 		</main>
 	</div>
 </template>
 
 <script lang="ts">
-import { Ref, ref, watch, computed, onMounted } from 'vue'
+import { Ref, ref, watch, computed, onMounted, reactive } from 'vue'
 import {
 	Plus,
 	Type,
@@ -223,6 +447,12 @@ import {
 	Eye,
 	ChevronDown,
 	Trash2,
+	Bold,
+	Italic,
+	Underline,
+	AlignLeft,
+	AlignCenter,
+	AlignRight,
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -244,18 +474,49 @@ export default {
 		Eye,
 		ChevronDown,
 		Trash2,
+		Bold,
+		Italic,
+		Underline,
+		AlignLeft,
+		AlignCenter,
+		AlignRight,
 	},
 	setup() {
+		const isUserTyping: Ref<boolean> = ref(false)
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
+		const isFontSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
-
 		const selectedShapeName: Ref<string> = ref('')
+		const showBorderDetails: Ref<boolean> = ref(false)
+		const showShadowDetails: Ref<boolean> = ref(false)
+
+		//Text
+		const isBold: Ref<boolean> = ref(false)
+		const isItalic: Ref<boolean> = ref(false)
+		const isUnderline: Ref<boolean> = ref(false)
+		const alignText: Ref<string> = ref('left')
 
 		const layer = ref()
 		const stage = ref()
 		const transformer = ref()
+
+		const userInput = reactive({
+			fontFamily: 'Arial',
+			fontWeight: 'Regular',
+			fontSize: 21,
+			textColor: '#000000',
+			textColorOpacity: 100,
+			textBorder: 0,
+			textBorderColor: '#000000',
+			textShadowX: 0,
+			textShadowY: 0,
+			textShadowBlur: 0,
+			textShadowSpread: 0,
+			textShadowColor: '#000000',
+			textShadowColorOpacity: 100,
+		})
 
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
@@ -396,12 +657,28 @@ export default {
 
 		onMounted(() => {
 			window.addEventListener('keydown', whickKeyIsBeingPressed)
+			window.addEventListener('mousedown', isCursorInsideInput)
 		})
 
 		const whickKeyIsBeingPressed = (e: KeyboardEvent) => {
 			//console.log(e.key)
-			if (e.key === 'Backspace' && selectedShapeName.value !== '') {
+			if (
+				e.key === 'Backspace' &&
+				selectedShapeName.value !== '' &&
+				!isUserTyping.value
+			) {
 				deleteShape()
+			}
+		}
+
+		const isCursorInsideInput = (e: MouseEvent) => {
+			const target = e.target as HTMLElement
+			if (target.tagName === 'INPUT') {
+				isUserTyping.value = true
+				return true
+			} else {
+				isUserTyping.value = false
+				return false
 			}
 		}
 
@@ -421,6 +698,14 @@ export default {
 			stage,
 			deleteShape,
 			selectedShapeName,
+			isFontSelectorOpen,
+			userInput,
+			isBold,
+			isItalic,
+			isUnderline,
+			alignText,
+			showBorderDetails,
+			showShadowDetails,
 		}
 	},
 }
