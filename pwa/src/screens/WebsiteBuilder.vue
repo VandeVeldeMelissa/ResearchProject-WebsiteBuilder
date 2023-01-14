@@ -242,68 +242,69 @@
 					</div>
 					<button
 						:class="
-							isBold
+							userInput.isFontBold
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
-						@click="isBold = !isBold"
+						@click="{userInput.isFontBold = !userInput.isFontBold; updateStylingText()}"
+
 					>
 						<Bold stroke-width="3" />
 					</button>
 					<button
 						:class="
-							isItalic
+							userInput.isFontItalic
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 py-1.5 px-3 transition-colors"
-						@click="isItalic = !isItalic"
+						@click="{userInput.isFontItalic = !userInput.isFontItalic; updateStylingText()}"
 					>
 						<Italic />
 					</button>
 					<button
 						:class="
-							isUnderline
+							userInput.isFontUnderlined
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
-						@click="isUnderline = !isUnderline"
+						@click="{userInput.isFontUnderlined = !userInput.isFontUnderlined; updateStylingText()}"
 					>
 						<Underline />
 					</button>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Align text</h3>
 					<button
 						:class="
-							alignText == 'left'
+							userInput.textAlign == 'left'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
-						@click="alignText = 'left'"
+						@click="{userInput.textAlign = 'left'; updateStylingText()}"
 					>
 						<AlignLeft />
 					</button>
 					<button
 						:class="
-							alignText == 'center'
+							userInput.textAlign == 'center'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 py-1.5 px-3 transition-colors"
-						@click="alignText = 'center'"
+						@click="{userInput.textAlign = 'center'; updateStylingText()}"
 					>
 						<AlignCenter />
 					</button>
 					<button
 						:class="
-							alignText == 'right'
+							userInput.textAlign == 'right'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
-						@click="alignText = 'right'"
+						@click="{userInput.textAlign = 'right'; updateStylingText()}"
 					>
 						<AlignRight />
 					</button>
@@ -495,9 +496,6 @@ export default {
 		const showShadowDetails: Ref<boolean> = ref(false)
 
 		//Text
-		const isBold: Ref<boolean> = ref(false)
-		const isItalic: Ref<boolean> = ref(false)
-		const isUnderline: Ref<boolean> = ref(false)
 		const alignText: Ref<string> = ref('left')
 
 		const layer = ref()
@@ -507,6 +505,10 @@ export default {
 		const userInput = reactive({
 			fontFamily: 'Arial',
 			fontSize: 21,
+			isFontBold: false,
+			isFontItalic: false,
+			isFontUnderlined: false,
+			textAlign: 'left',
 			textColor: '#000000',
 			textColorOpacity: 100,
 			textBorder: 0,
@@ -563,10 +565,10 @@ export default {
 				fontStyle: 'normal',
 				textDecoration: '',
 				align: 'left',
-				fill: 'black',
-				stroke: '',
+				fill: '#000000',
+				stroke: '#000000',
 				strokeWidth: 0,
-				shadowColor: '',
+				shadowColor: '#000000',
 				shadowBlur: 0,
 				shadowOffsetX: 0,
 				shadowOffsetY: 0,
@@ -683,36 +685,6 @@ export default {
 			}
 		}
 
-		//Update text styling
-		watch([isBold, isItalic, isUnderline, alignText], ([isBold, isItalic, isUnderline, alignText]) => {
-			const text = textList.value.find((text) => {
-				return text.name === selectedShapeName.value
-			})
-			if (text) {
-				if (isBold && isItalic) {
-					text.fontStyle = 'bold italic'
-				} else if (isBold) {
-					text.fontStyle = 'bold'
-				} else if (isItalic) {
-					text.fontStyle = 'italic'
-				} else {
-					text.fontStyle = 'normal'
-				}
-				if (isUnderline) {
-					text.textDecoration = 'underline'
-				} else {
-					text.textDecoration = ''
-				}
-				if (alignText === 'left') {
-					text.align = 'left'
-				} else if (alignText === 'center') {
-					text.align = 'center'
-				} else if (alignText === 'right') {
-					text.align = 'right'
-				}
-			}
-		})
-
 		const updateStylingText = () => {
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
@@ -720,6 +692,20 @@ export default {
 			if (text) {
 				text.fontFamily = userInput.fontFamily
 				text.fontSize = userInput.fontSize
+				if (userInput.isFontBold && userInput.isFontItalic) {
+					text.fontStyle = 'bold italic'
+				} else if (userInput.isFontBold) {
+					text.fontStyle = 'bold'
+				} else if (userInput.isFontItalic) {
+					text.fontStyle = 'italic'
+				} else {
+					text.fontStyle = 'normal'
+				}
+				if (userInput.isFontUnderlined) {
+					text.textDecoration = 'underline'
+				} else {
+					text.textDecoration = ''
+				}
 				text.fill = userInput.textColor
 				text.opacity = userInput.textColorOpacity / 100
 				text.stroke = userInput.textBorderColor
@@ -731,6 +717,39 @@ export default {
 				text.shadowOpacity = userInput.textShadowColorOpacity / 100
 			}
 		}
+
+		watch(selectedShapeName, () => {
+			const text = textList.value.find((text) => {
+				return text.name === selectedShapeName.value
+			})
+			if (text) {
+				userInput.fontFamily = text.fontFamily
+				userInput.fontSize = text.fontSize
+				userInput.textAlign = text.align
+				userInput.isFontBold = text.fontStyle.includes('bold')
+				userInput.isFontItalic = text.fontStyle.includes('italic')
+				userInput.isFontUnderlined = text.textDecoration.includes('underline')
+				userInput.textColor = text.fill
+				userInput.textColorOpacity = text.opacity * 100
+				userInput.textBorderColor = text.stroke
+				userInput.textBorder = text.strokeWidth
+				userInput.textShadowX = text.shadowOffsetX
+				userInput.textShadowY = text.shadowOffsetY
+				userInput.textShadowBlur = text.shadowBlur
+				userInput.textShadowColor = text.shadowColor
+				userInput.textShadowColorOpacity = text.shadowOpacity * 100
+				if (text.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
+				if (text.shadowOffsetX > 0 || text.shadowOffsetY > 0 || text.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+			}
+		})
 
 		return {
 			configKonva,
@@ -750,9 +769,6 @@ export default {
 			selectedShapeName,
 			isFontSelectorOpen,
 			userInput,
-			isBold,
-			isItalic,
-			isUnderline,
 			alignText,
 			showBorderDetails,
 			showShadowDetails,
