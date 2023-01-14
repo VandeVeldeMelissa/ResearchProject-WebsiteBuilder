@@ -558,7 +558,7 @@ export default {
 				id: textListNumber.toString(),
 				x: configKonva.value.width / 2,
 				y: configKonva.value.height / 2,
-				text: 'Double click to change this text.',
+				text: 'Double click to change this text. \nYou can also drag it around.',
 				draggable: true,
 				fontFamily: 'Arial',
 				fontSize: 21,
@@ -706,6 +706,7 @@ export default {
 				} else {
 					text.textDecoration = ''
 				}
+				text.align = userInput.textAlign
 				text.fill = userInput.textColor
 				text.opacity = userInput.textColorOpacity / 100
 				text.stroke = userInput.textBorderColor
