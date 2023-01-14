@@ -207,7 +207,7 @@
 				<div v-if="selectedShapeName.split('-')[0] == 'Text'">
 					<h3 class="mb-1 text-base font-semibold">Font</h3>
 					<div class="mb-2.5 grid grid-cols-3 gap-x-2.5 gap-y-2.5">
-						<select class="col-span-3 w-full rounded bg-slate-100 px-2 py-1.5">
+						<select class="col-span-3 w-full rounded bg-slate-100 px-2 py-1.5" @change="updateStylingText" v-model="userInput.fontFamily">
 							<option value="Andalé Mono">Andalé Mono</option>
 							<option value="Arial" selected>Arial</option>
 							<option value="Baskerville">Baskerville</option>
@@ -237,6 +237,7 @@
 							min="0"
 							max="1000"
 							v-model="userInput.fontSize"
+							@change="updateStylingText"
 						/>
 					</div>
 					<button
@@ -308,12 +309,13 @@
 					</button>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
 					<div class="flex items-center gap-x-1">
-						<input class="bg-white" type="color" v-model="userInput.textColor" />
+						<input class="bg-white" type="color" v-model="userInput.textColor" @change="updateStylingText"/>
 						<div>
 							<input
 								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 								type="text"
 								v-model="userInput.textColor"
+								@change="updateStylingText"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -321,6 +323,7 @@
 								min="0"
 								max="100"
 								v-model="userInput.textColorOpacity"
+								@change="updateStylingText"
 							/>
 						</div>
 					</div>
@@ -342,16 +345,19 @@
 							min="0"
 							max="1000"
 							v-model="userInput.textBorder"
+							@change="updateStylingText"
 						/>
 						<input
 							class="bg-white"
 							type="color"
 							v-model="userInput.textBorderColor"
+							@change="updateStylingText"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInput.textBorderColor"
+							@change="updateStylingText"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -367,7 +373,7 @@
 					</button>
 					<div
 						v-if="showShadowDetails"
-						class="grid grid-cols-7 items-center gap-y-4 mt-3"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
 					>
 						<label for="x">X</label>
 						<input
@@ -377,8 +383,9 @@
 							max="1000"
 							id="x"
 							v-model="userInput.textShadowX"
+							@change="updateStylingText"
 						/>
-						<label for="Blur" class="col-span-2">Blur</label>
+						<label for="Blur">Blur</label>
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
@@ -386,6 +393,7 @@
 							max="1000"
 							id="Blur"
 							v-model="userInput.textShadowBlur"
+							@change="updateStylingText"
 						/>
 						<label for="y">Y</label>
 						<input
@@ -395,23 +403,16 @@
 							max="1000"
 							id="y"
 							v-model="userInput.textShadowY"
+							@change="updateStylingText"
 						/>
-						<label for="Spread" class="col-span-2">Spread</label>
-						<input
-							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
-							type="number"
-							min="0"
-							max="1000"
-							id="Spread"
-							v-model="userInput.textShadowSpread"
-						/>
-						<div class="flex items-center gap-x-1 col-span-7">
-							<input class="bg-white" type="color" v-model="userInput.textShadowColor" />
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color" v-model="userInput.textShadowColor" @change="updateStylingText"/>
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 									type="text"
 									v-model="userInput.textShadowColor"
+									@change="updateStylingText"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -419,6 +420,7 @@
 									min="0"
 									max="100"
 									v-model="userInput.textShadowColorOpacity"
+									@change="updateStylingText"
 								/>
 							</div>
 						</div>
@@ -504,7 +506,6 @@ export default {
 
 		const userInput = reactive({
 			fontFamily: 'Arial',
-			fontWeight: 'Regular',
 			fontSize: 21,
 			textColor: '#000000',
 			textColorOpacity: 100,
@@ -515,7 +516,7 @@ export default {
 			textShadowBlur: 0,
 			textShadowSpread: 0,
 			textShadowColor: '#000000',
-			textShadowColorOpacity: 100,
+			textShadowColorOpacity: 50,
 		})
 
 		const configKonva = ref({
@@ -569,7 +570,7 @@ export default {
 				shadowBlur: 0,
 				shadowOffsetX: 0,
 				shadowOffsetY: 0,
-				shadowOpacity: 0,
+				shadowOpacity: 0.5,
 				opacity: 1,
 				rotation: 0,
 				scaleX: 1,
@@ -682,6 +683,55 @@ export default {
 			}
 		}
 
+		//Update text styling
+		watch([isBold, isItalic, isUnderline, alignText], ([isBold, isItalic, isUnderline, alignText]) => {
+			const text = textList.value.find((text) => {
+				return text.name === selectedShapeName.value
+			})
+			if (text) {
+				if (isBold && isItalic) {
+					text.fontStyle = 'bold italic'
+				} else if (isBold) {
+					text.fontStyle = 'bold'
+				} else if (isItalic) {
+					text.fontStyle = 'italic'
+				} else {
+					text.fontStyle = 'normal'
+				}
+				if (isUnderline) {
+					text.textDecoration = 'underline'
+				} else {
+					text.textDecoration = ''
+				}
+				if (alignText === 'left') {
+					text.align = 'left'
+				} else if (alignText === 'center') {
+					text.align = 'center'
+				} else if (alignText === 'right') {
+					text.align = 'right'
+				}
+			}
+		})
+
+		const updateStylingText = () => {
+			const text = textList.value.find((text) => {
+				return text.name === selectedShapeName.value
+			})
+			if (text) {
+				text.fontFamily = userInput.fontFamily
+				text.fontSize = userInput.fontSize
+				text.fill = userInput.textColor
+				text.opacity = userInput.textColorOpacity / 100
+				text.stroke = userInput.textBorderColor
+				text.strokeWidth = userInput.textBorder
+				text.shadowOffsetX = userInput.textShadowX
+				text.shadowOffsetY = userInput.textShadowY
+				text.shadowBlur = userInput.textShadowBlur
+				text.shadowColor = userInput.textShadowColor
+				text.shadowOpacity = userInput.textShadowColorOpacity / 100
+			}
+		}
+
 		return {
 			configKonva,
 			configCircle,
@@ -706,6 +756,7 @@ export default {
 			alignText,
 			showBorderDetails,
 			showShadowDetails,
+			updateStylingText
 		}
 	},
 }
