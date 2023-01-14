@@ -136,32 +136,40 @@
 				</button>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<v-stage
-				ref="stage"
-				:config="configKonva"
-				@mousedown="handleStageMouseDown"
-				@touchstart="handleStageMouseDown"
-			>
-				<v-layer ref="layer">
-					<v-text
-						v-for="item in textList"
-						:key="item.id"
-						:config="item"
-						@transformend="handleTransformEnd"
-						@dragend="handleTransformEnd"
-					></v-text>
-					<v-transformer
-						ref="transformer"
-						:config="{
-							rotationSnaps: [0, 90, 180, 270],
-							rotationSnapTolerance: 5,
-							anchorStroke: '#2563EB',
-							borderStroke: '#2563EB',
-							borderDash: [3, 3],
-						}"
-					/>
-				</v-layer>
-			</v-stage>
+			<div class="relative">
+				<v-stage
+					ref="stage"
+					:config="configKonva"
+					@mousedown="handleStageMouseDown"
+					@touchstart="handleStageMouseDown"
+				>
+					<v-layer ref="layer">
+						<v-text
+							v-for="item in textList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+							@dblclick="showTextEditor = true"
+						></v-text>
+						<v-transformer
+							ref="transformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								borderDash: [3, 3],
+								enabledAnchors: [],
+							}"
+						/>
+					</v-layer>
+				</v-stage>
+				<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(50%-400px)]" v-if="showTextEditor">
+					<label class="font-medium">What do you want this selected text to say?</label>
+					<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2" placeholder="Type here your text" v-model="userInput.text" @input="updateStylingText"></textarea>
+				</div>
+			</div>
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
 				<div class="mb-4 flex justify-between rounded">
@@ -487,15 +495,13 @@ export default {
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
-		const isFontSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
-
-		//Text
+		const showTextEditor: Ref<boolean> = ref(false)
 		const alignText: Ref<string> = ref('left')
 
 		const layer = ref()
@@ -519,6 +525,7 @@ export default {
 			textShadowSpread: 0,
 			textShadowColor: '#000000',
 			textShadowColorOpacity: 50,
+			text: ''
 		})
 
 		const configKonva = ref({
@@ -608,6 +615,7 @@ export default {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
+				showTextEditor.value = false
 				updateTransformer()
 				return
 			}
@@ -628,6 +636,7 @@ export default {
 				selectedShapeName.value = name
 			} else {
 				selectedShapeName.value = ''
+				showTextEditor.value = false
 			}
 			updateTransformer()
 		}
@@ -640,6 +649,7 @@ export default {
 				text.rotation = e.target.rotation()
 				text.scaleX = e.target.scaleX()
 				text.scaleY = e.target.scaleY()
+
 			}
 		}
 
@@ -651,6 +661,7 @@ export default {
 						return text.name !== selectedShapeName.value
 					})
 					selectedShapeName.value = ''
+					showTextEditor.value = false
 					updateTransformer()
 					break
 				default:
@@ -676,7 +687,7 @@ export default {
 
 		const isCursorInsideInput = (e: MouseEvent) => {
 			const target = e.target as HTMLElement
-			if (target.tagName === 'INPUT') {
+			if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
 				isUserTyping.value = true
 				return true
 			} else {
@@ -686,6 +697,7 @@ export default {
 		}
 
 		const updateStylingText = () => {
+			console.log('update')
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
 			})
@@ -716,6 +728,7 @@ export default {
 				text.shadowBlur = userInput.textShadowBlur
 				text.shadowColor = userInput.textShadowColor
 				text.shadowOpacity = userInput.textShadowColorOpacity / 100
+				text.text = userInput.text
 			}
 		}
 
@@ -749,6 +762,7 @@ export default {
 				} else {
 					showShadowDetails.value = false
 				}
+				userInput.text = text.text
 			}
 		})
 
@@ -768,12 +782,12 @@ export default {
 			stage,
 			deleteShape,
 			selectedShapeName,
-			isFontSelectorOpen,
 			userInput,
 			alignText,
 			showBorderDetails,
 			showShadowDetails,
-			updateStylingText
+			updateStylingText,
+			showTextEditor
 		}
 	},
 }
