@@ -159,6 +159,7 @@
 								anchorStroke: '#2563EB',
 								borderStroke: '#2563EB',
 							}"
+							@transform="handleTransformImage"
 						/>
 						<v-line
 							v-for="item in lineList"
@@ -356,7 +357,7 @@
 					>
 						<AlignRight />
 					</button>
-					<h3 class="mb-1 mt-5 text-base font-semibold">Text color and opacity</h3>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
 					<div class="flex items-center gap-x-1">
 						<input class="bg-white" type="color" v-model="userInputText.textColor" @change="updateStylingText"/>
 						<div>
@@ -476,7 +477,30 @@
 					</div>
 				</div>
 				<div v-if="selectedShapeName.split('-')[0] == 'Image'">
-					<h3 class="mb-1 text-base font-semibold">Opacity</h3>
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Size</h3>
+					<div class="grid grid-cols-6 items-center gap-y-4 mr-8">
+							<label for="imageHeight">Height</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="imageHeight"
+								v-model="userInputImage.imageHeight"
+								@change="updateStylingImage()"
+							/>
+							<label for="imageWidth">Width</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="imageWidth"
+								v-model="userInputImage.imageWidth"
+								@change="updateStylingImage"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Opacity</h3>
 					<input
 								class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 								type="number"
@@ -485,31 +509,52 @@
 								v-model="userInputImage.imageOpacity"
 								@change="updateStylingImage"
 							/>
-					<h3 class="mb-1 mt-5 text-base font-semibold">Border</h3>
-					<div class="flex items-center gap-x-1">
+							<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
 						<input
-								class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
-								type="number"
-								min="0"
-								max="1000"
-								v-model="userInputImage.imageBorder"
-								@change="updateStylingImage"
-							/>
-							<input
-								class="bg-white"
-								type="color"
-								v-model="userInputImage.imageBorderColor"
-								@change="updateStylingImage"
-							/>
-							<input
-								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
-								type="text"
-								v-model="userInputImage.imageBorderColor"
-								@change="updateStylingImage"
-							/>
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInputImage.imageBorder"
+							@change="updateStylingImage"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInputImage.imageBorderColor"
+							@change="updateStylingImage"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInputImage.imageBorderColor"
+							@change="updateStylingImage"
+						/>
 					</div>
-					<h3 class="mb-1 mt-5 text-base font-semibold">Shadow</h3>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
 					<div
+						v-if="showShadowDetails"
 						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
 					>
 						<label for="x">X</label>
@@ -543,7 +588,7 @@
 							@change="updateStylingImage"
 						/>
 						<div class="flex items-center gap-x-1 col-span-6">
-							<input class="bg-white" type="color"/>
+							<input class="bg-white" type="color" v-model="userInputImage.imageShadowColor" @change="updateStylingImage"/>
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
@@ -561,7 +606,7 @@
 								/>
 							</div>
 						</div>
-					</div>
+					</div>	
 				</div>
 				<div v-if="selectedShapeName.split('-')[0] == 'Line'">
 					<h3 class="mb-1 text-base font-semibold flex-wrap">Size</h3>
@@ -587,7 +632,7 @@
 								@change="updateStylingLine"
 							/>
 					</div>
-					<h3 class="mb-1 mt-5 text-base font-semibold">Line color and opacity</h3>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Line color</h3>
 					<div class="flex items-center gap-x-1">
 						<input class="bg-white" type="color" v-model="userInputLine.lineColor" @change="updateStylingLine"/>
 						<div>
@@ -782,6 +827,8 @@ export default {
 			imageShadowSpread: 0,
 			imageShadowColor: '#000000',
 			imageShadowColorOpacity: 50,
+			imageWidth: 100,
+			imageHeight: 100,
 		})
 
 		const userInputLine = reactive({
@@ -1133,6 +1180,8 @@ export default {
 				image.shadowBlur = userInputImage.imageShadowBlur
 				image.shadowColor = userInputImage.imageShadowColor
 				image.shadowOpacity = userInputImage.imageShadowColorOpacity / 100
+				image.width = userInputImage.imageWidth
+				image.height = userInputImage.imageHeight
 			}
 		}
 
@@ -1199,6 +1248,18 @@ export default {
 				userInputImage.imageShadowBlur = image.shadowBlur
 				userInputImage.imageShadowColor = image.shadowColor
 				userInputImage.imageShadowColorOpacity = image.shadowOpacity * 100
+				userInputImage.imageWidth = image.width
+				userInputImage.imageHeight = image.height
+				if (image.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
+				if (image.shadowOffsetX > 0 || image.shadowOffsetY > 0 || image.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
 				return
 			}
 			const line = lineList.value.find((line) => {
@@ -1214,6 +1275,11 @@ export default {
 				userInputLine.lineShadowBlur = line.shadowBlur
 				userInputLine.lineShadowColor = line.shadowColor
 				userInputLine.lineShadowColorOpacity = line.shadowOpacity * 100
+				if (line.shadowOffsetX > 0 || line.shadowOffsetY > 0 || line.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
 				return
 			}
 		})
@@ -1270,6 +1336,20 @@ export default {
 			}
 		}
 
+		const handleTransformImage = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const image = e.target as Konva.Image
+			const imageName = image.name()
+			const imageObject = imageList.value.find((image) => {
+				return image.name === imageName
+			})
+			if (imageObject) {
+				imageObject.width = Math.round(image.width() * image.scaleX())
+				imageObject.height = Math.round(image.height() * image.scaleY())
+				userInputImage.imageWidth = Math.round(imageObject.width)
+				userInputImage.imageHeight = Math.round(imageObject.height)
+			}
+		}
+
 		const handleLineLengthChange = () => {
 			const lineTransformerNode = lineTransformer.value?.getNode()
 			lineTransformerNode?.forceUpdate()
@@ -1311,7 +1391,8 @@ export default {
 			updateStylingLine,
 			updateLineTransformer,
 			handleTransformLine,
-			handleLineLengthChange
+			handleLineLengthChange,
+			handleTransformImage
 		}
 	},
 }
