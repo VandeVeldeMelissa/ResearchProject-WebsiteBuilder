@@ -144,6 +144,13 @@
 					@touchstart="handleStageMouseDown"
 				>
 					<v-layer ref="layer">
+						<v-image
+							v-for="item in imageList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-image>
 						<v-text
 							v-for="item in textList"
 							:key="item.id"
@@ -193,12 +200,16 @@
 						<div class="flex gap-x-2"><Plus />Add text</div>
 						<Type />
 					</button>
-					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-					>
-						<div class="flex gap-x-2"><Plus />Add image</div>
-						<Image />
-					</button>
+					<div>
+						<button
+							class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+							@click="selectImage"
+						>
+							<div class="flex gap-x-2"><Plus />Add image</div>
+							<Image />
+						</button>
+						<input type="file" ref="fileInput" @change="uploadImage" class="hidden"/>
+					</div>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 					>
@@ -435,6 +446,7 @@
 						</div>
 					</div>
 				</div>
+				<div>Image styling</div>
 			</aside>
 		</main>
 	</div>
@@ -497,7 +509,9 @@ export default {
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
+		const imageList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
+		let imageListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -507,6 +521,7 @@ export default {
 		const layer = ref()
 		const stage = ref()
 		const textTransformer = ref()
+		const fileInput = ref()
 
 		const userInput = reactive({
 			fontFamily: 'Arial',
@@ -765,6 +780,37 @@ export default {
 			}
 		})
 
+		const selectImage = () => {
+			fileInput.value.click()
+		}
+
+		const uploadImage = (e: Event) => {
+			const target = e.target as HTMLInputElement
+			const file = target.files?.[0]
+			if (file) {
+				const reader = new FileReader()
+				reader.onload = (e) => {
+					const dataURL = e.target?.result
+					if (dataURL) {
+						const image = new window.Image()
+						image.src = dataURL as string
+						image.onload = () => {
+							imageList.value.push({
+								image,
+								name: file.name,
+								x: configKonva.value.width / 2,
+								y: configKonva.value.height / 2,
+								width: image.width / 2,
+								height: image.height / 2,
+								draggable: true,
+							})
+						}
+					}
+				}
+				reader.readAsDataURL(file)
+			}
+		}
+
 		return {
 			configKonva,
 			configCircle,
@@ -786,7 +832,11 @@ export default {
 			showBorderDetails,
 			showShadowDetails,
 			updateStylingText,
-			showTextEditor
+			showTextEditor,
+			uploadImage,
+			selectImage,
+			fileInput,
+			imageList
 		}
 	},
 }
