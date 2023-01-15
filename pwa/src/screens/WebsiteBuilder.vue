@@ -153,7 +153,7 @@
 							@dblclick="showTextEditor = true"
 						></v-text>
 						<v-transformer
-							ref="transformer"
+							ref="textTransformer"
 							:config="{
 								rotationSnaps: [0, 90, 180, 270],
 								rotationSnapTolerance: 5,
@@ -506,7 +506,7 @@ export default {
 
 		const layer = ref()
 		const stage = ref()
-		const transformer = ref()
+		const textTransformer = ref()
 
 		const userInput = reactive({
 			fontFamily: 'Arial',
@@ -560,7 +560,7 @@ export default {
 		const addTextElementToCanvas = () => {
 			textListNumber.value++
 			const textName = 'Text-' + textListNumber.value.toString()
-			updateTransformer()
+			updateTextTransformer()
 			textList.value.push({
 				id: textListNumber.toString(),
 				x: configKonva.value.width / 2,
@@ -588,26 +588,26 @@ export default {
 			})
 		}
 
-		const updateTransformer = () => {
-			const transformerNode = transformer.value?.getNode()
+		const updateTextTransformer = () => {
+			const textTransformerNode = textTransformer.value?.getNode()
 			if (selectedShapeName.value !== '') {
-				const transformerStage = transformerNode.getStage()
-				const selectedNode = transformerStage.findOne(
+				const textTransformerStage = textTransformerNode.getStage()
+				const selectedNode = textTransformerStage.findOne(
 					(node: { name: () => string }) => {
 						return node.name() === selectedShapeName.value
 					},
 				)
-				if (selectedNode === transformerNode?.node()) {
+				if (selectedNode === textTransformerNode?.node()) {
 					return
 				}
 
 				if (selectedNode) {
-					transformerNode.nodes([selectedNode])
+					textTransformerNode.nodes([selectedNode])
 				} else {
-					transformerNode.nodes([])
+					textTransformerNode.nodes([])
 				}
 			} else {
-				transformerNode.nodes([])
+				textTransformerNode.nodes([])
 			}
 		}
 
@@ -616,7 +616,7 @@ export default {
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
-				updateTransformer()
+				updateTextTransformer()
 				return
 			}
 
@@ -638,7 +638,7 @@ export default {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
 			}
-			updateTransformer()
+			updateTextTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -662,7 +662,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					showTextEditor.value = false
-					updateTransformer()
+					updateTextTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -697,7 +697,6 @@ export default {
 		}
 
 		const updateStylingText = () => {
-			console.log('update')
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
 			})
@@ -777,7 +776,7 @@ export default {
 			textList,
 			handleTransformEnd,
 			handleStageMouseDown,
-			transformer,
+			textTransformer,
 			layer,
 			stage,
 			deleteShape,
