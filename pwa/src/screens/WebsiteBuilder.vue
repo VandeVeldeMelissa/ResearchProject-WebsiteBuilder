@@ -151,6 +151,15 @@
 							@transformend="handleTransformEnd"
 							@dragend="handleTransformEnd"
 						></v-image>
+						<v-transformer
+							ref="imageTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+							}"
+						/>
 						<v-text
 							v-for="item in textList"
 							:key="item.id"
@@ -168,13 +177,14 @@
 								borderStroke: '#2563EB',
 								borderDash: [3, 3],
 								enabledAnchors: [],
+								rotateAnchorOffset: 30
 							}"
 						/>
 					</v-layer>
 				</v-stage>
 				<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(50%-400px)]" v-if="showTextEditor">
 					<label class="font-medium">What do you want this selected text to say?</label>
-					<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2" placeholder="Type here your text" v-model="userInput.text" @input="updateStylingText"></textarea>
+					<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
 				</div>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
@@ -226,7 +236,7 @@
 				<div v-if="selectedShapeName.split('-')[0] == 'Text'">
 					<h3 class="mb-1 text-base font-semibold">Font</h3>
 					<div class="mb-2.5 grid grid-cols-3 gap-x-2.5 gap-y-2.5">
-						<select class="col-span-3 w-full rounded bg-slate-100 px-2 py-1.5" @change="updateStylingText" v-model="userInput.fontFamily">
+						<select class="col-span-3 w-full rounded bg-slate-100 px-2 py-1.5" @change="updateStylingText" v-model="userInputText.fontFamily">
 							<option value="Andalé Mono">Andalé Mono</option>
 							<option value="Arial" selected>Arial</option>
 							<option value="Baskerville">Baskerville</option>
@@ -255,86 +265,86 @@
 							type="number"
 							min="0"
 							max="1000"
-							v-model="userInput.fontSize"
+							v-model="userInputText.fontSize"
 							@change="updateStylingText"
 						/>
 					</div>
 					<button
 						:class="
-							userInput.isFontBold
+							userInputText.isFontBold
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
-						@click="{userInput.isFontBold = !userInput.isFontBold; updateStylingText()}"
+						@click="{userInputText.isFontBold = !userInputText.isFontBold; updateStylingText()}"
 
 					>
 						<Bold stroke-width="3" />
 					</button>
 					<button
 						:class="
-							userInput.isFontItalic
+							userInputText.isFontItalic
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 py-1.5 px-3 transition-colors"
-						@click="{userInput.isFontItalic = !userInput.isFontItalic; updateStylingText()}"
+						@click="{userInputText.isFontItalic = !userInputText.isFontItalic; updateStylingText()}"
 					>
 						<Italic />
 					</button>
 					<button
 						:class="
-							userInput.isFontUnderlined
+							userInputText.isFontUnderlined
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
-						@click="{userInput.isFontUnderlined = !userInput.isFontUnderlined; updateStylingText()}"
+						@click="{userInputText.isFontUnderlined = !userInputText.isFontUnderlined; updateStylingText()}"
 					>
 						<Underline />
 					</button>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Align text</h3>
 					<button
 						:class="
-							userInput.textAlign == 'left'
+							userInputText.textAlign == 'left'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-l py-1.5 px-3 transition-colors"
-						@click="{userInput.textAlign = 'left'; updateStylingText()}"
+						@click="{userInputText.textAlign = 'left'; updateStylingText()}"
 					>
 						<AlignLeft />
 					</button>
 					<button
 						:class="
-							userInput.textAlign == 'center'
+							userInputText.textAlign == 'center'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 py-1.5 px-3 transition-colors"
-						@click="{userInput.textAlign = 'center'; updateStylingText()}"
+						@click="{userInputText.textAlign = 'center'; updateStylingText()}"
 					>
 						<AlignCenter />
 					</button>
 					<button
 						:class="
-							userInput.textAlign == 'right'
+							userInputText.textAlign == 'right'
 								? 'bg-blue-600 text-white hover:bg-blue-700'
 								: 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
 						"
 						class="mr-1 rounded-r py-1.5 px-3 transition-colors"
-						@click="{userInput.textAlign = 'right'; updateStylingText()}"
+						@click="{userInputText.textAlign = 'right'; updateStylingText()}"
 					>
 						<AlignRight />
 					</button>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
 					<div class="flex items-center gap-x-1">
-						<input class="bg-white" type="color" v-model="userInput.textColor" @change="updateStylingText"/>
+						<input class="bg-white" type="color" v-model="userInputText.textColor" @change="updateStylingText"/>
 						<div>
 							<input
 								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 								type="text"
-								v-model="userInput.textColor"
+								v-model="userInputText.textColor"
 								@change="updateStylingText"
 							/>
 							<input
@@ -342,7 +352,7 @@
 								type="number"
 								min="0"
 								max="100"
-								v-model="userInput.textColorOpacity"
+								v-model="userInputText.textColorOpacity"
 								@change="updateStylingText"
 							/>
 						</div>
@@ -364,19 +374,19 @@
 							type="number"
 							min="0"
 							max="1000"
-							v-model="userInput.textBorder"
+							v-model="userInputText.textBorder"
 							@change="updateStylingText"
 						/>
 						<input
 							class="bg-white"
 							type="color"
-							v-model="userInput.textBorderColor"
+							v-model="userInputText.textBorderColor"
 							@change="updateStylingText"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
-							v-model="userInput.textBorderColor"
+							v-model="userInputText.textBorderColor"
 							@change="updateStylingText"
 						/>
 					</div>
@@ -402,7 +412,7 @@
 							min="0"
 							max="1000"
 							id="x"
-							v-model="userInput.textShadowX"
+							v-model="userInputText.textShadowX"
 							@change="updateStylingText"
 						/>
 						<label for="Blur">Blur</label>
@@ -412,7 +422,7 @@
 							min="0"
 							max="1000"
 							id="Blur"
-							v-model="userInput.textShadowBlur"
+							v-model="userInputText.textShadowBlur"
 							@change="updateStylingText"
 						/>
 						<label for="y">Y</label>
@@ -422,16 +432,16 @@
 							min="0"
 							max="1000"
 							id="y"
-							v-model="userInput.textShadowY"
+							v-model="userInputText.textShadowY"
 							@change="updateStylingText"
 						/>
 						<div class="flex items-center gap-x-1 col-span-6">
-							<input class="bg-white" type="color" v-model="userInput.textShadowColor" @change="updateStylingText"/>
+							<input class="bg-white" type="color" v-model="userInputText.textShadowColor" @change="updateStylingText"/>
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 									type="text"
-									v-model="userInput.textShadowColor"
+									v-model="userInputText.textShadowColor"
 									@change="updateStylingText"
 								/>
 								<input
@@ -439,14 +449,101 @@
 									type="number"
 									min="0"
 									max="100"
-									v-model="userInput.textShadowColorOpacity"
+									v-model="userInputText.textShadowColorOpacity"
 									@change="updateStylingText"
 								/>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div>Image styling</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Image'">
+					<h3 class="mb-1 text-base font-semibold">Opacity</h3>
+					<input
+								class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputImage.imageOpacity"
+								@change="updateStylingImage"
+							/>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Border</h3>
+					<div class="flex items-center gap-x-1">
+						<input
+								class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+								type="number"
+								min="0"
+								max="1000"
+								v-model="userInputImage.imageBorder"
+								@change="updateStylingImage"
+							/>
+							<input
+								class="bg-white"
+								type="color"
+								v-model="userInputImage.imageBorderColor"
+								@change="updateStylingImage"
+							/>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputImage.imageBorderColor"
+								@change="updateStylingImage"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Shadow</h3>
+					<div
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputImage.imageShadowX"
+							@change="updateStylingImage"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputImage.imageShadowBlur"
+							@change="updateStylingImage"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputImage.imageShadowY"
+							@change="updateStylingImage"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color"/>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputImage.imageShadowColor"
+									@change="updateStylingImage"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputImage.imageShadowColorOpacity"
+									@change="updateStylingImage"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</aside>
 		</main>
 	</div>
@@ -521,9 +618,10 @@ export default {
 		const layer = ref()
 		const stage = ref()
 		const textTransformer = ref()
+		const imageTransformer = ref()
 		const fileInput = ref()
 
-		const userInput = reactive({
+		const userInputText = reactive({
 			fontFamily: 'Arial',
 			fontSize: 21,
 			isFontBold: false,
@@ -541,6 +639,18 @@ export default {
 			textShadowColor: '#000000',
 			textShadowColorOpacity: 50,
 			text: ''
+		})
+
+		const userInputImage = reactive({
+			imageOpacity: 100,
+			imageBorder: 0,
+			imageBorderColor: '#000000',
+			imageShadowX: 0,
+			imageShadowY: 0,
+			imageShadowBlur: 0,
+			imageShadowSpread: 0,
+			imageShadowColor: '#000000',
+			imageShadowColorOpacity: 50,
 		})
 
 		const configKonva = ref({
@@ -605,7 +715,7 @@ export default {
 
 		const updateTextTransformer = () => {
 			const textTransformerNode = textTransformer.value?.getNode()
-			if (selectedShapeName.value !== '') {
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Text') {
 				const textTransformerStage = textTransformerNode.getStage()
 				const selectedNode = textTransformerStage.findOne(
 					(node: { name: () => string }) => {
@@ -626,12 +736,36 @@ export default {
 			}
 		}
 
+		const updateImageTransformer = () => {
+			const imageTransformerNode = imageTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Image') {
+				const imageTransformerStage = imageTransformerNode.getStage()
+				const selectedNode = imageTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === imageTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					imageTransformerNode.nodes([selectedNode])
+				} else {
+					imageTransformerNode.nodes([])
+				}
+			} else {
+				imageTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
 				updateTextTransformer()
+				updateImageTransformer()
 				return
 			}
 
@@ -641,19 +775,27 @@ export default {
 				return
 			}
 
-			// find clicked text by its name
 			const name = e.target.name()
+
+			// find clicked text by its name
 			const text = textList.value.find((text) => {
 				return text.name === name
+			})
+			const image = imageList.value.find((image) => {
+				return image.name === name
 			})
 
 			if (text) {
 				selectedShapeName.value = name
+			} else if (image){
+				selectedShapeName.value = name
+				showTextEditor.value = false
 			} else {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
 			}
 			updateTextTransformer()
+			updateImageTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -664,7 +806,15 @@ export default {
 				text.rotation = e.target.rotation()
 				text.scaleX = e.target.scaleX()
 				text.scaleY = e.target.scaleY()
+			}
 
+			const image = imageList.value.find((r) => r.name === selectedShapeName.value)
+			if (image) {
+				image.x = e.target.x()
+				image.y = e.target.y()
+				image.rotation = e.target.rotation()
+				image.scaleX = e.target.scaleX()
+				image.scaleY = e.target.scaleY()
 			}
 		}
 
@@ -678,6 +828,13 @@ export default {
 					selectedShapeName.value = ''
 					showTextEditor.value = false
 					updateTextTransformer()
+					break
+				case 'Image':
+					imageList.value = imageList.value.filter((image) => {
+						return image.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateImageTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -716,56 +873,73 @@ export default {
 				return text.name === selectedShapeName.value
 			})
 			if (text) {
-				text.fontFamily = userInput.fontFamily
-				text.fontSize = userInput.fontSize
-				if (userInput.isFontBold && userInput.isFontItalic) {
+				text.fontFamily = userInputText.fontFamily
+				text.fontSize = userInputText.fontSize
+				if (userInputText.isFontBold && userInputText.isFontItalic) {
 					text.fontStyle = 'bold italic'
-				} else if (userInput.isFontBold) {
+				} else if (userInputText.isFontBold) {
 					text.fontStyle = 'bold'
-				} else if (userInput.isFontItalic) {
+				} else if (userInputText.isFontItalic) {
 					text.fontStyle = 'italic'
 				} else {
 					text.fontStyle = 'normal'
 				}
-				if (userInput.isFontUnderlined) {
+				if (userInputText.isFontUnderlined) {
 					text.textDecoration = 'underline'
 				} else {
 					text.textDecoration = ''
 				}
-				text.align = userInput.textAlign
-				text.fill = userInput.textColor
-				text.opacity = userInput.textColorOpacity / 100
-				text.stroke = userInput.textBorderColor
-				text.strokeWidth = userInput.textBorder
-				text.shadowOffsetX = userInput.textShadowX
-				text.shadowOffsetY = userInput.textShadowY
-				text.shadowBlur = userInput.textShadowBlur
-				text.shadowColor = userInput.textShadowColor
-				text.shadowOpacity = userInput.textShadowColorOpacity / 100
-				text.text = userInput.text
+				text.align = userInputText.textAlign
+				text.fill = userInputText.textColor
+				text.opacity = userInputText.textColorOpacity / 100
+				text.stroke = userInputText.textBorderColor
+				text.strokeWidth = userInputText.textBorder
+				text.shadowOffsetX = userInputText.textShadowX
+				text.shadowOffsetY = userInputText.textShadowY
+				text.shadowBlur = userInputText.textShadowBlur
+				text.shadowColor = userInputText.textShadowColor
+				text.shadowOpacity = userInputText.textShadowColorOpacity / 100
+				text.text = userInputText.text
+			}
+		}
+
+		const updateStylingImage = () => {
+			const image = imageList.value.find((image) => {
+				return image.name === selectedShapeName.value
+			})
+			if (image) {
+				image.opacity = userInputImage.imageOpacity / 100
+				image.stroke = userInputImage.imageBorderColor
+				image.strokeWidth = userInputImage.imageBorder
+				image.shadowOffsetX = userInputImage.imageShadowX
+				image.shadowOffsetY = userInputImage.imageShadowY
+				image.shadowBlur = userInputImage.imageShadowBlur
+				image.shadowColor = userInputImage.imageShadowColor
+				image.shadowOpacity = userInputImage.imageShadowColorOpacity / 100
 			}
 		}
 
 		watch(selectedShapeName, () => {
+			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
 			})
 			if (text) {
-				userInput.fontFamily = text.fontFamily
-				userInput.fontSize = text.fontSize
-				userInput.textAlign = text.align
-				userInput.isFontBold = text.fontStyle.includes('bold')
-				userInput.isFontItalic = text.fontStyle.includes('italic')
-				userInput.isFontUnderlined = text.textDecoration.includes('underline')
-				userInput.textColor = text.fill
-				userInput.textColorOpacity = text.opacity * 100
-				userInput.textBorderColor = text.stroke
-				userInput.textBorder = text.strokeWidth
-				userInput.textShadowX = text.shadowOffsetX
-				userInput.textShadowY = text.shadowOffsetY
-				userInput.textShadowBlur = text.shadowBlur
-				userInput.textShadowColor = text.shadowColor
-				userInput.textShadowColorOpacity = text.shadowOpacity * 100
+				userInputText.fontFamily = text.fontFamily
+				userInputText.fontSize = text.fontSize
+				userInputText.textAlign = text.align
+				userInputText.isFontBold = text.fontStyle.includes('bold')
+				userInputText.isFontItalic = text.fontStyle.includes('italic')
+				userInputText.isFontUnderlined = text.textDecoration.includes('underline')
+				userInputText.textColor = text.fill
+				userInputText.textColorOpacity = text.opacity * 100
+				userInputText.textBorderColor = text.stroke
+				userInputText.textBorder = text.strokeWidth
+				userInputText.textShadowX = text.shadowOffsetX
+				userInputText.textShadowY = text.shadowOffsetY
+				userInputText.textShadowBlur = text.shadowBlur
+				userInputText.textShadowColor = text.shadowColor
+				userInputText.textShadowColorOpacity = text.shadowOpacity * 100
 				if (text.strokeWidth > 0) {
 					showBorderDetails.value = true
 				} else {
@@ -776,7 +950,20 @@ export default {
 				} else {
 					showShadowDetails.value = false
 				}
-				userInput.text = text.text
+				userInputText.text = text.text
+			}
+			const image = imageList.value.find((image) => {
+				return image.name === selectedShapeName.value
+			})
+			if (image) {
+				userInputImage.imageOpacity = image.opacity * 100
+				userInputImage.imageBorderColor = image.stroke
+				userInputImage.imageBorder = image.strokeWidth
+				userInputImage.imageShadowX = image.shadowOffsetX
+				userInputImage.imageShadowY = image.shadowOffsetY
+				userInputImage.imageShadowBlur = image.shadowBlur
+				userInputImage.imageShadowColor = image.shadowColor
+				userInputImage.imageShadowColorOpacity = image.shadowOpacity * 100
 			}
 		})
 
@@ -794,15 +981,24 @@ export default {
 					if (dataURL) {
 						const image = new window.Image()
 						image.src = dataURL as string
+						const fileName = 'Image-' + file.name
 						image.onload = () => {
 							imageList.value.push({
 								image,
-								name: file.name,
+								name: fileName,
 								x: configKonva.value.width / 2,
 								y: configKonva.value.height / 2,
 								width: image.width / 2,
 								height: image.height / 2,
 								draggable: true,
+								opacity: 1,
+								stroke: '#000000',
+								strokeWidth: 0,
+								shadowOffsetX: 0,
+								shadowOffsetY: 0,
+								shadowBlur: 0,
+								shadowColor: '#000000',
+								shadowOpacity: 0.5,
 							})
 						}
 					}
@@ -827,7 +1023,7 @@ export default {
 			stage,
 			deleteShape,
 			selectedShapeName,
-			userInput,
+			userInputText,
 			alignText,
 			showBorderDetails,
 			showShadowDetails,
@@ -836,7 +1032,10 @@ export default {
 			uploadImage,
 			selectImage,
 			fileInput,
-			imageList
+			imageList,
+			imageTransformer,
+			userInputImage,
+			updateStylingImage
 		}
 	},
 }
