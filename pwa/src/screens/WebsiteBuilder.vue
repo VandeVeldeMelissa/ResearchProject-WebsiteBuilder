@@ -160,6 +160,24 @@
 								borderStroke: '#2563EB',
 							}"
 						/>
+						<v-line
+							v-for="item in lineList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						/>
+						<v-transformer
+							ref="lineTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: ['middle-left', 'middle-right'],
+							}"
+							@transform="handleTransformLine"
+							/>
 						<v-text
 							v-for="item in textList"
 							:key="item.id"
@@ -222,6 +240,7 @@
 					</div>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addLineElementToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add line</div>
 						<Spline />
@@ -337,7 +356,7 @@
 					>
 						<AlignRight />
 					</button>
-					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Text color and opacity</h3>
 					<div class="flex items-center gap-x-1">
 						<input class="bg-white" type="color" v-model="userInputText.textColor" @change="updateStylingText"/>
 						<div>
@@ -544,6 +563,116 @@
 						</div>
 					</div>
 				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Line'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Size</h3>
+					<div class="grid grid-cols-6 items-center gap-y-4 mr-8">
+							<label for="lineLength">Length</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="1000"
+								id="lineLength"
+								v-model="userInputLine.lineLength"
+								@change="{updateStylingLine(); handleLineLengthChange()}"
+							/>
+							<label for="lineWidth">Width</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="1000"
+								id="lineWidth"
+								v-model="userInputLine.lineWidth"
+								@change="updateStylingLine"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Line color and opacity</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color" v-model="userInputLine.lineColor" @change="updateStylingLine"/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputLine.lineColor"
+								@change="updateStylingLine"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputLine.lineColorOpacity"
+								@change="updateStylingLine"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputLine.lineShadowX"
+							@change="updateStylingLine"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputLine.lineShadowBlur"
+							@change="updateStylingLine"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputLine.lineShadowY"
+							@change="updateStylingLine"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color" v-model="userInputLine.lineShadowColor" @change="updateStylingLine">
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputLine.lineShadowColor"
+									@change="updateStylingLine"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputLine.lineShadowColorOpacity"
+									@change="updateStylingLine"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</aside>
 		</main>
 	</div>
@@ -607,8 +736,9 @@ export default {
 		const selectedPage: Ref<string> = ref('Home')
 		const textList: Ref<Text[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
+		const lineList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
-		let imageListNumber: Ref<number> = ref(0)
+		let lineListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -619,6 +749,7 @@ export default {
 		const stage = ref()
 		const textTransformer = ref()
 		const imageTransformer = ref()
+		const lineTransformer = ref()
 		const fileInput = ref()
 
 		const userInputText = reactive({
@@ -653,6 +784,21 @@ export default {
 			imageShadowColorOpacity: 50,
 		})
 
+		const userInputLine = reactive({
+			lineWidth: 3,
+			lineLength: 100,
+			lineColor: '#000000',
+			lineColorOpacity: 100,
+			lineBorder: 0,
+			lineBorderColor: '#000000',
+			lineShadowX: 0,
+			lineShadowY: 0,
+			lineShadowBlur: 0,
+			lineShadowSpread: 0,
+			lineShadowColor: '#000000',
+			lineShadowColorOpacity: 50,
+		})
+
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: window.innerHeight - 72 - 32,
@@ -674,8 +820,8 @@ export default {
 		}
 
 		window.addEventListener('resize', () => {
-			configKonva.value.width = window.innerWidth * 0.75 - 48
-			configKonva.value.height = window.innerHeight - 56
+			configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
+			configKonva.value.height = window.innerHeight - 72 - 32
 		})
 
 		const toggleIsPageSelectorOpen = () => {
@@ -710,6 +856,30 @@ export default {
 				scaleX: 1,
 				scaleY: 1,
 				name: textName,
+			})
+		}
+
+		const addLineElementToCanvas = () => {
+			lineListNumber.value++
+			const lineName = 'Line-' + lineListNumber.value.toString()
+			lineList.value.push({
+				id: textListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				points: [0, 0, 200, 0],
+				stroke: '#000000',
+				strokeWidth: 3,
+				draggable: true,
+				name: lineName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
 			})
 		}
 
@@ -759,6 +929,29 @@ export default {
 			}
 		}
 
+		const updateLineTransformer = () => {
+			const lineTransformerNode = lineTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Line') {
+				const lineTransformerStage = lineTransformerNode.getStage()
+				const selectedNode = lineTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === lineTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					lineTransformerNode.nodes([selectedNode])
+				} else {
+					lineTransformerNode.nodes([])
+				}
+			} else {
+				lineTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -766,6 +959,7 @@ export default {
 				showTextEditor.value = false
 				updateTextTransformer()
 				updateImageTransformer()
+				updateLineTransformer()
 				return
 			}
 
@@ -784,10 +978,16 @@ export default {
 			const image = imageList.value.find((image) => {
 				return image.name === name
 			})
+			const line = lineList.value.find((line) => {
+				return line.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
 			} else if (image){
+				selectedShapeName.value = name
+				showTextEditor.value = false
+			} else if(line) {
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -796,6 +996,7 @@ export default {
 			}
 			updateTextTransformer()
 			updateImageTransformer()
+			updateLineTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -816,6 +1017,15 @@ export default {
 				image.scaleX = e.target.scaleX()
 				image.scaleY = e.target.scaleY()
 			}
+
+			const line = lineList.value.find((r) => r.name === selectedShapeName.value)
+			if (line) {
+				line.x = e.target.x()
+				line.y = e.target.y()
+				line.rotation = e.target.rotation()
+				line.scaleX = e.target.scaleX()
+				line.scaleY = e.target.scaleY()
+			}
 		}
 
 		const deleteShape = () => {
@@ -835,6 +1045,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateImageTransformer()
+					break
+				case 'Line':
+					lineList.value = lineList.value.filter((line) => {
+						return line.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateLineTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -919,6 +1136,23 @@ export default {
 			}
 		}
 
+		const updateStylingLine = () => {
+			const line = lineList.value.find((line) => {
+				return line.name === selectedShapeName.value
+			})
+			if (line) {
+				line.stroke = userInputLine.lineColor
+				line.strokeWidth = userInputLine.lineWidth
+				line.opacity = userInputLine.lineColorOpacity / 100
+				line.shadowOffsetX = userInputLine.lineShadowX
+				line.shadowOffsetY = userInputLine.lineShadowY
+				line.shadowBlur = userInputLine.lineShadowBlur
+				line.shadowColor = userInputLine.lineShadowColor
+				line.shadowOpacity = userInputLine.lineShadowColorOpacity / 100
+				line.points[2] = userInputLine.lineLength
+			}
+		}
+
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
@@ -951,6 +1185,7 @@ export default {
 					showShadowDetails.value = false
 				}
 				userInputText.text = text.text
+				return
 			}
 			const image = imageList.value.find((image) => {
 				return image.name === selectedShapeName.value
@@ -964,6 +1199,22 @@ export default {
 				userInputImage.imageShadowBlur = image.shadowBlur
 				userInputImage.imageShadowColor = image.shadowColor
 				userInputImage.imageShadowColorOpacity = image.shadowOpacity * 100
+				return
+			}
+			const line = lineList.value.find((line) => {
+				return line.name === selectedShapeName.value
+			})
+			if (line) {
+				userInputLine.lineLength = line.points[2]
+				userInputLine.lineColor = line.stroke
+				userInputLine.lineWidth = line.strokeWidth
+				userInputLine.lineColorOpacity = line.opacity * 100
+				userInputLine.lineShadowX = line.shadowOffsetX
+				userInputLine.lineShadowY = line.shadowOffsetY
+				userInputLine.lineShadowBlur = line.shadowBlur
+				userInputLine.lineShadowColor = line.shadowColor
+				userInputLine.lineShadowColorOpacity = line.shadowOpacity * 100
+				return
 			}
 		})
 
@@ -1007,6 +1258,23 @@ export default {
 			}
 		}
 
+		const handleTransformLine = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const line = e.target as Konva.Line
+			const lineName = line.name()
+			const lineObject = lineList.value.find((line) => {
+				return line.name === lineName
+			})
+			if (lineObject) {
+				lineObject.points[2] = Math.round(line.points()[2] * line.scaleX())
+				userInputLine.lineLength = Math.round(lineObject.points[2])
+			}
+		}
+
+		const handleLineLengthChange = () => {
+			const lineTransformerNode = lineTransformer.value?.getNode()
+			lineTransformerNode?.forceUpdate()
+		}
+
 		return {
 			configKonva,
 			configCircle,
@@ -1035,7 +1303,15 @@ export default {
 			imageList,
 			imageTransformer,
 			userInputImage,
-			updateStylingImage
+			updateStylingImage, 
+			lineList,
+			addLineElementToCanvas,
+			lineTransformer,
+			userInputLine,
+			updateStylingLine,
+			updateLineTransformer,
+			handleTransformLine,
+			handleLineLengthChange
 		}
 	},
 }
