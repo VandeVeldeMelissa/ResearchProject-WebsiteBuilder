@@ -215,6 +215,24 @@
 							}"
 							@transform="handleTransformImage"
 						/>
+						<v-arrow
+							v-for="item in arrowList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-arrow>
+						<v-transformer
+							ref="arrowTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: ['middle-left', 'middle-right'],
+							}"
+							@transform="handleTransformArrow"
+						/>
 						<v-line
 							v-for="item in lineList"
 							:key="item.id"
@@ -676,7 +694,7 @@
 								v-model="userInputLine.lineLength"
 								@change="{updateStylingLine(); handleLineLengthChange()}"
 							/>
-							<label for="lineWidth">Width</label>
+							<label for="lineWidth">Stroke</label>
 							<input
 								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
 								type="number"
@@ -803,6 +821,7 @@
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addArrowToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add arrow</div>
 						<ArrowBigRight />
@@ -1245,6 +1264,122 @@
 						</div>
 					</div>	
 				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Arrow'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Size</h3>
+					<div class="grid grid-cols-6 items-center gap-y-4 mr-8">
+							<label for="arrowLength">Length</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="1000"
+								id="arrowLength"
+								v-model="userInputArrow.arrowLength"
+								@change="{updateStylingArrow(); handleArrowLengthChange()}"
+							/>
+							<label for="arrowStroke">Stroke</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="1000"
+								id="arrowStroke"
+								v-model="userInputArrow.arrowStroke"
+								@change="updateStylingArrow"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Arrow color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color"
+						v-model="userInputArrow.arrowStrokeColor"
+						@change="updateStylingArrow"
+						/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputArrow.arrowStrokeColor"
+								@change="updateStylingArrow"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputArrow.arrowStrokeColorOpacity"
+								@change="updateStylingArrow"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputArrow.arrowShadowX"
+							@change="updateStylingArrow"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputArrow.arrowShadowBlur"
+							@change="updateStylingArrow"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputArrow.arrowShadowY"
+							@change="updateStylingArrow"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color"
+							v-model="userInputArrow.arrowShadowColor"
+							@change="updateStylingArrow"
+							>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputArrow.arrowShadowColor"
+									@change="updateStylingArrow"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputArrow.arrowShadowColorOpacity"
+									@change="updateStylingArrow"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</aside>
 		</main>
 	</div>
@@ -1317,11 +1452,13 @@ export default {
 		const rectangleList: Ref<any[]> = ref([])
 		const circleList: Ref<any[]> = ref([])
 		const polygonList: Ref<any[]> = ref([])
+		const arrowList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
 		let rectangleListNumber: Ref<number> = ref(0)
 		let circleListNumber: Ref<number> = ref(0)
 		let polygonListNumber: Ref<number> = ref(0)
+		let arrowListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -1336,6 +1473,7 @@ export default {
 		const lineTransformer = ref()
 		const circleTransformer = ref()
 		const polygonTransformer = ref()
+		const arrowTransformer = ref()
 		const fileInput = ref()
 		const rectangleTransformer = ref()
 
@@ -1430,6 +1568,23 @@ export default {
 			polygonShadowSpread: 0,
 			polygonShadowColor: '#000000',
 			polygonShadowColorOpacity: 50,
+		})
+
+		const userInputArrow = reactive({
+			arrowPointerWidth: 10,
+			arrowPointerLength: 100,
+			arrowStroke: 3,
+			arrowStrokeColor: '#000000',
+			arrowStrokeColorOpacity: 100,
+			arrowBorder: 0,
+			arrowBorderColor: '#000000',
+			arrowShadowX: 0,
+			arrowShadowY: 0,
+			arrowShadowBlur: 0,
+			arrowShadowSpread: 0,
+			arrowShadowColor: '#000000',
+			arrowShadowColorOpacity: 50,
+			arrowLength: 100,
 		})
 
 		const configKonva = ref({
@@ -1584,6 +1739,33 @@ export default {
 			})
 		}
 
+		const addArrowToCanvas = () => {
+			arrowListNumber.value++
+			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
+			arrowList.value.push({
+				id: arrowListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				points: [0, 0, 100, 0],
+				stroke: '#000000',
+				strokeWidth: 3,
+				draggable: true,
+				name: arrowName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
+				pointerLength: 10,
+				pointerWidth: 10,
+				fill: '#000000'
+			})
+		}
+
 		const updateTextTransformer = () => {
 			const textTransformerNode = textTransformer.value?.getNode()
 			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Text') {
@@ -1722,6 +1904,29 @@ export default {
 			}
 		}
 
+		const updateArrowTransformer = () => {
+			const arrowTransformerNode = arrowTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Arrow') {
+				const arrowTransformerStage = arrowTransformerNode.getStage()
+				const selectedNode = arrowTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === arrowTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					arrowTransformerNode.nodes([selectedNode])
+				} else {
+					arrowTransformerNode.nodes([])
+				}
+			} else {
+				arrowTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -1733,6 +1938,7 @@ export default {
 				updateRectangleTransformer()
 				updateCircleTransformer()
 				updatePolygonTransformer()
+				updateArrowTransformer()
 				return
 			}
 
@@ -1763,10 +1969,13 @@ export default {
 			const polygon = polygonList.value.find((polygon) => {
 				return polygon.name === name
 			})
+			const arrow = arrowList.value.find((arrow) => {
+				return arrow.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image || line || rectangle || circle || polygon){
+			} else if (image || line || rectangle || circle || polygon || arrow){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -1779,6 +1988,7 @@ export default {
 			updateRectangleTransformer()
 			updateCircleTransformer()
 			updatePolygonTransformer()
+			updateArrowTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -1849,6 +2059,16 @@ export default {
 				polygon.scaleY = e.target.scaleY()
 				return
 			}
+
+			const arrow = arrowList.value.find((r) => r.name === selectedShapeName.value)
+			if (arrow) {
+				arrow.x = e.target.x()
+				arrow.y = e.target.y()
+				arrow.rotation = e.target.rotation()
+				arrow.scaleX = e.target.scaleX()
+				arrow.scaleY = e.target.scaleY()
+				return
+			}
 		}
 
 		const deleteShape = () => {
@@ -1896,6 +2116,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updatePolygonTransformer()
+					break
+				case 'Arrow':
+					arrowList.value = arrowList.value.filter((arrow) => {
+						return arrow.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateArrowTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -2056,6 +2283,23 @@ export default {
 			}
 		}
 
+		const updateStylingArrow = () => {
+			const arrow = arrowList.value.find((arrow) => {
+				return arrow.name === selectedShapeName.value
+			})
+			if (arrow) {
+				arrow.stroke = userInputArrow.arrowStrokeColor
+				arrow.strokeWidth = userInputArrow.arrowStroke
+				arrow.opacity = userInputArrow.arrowStrokeColorOpacity / 100
+				arrow.shadowOffsetX = userInputArrow.arrowShadowX
+				arrow.shadowOffsetY = userInputArrow.arrowShadowY
+				arrow.shadowBlur = userInputArrow.arrowShadowBlur
+				arrow.shadowColor = userInputArrow.arrowShadowColor
+				arrow.shadowOpacity = userInputArrow.arrowShadowColorOpacity / 100
+				arrow.points[2] = userInputArrow.arrowLength
+				arrow.fill = userInputArrow.arrowStrokeColor
+			}
+		}
 
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
@@ -2222,6 +2466,29 @@ export default {
 				}
 				return
 			}
+
+			const arrow = arrowList.value.find((arrow) => {
+				return arrow.name === selectedShapeName.value
+			})
+			if (arrow) {
+				userInputArrow.arrowLength = arrow.points[2]
+				userInputArrow.arrowStroke = arrow.strokeWidth
+				userInputArrow.arrowStrokeColor = arrow.stroke
+				userInputArrow.arrowStrokeColorOpacity = arrow.opacity * 100
+				userInputArrow.arrowShadowX = arrow.shadowOffsetX
+				userInputArrow.arrowShadowY = arrow.shadowOffsetY
+				userInputArrow.arrowShadowBlur = arrow.shadowBlur
+				userInputArrow.arrowShadowColor = arrow.shadowColor
+				userInputArrow.arrowShadowColorOpacity = arrow.shadowOpacity * 100
+				userInputArrow.arrowBorderColor = arrow.stroke
+				userInputArrow.arrowBorder = arrow.strokeWidth
+				if (arrow.shadowOffsetX > 0 || arrow.shadowOffsetY > 0 || arrow.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+				return
+			}
 		})
 
 		const selectImage = () => {
@@ -2330,6 +2597,18 @@ export default {
 			}
 		}
 
+		const handleTransformArrow = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const arrow = e.target as Konva.Arrow
+			const arrowName = arrow.name()
+			const arrowObject = arrowList.value.find((arrow) => {
+				return arrow.name === arrowName
+			})
+			if (arrowObject) {
+				arrowObject.points[2] = Math.round(arrow.points()[2] * arrow.scaleX())
+				userInputArrow.arrowLength = Math.round(arrowObject.points[2])
+			}
+		}
+
 		const handleLineLengthChange = () => {
 			const lineTransformerNode = lineTransformer.value?.getNode()
 			lineTransformerNode?.forceUpdate()
@@ -2338,6 +2617,11 @@ export default {
 		const handlePolygonSidesChange = () => {
 			const polygonTransformerNode = polygonTransformer.value?.getNode()
 			polygonTransformerNode?.forceUpdate()
+		}
+
+		const handleArrowLengthChange = () => {
+			const arrowTransformerNode = arrowTransformer.value?.getNode()
+			arrowTransformerNode?.forceUpdate()
 		}
 
 		return {
@@ -2396,7 +2680,14 @@ export default {
 			userInputPolygon,
 			handlePolygonSidesChange,
 			handleTransformPolygon,
-			handleTransformCircle
+			handleTransformCircle,
+			arrowList,
+			addArrowToCanvas,
+			arrowTransformer,
+			updateStylingArrow,
+			handleTransformArrow,
+			handleArrowLengthChange,
+			userInputArrow
 		}
 	},
 }
