@@ -215,6 +215,24 @@
 							}"
 							@transform="handleTransformImage"
 						/>
+						<v-star
+							v-for="item in starList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-star>
+						<v-transformer
+							ref="starTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: [],
+								borderDash: [3, 3],
+							}"
+						/>
 						<v-arrow
 							v-for="item in arrowList"
 							:key="item.id"
@@ -502,7 +520,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputText.textShadowX"
@@ -513,7 +531,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputText.textShadowBlur"
 							@change="updateStylingText"
@@ -522,7 +540,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputText.textShadowY"
@@ -634,7 +652,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputImage.imageShadowX"
@@ -645,7 +663,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputImage.imageShadowBlur"
 							@change="updateStylingImage"
@@ -654,7 +672,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputImage.imageShadowY"
@@ -744,7 +762,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputLine.lineShadowX"
@@ -755,7 +773,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputLine.lineShadowBlur"
 							@change="updateStylingLine"
@@ -764,7 +782,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputLine.lineShadowY"
@@ -828,6 +846,7 @@
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addStarToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add star</div>
 						<Star />
@@ -929,7 +948,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputRectangle.rectangleShadowX"
@@ -940,7 +959,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputRectangle.rectangleShadowBlur"
 							@change="updateStylingRectangle"
@@ -949,7 +968,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputRectangle.rectangleShadowY"
@@ -1065,7 +1084,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputCircle.circleShadowX"
@@ -1076,7 +1095,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputCircle.circleShadowBlur"
 							@change="updateStylingCircle"
@@ -1085,7 +1104,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputCircle.circleShadowY"
@@ -1214,7 +1233,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputPolygon.polygonShadowX"
@@ -1225,7 +1244,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputPolygon.polygonShadowBlur"
 							@change="updateStylingPolygon"
@@ -1234,7 +1253,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputPolygon.polygonShadowY"
@@ -1330,7 +1349,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="x"
 							v-model="userInputArrow.arrowShadowX"
@@ -1341,7 +1360,7 @@
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
 							min="0"
-							max="1000"
+							max="50"
 							id="Blur"
 							v-model="userInputArrow.arrowShadowBlur"
 							@change="updateStylingArrow"
@@ -1350,7 +1369,7 @@
 						<input
 							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
 							type="number"
-							min="0"
+							min="-1000"
 							max="1000"
 							id="y"
 							v-model="userInputArrow.arrowShadowY"
@@ -1379,6 +1398,165 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Star'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Properties</h3>
+					<div class="grid grid-cols-3 items-center gap-y-4 mr-8">
+							<label for="pointsStar">Points</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="2"
+								max="30"
+								id="pointsStar"
+								v-model="userInputStar.starPoints"
+								@change="updateStylingStar"
+							/>
+							<label for="innerRadiusStar">Inner radius</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="innerRadiusStar"
+								v-model="userInputStar.starInnerRadius"
+								@change="updateStylingStar"
+							/>
+							<label for="outerRadiusStar">Outer radius</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="outerRadiusStar"
+								v-model="userInputStar.starOuterRadius"
+								@change="updateStylingStar"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Star color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color"
+						v-model="userInputStar.starColor"
+						@change="updateStylingStar"
+						/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputStar.starColor"
+								@change="updateStylingStar"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputStar.starColorOpacity"
+								@change="updateStylingStar"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
+						<input
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInputStar.starBorder"
+							@change="updateStylingStar"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInputStar.starBorderColor"
+							@change="updateStylingStar"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInputStar.starBorderColor"
+							@change="updateStylingStar"
+						/>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="-1000"
+							max="1000"
+							id="x"
+							v-model="userInputStar.starShadowX"
+							@change="updateStylingStar"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="50"
+							id="Blur"
+							v-model="userInputStar.starShadowBlur"
+							@change="updateStylingStar"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="-1000"
+							max="1000"
+							id="y"
+							v-model="userInputStar.starShadowY"
+							@change="updateStylingStar"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color" 
+							v-model="userInputStar.starShadowColor"
+							@change="updateStylingStar"
+							/>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputStar.starShadowColor"
+									@change="updateStylingStar"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputStar.starShadowColorOpacity"
+									@change="updateStylingStar"
+								/>
+							</div>
+						</div>
+					</div>	
 				</div>
 			</aside>
 		</main>
@@ -1453,12 +1631,14 @@ export default {
 		const circleList: Ref<any[]> = ref([])
 		const polygonList: Ref<any[]> = ref([])
 		const arrowList: Ref<any[]> = ref([])
+		const starList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
 		let rectangleListNumber: Ref<number> = ref(0)
 		let circleListNumber: Ref<number> = ref(0)
 		let polygonListNumber: Ref<number> = ref(0)
 		let arrowListNumber: Ref<number> = ref(0)
+		let starListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -1476,6 +1656,7 @@ export default {
 		const arrowTransformer = ref()
 		const fileInput = ref()
 		const rectangleTransformer = ref()
+		const starTransformer = ref()
 
 		const userInputText = reactive({
 			fontFamily: 'Arial',
@@ -1585,6 +1766,22 @@ export default {
 			arrowShadowColor: '#000000',
 			arrowShadowColorOpacity: 50,
 			arrowLength: 100,
+		})
+
+		const userInputStar = reactive({
+			starPoints: 5,
+			starInnerRadius: 20,
+			starOuterRadius: 50,
+			starColor: '#000000',
+			starColorOpacity: 100,
+			starBorder: 0,
+			starBorderColor: '#000000',
+			starShadowX: 0,
+			starShadowY: 0,
+			starShadowBlur: 0,
+			starShadowSpread: 0,
+			starShadowColor: '#000000',
+			starShadowColorOpacity: 50,
 		})
 
 		const configKonva = ref({
@@ -1766,6 +1963,33 @@ export default {
 			})
 		}
 
+		const addStarToCanvas = () => {
+			starListNumber.value++
+			const starName = 'Star-' + starListNumber.value.toString()
+			starList.value.push({
+				id: starListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				numPoints: 5,
+				innerRadius: 20,
+				outerRadius: 50,
+				fill: '#000000',
+				stroke: '#000000',
+				strokeWidth: 0,
+				draggable: true,
+				name: starName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
+			})
+		}
+
 		const updateTextTransformer = () => {
 			const textTransformerNode = textTransformer.value?.getNode()
 			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Text') {
@@ -1927,6 +2151,29 @@ export default {
 			}
 		}
 
+		const updateStarTransformer = () => {
+			const starTransformerNode = starTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Star') {
+				const starTransformerStage = starTransformerNode.getStage()
+				const selectedNode = starTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === starTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					starTransformerNode.nodes([selectedNode])
+				} else {
+					starTransformerNode.nodes([])
+				}
+			} else {
+				starTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -1939,6 +2186,7 @@ export default {
 				updateCircleTransformer()
 				updatePolygonTransformer()
 				updateArrowTransformer()
+				updateStarTransformer()
 				return
 			}
 
@@ -1972,10 +2220,13 @@ export default {
 			const arrow = arrowList.value.find((arrow) => {
 				return arrow.name === name
 			})
+			const star = starList.value.find((star) => {
+				return star.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image || line || rectangle || circle || polygon || arrow){
+			} else if (image || line || rectangle || circle || polygon || arrow || star){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -1989,6 +2240,7 @@ export default {
 			updateCircleTransformer()
 			updatePolygonTransformer()
 			updateArrowTransformer()
+			updateStarTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -2065,8 +2317,24 @@ export default {
 				arrow.x = e.target.x()
 				arrow.y = e.target.y()
 				arrow.rotation = e.target.rotation()
+				e.target.scaleX(1)
+				e.target.scaleY(1)
 				arrow.scaleX = e.target.scaleX()
 				arrow.scaleY = e.target.scaleY()
+				return
+			}
+
+			const star = starList.value.find((r) => r.name === selectedShapeName.value)
+			if (star) {
+				star.x = e.target.x()
+				star.y = e.target.y()
+				star.rotation = e.target.rotation()
+				star.width = e.target.width()
+				star.height = e.target.height()
+				e.target.scaleX(1)
+				e.target.scaleY(1)
+				star.scaleX = e.target.scaleX()
+				star.scaleY = e.target.scaleY()
 				return
 			}
 		}
@@ -2123,6 +2391,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateArrowTransformer()
+					break
+				case 'Star':
+					starList.value = starList.value.filter((star) => {
+						return star.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateStarTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -2301,6 +2576,26 @@ export default {
 			}
 		}
 
+		const updateStylingStar = () => {
+			const star = starList.value.find((star) => {
+				return star.name === selectedShapeName.value
+			})
+			if (star) {
+				star.stroke = userInputStar.starBorderColor
+				star.strokeWidth = userInputStar.starBorder
+				star.opacity = userInputStar.starColorOpacity / 100
+				star.shadowOffsetX = userInputStar.starShadowX
+				star.shadowOffsetY = userInputStar.starShadowY
+				star.shadowBlur = userInputStar.starShadowBlur
+				star.shadowColor = userInputStar.starShadowColor
+				star.shadowOpacity = userInputStar.starShadowColorOpacity / 100
+				star.fill = userInputStar.starColor
+				star.innerRadius = userInputStar.starInnerRadius
+				star.outerRadius = userInputStar.starOuterRadius
+				star.numPoints = userInputStar.starPoints
+			}
+		}
+
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
@@ -2454,6 +2749,7 @@ export default {
 				userInputPolygon.polygonShadowColorOpacity = polygon.shadowOpacity * 100
 				userInputPolygon.polygonBorderColor = polygon.stroke
 				userInputPolygon.polygonBorder = polygon.strokeWidth
+				userInputPolygon.polygonSides = polygon.sides
 				if (polygon.strokeWidth > 0) {
 					showBorderDetails.value = true
 				} else {
@@ -2489,6 +2785,37 @@ export default {
 				}
 				return
 			}
+			
+			const star = starList.value.find((star) => {
+				return star.name === selectedShapeName.value
+			})
+
+			if (star) {
+				userInputStar.starColor = star.fill
+				userInputStar.starColorOpacity = star.opacity * 100
+				userInputStar.starShadowX = star.shadowOffsetX
+				userInputStar.starShadowY = star.shadowOffsetY
+				userInputStar.starShadowBlur = star.shadowBlur
+				userInputStar.starShadowColor = star.shadowColor
+				userInputStar.starShadowColorOpacity = star.shadowOpacity * 100
+				userInputStar.starBorderColor = star.stroke
+				userInputStar.starBorder = star.strokeWidth
+				userInputStar.starInnerRadius = star.innerRadius
+				userInputStar.starOuterRadius = star.outerRadius
+				userInputStar.starPoints = star.numPoints
+				if (star.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
+				if (star.shadowOffsetX > 0 || star.shadowOffsetY > 0 || star.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+				return
+			}
+
 		})
 
 		const selectImage = () => {
@@ -2592,8 +2919,8 @@ export default {
 			})
 			if (polygonObject) {
 				polygonObject.radius = Math.round(polygon.radius() * polygon.scaleX())
-				userInputPolygon.polygonSides = polygonObject.sides
 				userInputPolygon.polygonRadius = Math.round(polygonObject.radius)
+				userInputPolygon.polygonSides = polygonObject.sides
 			}
 		}
 
@@ -2622,6 +2949,11 @@ export default {
 		const handleArrowLengthChange = () => {
 			const arrowTransformerNode = arrowTransformer.value?.getNode()
 			arrowTransformerNode?.forceUpdate()
+		}
+
+		const handleStarPointsChange = () => {
+			const starTransformerNode = starTransformer.value?.getNode()
+			starTransformerNode?.forceUpdate()
 		}
 
 		return {
@@ -2687,7 +3019,13 @@ export default {
 			updateStylingArrow,
 			handleTransformArrow,
 			handleArrowLengthChange,
-			userInputArrow
+			userInputArrow,
+			starList,
+			addStarToCanvas,
+			starTransformer,
+			updateStylingStar,
+			handleStarPointsChange,
+			userInputStar,
 		}
 	},
 }
