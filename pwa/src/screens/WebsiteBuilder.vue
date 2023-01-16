@@ -160,6 +160,7 @@
 								borderStroke: '#2563EB',
 								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
 							}"
+							@transform="handleTransformPolygon"
 						></v-transformer>
 						<v-circle
 							v-for="item in circleList"
@@ -178,6 +179,7 @@
 								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
 								rotateEnabled: false,
 							}"
+							@transform="handleTransformCircle"
 						></v-transformer>
 						<v-rect
 							v-for="item in rectangleList"
@@ -2302,6 +2304,32 @@ export default {
 			}
 		}
 
+		const handleTransformCircle = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const circle = e.target as Konva.Circle
+			const circleName = circle.name()
+			const circleObject = circleList.value.find((circle) => {
+				return circle.name === circleName
+			})
+			if (circleObject) {
+				circleObject.radius = Math.round(circle.radius() * circle.scaleX())
+				userInputCircle.circleRadius = Math.round(circleObject.radius)
+			}
+		}
+
+		const handleTransformPolygon = (e: Konva.KonvaEventObject<DragEvent>) => {
+			console.log('transforming polygon')
+			const polygon = e.target as Konva.RegularPolygon
+			const polygonName = polygon.name()
+			const polygonObject = polygonList.value.find((polygon) => {
+				return polygon.name === polygonName
+			})
+			if (polygonObject) {
+				polygonObject.radius = Math.round(polygon.radius() * polygon.scaleX())
+				userInputPolygon.polygonSides = polygonObject.sides
+				userInputPolygon.polygonRadius = Math.round(polygonObject.radius)
+			}
+		}
+
 		const handleLineLengthChange = () => {
 			const lineTransformerNode = lineTransformer.value?.getNode()
 			lineTransformerNode?.forceUpdate()
@@ -2366,7 +2394,9 @@ export default {
 			addPolygonToCanvas,
 			updateStylingPolygon,
 			userInputPolygon,
-			handlePolygonSidesChange
+			handlePolygonSidesChange,
+			handleTransformPolygon,
+			handleTransformCircle
 		}
 	},
 }
