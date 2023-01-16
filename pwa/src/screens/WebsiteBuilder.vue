@@ -144,6 +144,24 @@
 					@touchstart="handleStageMouseDown"
 				>
 					<v-layer ref="layer">
+						<v-circle
+							v-for="item in circleList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-circle>
+						<v-transformer
+							ref="circleTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+								rotateEnabled: false,
+							}"
+						></v-transformer>
 						<v-rect
 							v-for="item in rectangleList"
 							:key="item.id"
@@ -752,6 +770,7 @@
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addCircleToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add circle</div>
 						<Circle />
@@ -927,6 +946,142 @@
 						</div>
 					</div>	
 				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Circle'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Radius</h3>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="radius"
+								v-model="userInputCircle.circleRadius"
+								@change="updateStylingCircle"
+							/>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Circle color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color"
+						v-model="userInputCircle.circleColor"
+						@change="updateStylingCircle"
+						/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputCircle.circleColor"
+								@change="updateStylingCircle"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputCircle.circleColorOpacity"
+								@change="updateStylingCircle"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
+						<input
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInputCircle.circleBorder"
+							@change="updateStylingCircle"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInputCircle.circleBorderColor"
+							@change="updateStylingCircle"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInputCircle.circleBorderColor"
+							@change="updateStylingCircle"
+						/>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputCircle.circleShadowX"
+							@change="updateStylingCircle"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputCircle.circleShadowBlur"
+							@change="updateStylingCircle"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputCircle.circleShadowY"
+							@change="updateStylingCircle"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color"
+							v-model="userInputCircle.circleShadowColor"
+							@change="updateStylingCircle"
+							/>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputCircle.circleShadowColor"
+									@change="updateStylingCircle"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputCircle.circleShadowColorOpacity"
+									@change="updateStylingCircle"
+								/>
+							</div>
+						</div>
+					</div>	
+				</div>
 			</aside>
 		</main>
 	</div>
@@ -997,9 +1152,11 @@ export default {
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
 		const rectangleList: Ref<any[]> = ref([])
+		const circleList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
 		let rectangleListNumber: Ref<number> = ref(0)
+		let circleListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -1012,6 +1169,7 @@ export default {
 		const textTransformer = ref()
 		const imageTransformer = ref()
 		const lineTransformer = ref()
+		const circleTransformer = ref()
 		const fileInput = ref()
 		const rectangleTransformer = ref()
 
@@ -1077,6 +1235,20 @@ export default {
 			rectangleShadowSpread: 0,
 			rectangleShadowColor: '#000000',
 			rectangleShadowColorOpacity: 50,
+		})
+
+		const userInputCircle = reactive({
+			circleRadius: 50,
+			circleColor: '#000000',
+			circleColorOpacity: 100,
+			circleBorder: 0,
+			circleBorderColor: '#000000',
+			circleShadowX: 0,
+			circleShadowY: 0,
+			circleShadowBlur: 0,
+			circleShadowSpread: 0,
+			circleShadowColor: '#000000',
+			circleShadowColorOpacity: 50,
 		})
 
 		const configKonva = ref({
@@ -1154,7 +1326,6 @@ export default {
 		}
 
 		const addRectangleToCanvas = () => {
-			console.log('addRectangleToCanvas')
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
 			rectangleList.value.push({
@@ -1178,6 +1349,31 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 				cornerRadius: 0,
+			})
+		}
+
+		const addCircleToCanvas = () => {
+			circleListNumber.value++
+			const circleName = 'Circle-' + circleListNumber.value.toString()
+			circleList.value.push({
+				id: circleListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				radius: 50,
+				fill: '#000000',
+				stroke: '#000000',
+				strokeWidth: 0,
+				draggable: true,
+				name: circleName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
 			})
 		}
 
@@ -1273,6 +1469,29 @@ export default {
 			}
 		}
 
+		const updateCircleTransformer = () => {
+			const circleTransformerNode = circleTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Circle') {
+				const circleTransformerStage = circleTransformerNode.getStage()
+				const selectedNode = circleTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === circleTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					circleTransformerNode.nodes([selectedNode])
+				} else {
+					circleTransformerNode.nodes([])
+				}
+			} else {
+				circleTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -1282,6 +1501,7 @@ export default {
 				updateImageTransformer()
 				updateLineTransformer()
 				updateRectangleTransformer()
+				updateCircleTransformer()
 				return
 			}
 
@@ -1306,10 +1526,13 @@ export default {
 			const rectangle = rectangleList.value.find((rectangle) => {
 				return rectangle.name === name
 			})
+			const circle = circleList.value.find((circle) => {
+				return circle.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image || line || rectangle ){
+			} else if (image || line || rectangle || circle){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -1320,6 +1543,7 @@ export default {
 			updateImageTransformer()
 			updateLineTransformer()
 			updateRectangleTransformer()
+			updateCircleTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -1330,6 +1554,7 @@ export default {
 				text.rotation = e.target.rotation()
 				text.scaleX = e.target.scaleX()
 				text.scaleY = e.target.scaleY()
+				return
 			}
 
 			const image = imageList.value.find((r) => r.name === selectedShapeName.value)
@@ -1343,6 +1568,7 @@ export default {
 				e.target.scaleY(1)
 				image.scaleX = e.target.scaleX()
 				image.scaleY = e.target.scaleY()
+				return
 			}
 
 			const line = lineList.value.find((r) => r.name === selectedShapeName.value)
@@ -1352,6 +1578,7 @@ export default {
 				line.rotation = e.target.rotation()
 				line.scaleX = e.target.scaleX()
 				line.scaleY = e.target.scaleY()
+				return
 			}
 
 			const rectangle = rectangleList.value.find((r) => r.name === selectedShapeName.value)
@@ -1365,7 +1592,22 @@ export default {
 				e.target.scaleY(1)
 				rectangle.scaleX = e.target.scaleX()
 				rectangle.scaleY = e.target.scaleY()
-				
+				return
+			}
+
+			const circle = circleList.value.find((r) => r.name === selectedShapeName.value)
+			if (circle) {
+				circle.x = e.target.x()
+				circle.y = e.target.y()
+				circle.rotation = e.target.rotation()
+				circle.radius = e.target.width() / 2
+				circle.height = e.target.height()
+				circle.width = e.target.width()
+				// e.target.scaleX(1)
+				// e.target.scaleY(1)
+				// circle.scaleX = e.target.scaleX()
+				// circle.scaleY = e.target.scaleY()
+				return
 			}
 		}
 
@@ -1400,6 +1642,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateRectangleTransformer()
+					break
+				case 'Circle':
+					circleList.value = circleList.value.filter((circle) => {
+						return circle.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateCircleTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -1523,6 +1772,25 @@ export default {
 			}
 		}
 
+		const updateStylingCircle = () => {
+			const circle = circleList.value.find((circle) => {
+				return circle.name === selectedShapeName.value
+			})
+			if (circle) {
+				circle.stroke = userInputCircle.circleBorderColor
+				circle.strokeWidth = userInputCircle.circleBorder
+				circle.opacity = userInputCircle.circleColorOpacity / 100
+				circle.shadowOffsetX = userInputCircle.circleShadowX
+				circle.shadowOffsetY = userInputCircle.circleShadowY
+				circle.shadowBlur = userInputCircle.circleShadowBlur
+				circle.shadowColor = userInputCircle.circleShadowColor
+				circle.shadowOpacity = userInputCircle.circleShadowColorOpacity / 100
+				circle.radius = userInputCircle.circleRadius
+				circle.fill = userInputCircle.circleColor
+			}
+		}
+
+
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
@@ -1596,6 +1864,11 @@ export default {
 				userInputLine.lineShadowBlur = line.shadowBlur
 				userInputLine.lineShadowColor = line.shadowColor
 				userInputLine.lineShadowColorOpacity = line.shadowOpacity * 100
+				if (line.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
 				if (line.shadowOffsetX > 0 || line.shadowOffsetY > 0 || line.shadowBlur > 0) {
 					showShadowDetails.value = true
 				} else {
@@ -1616,7 +1889,41 @@ export default {
 				userInputRectangle.rectangleShadowBlur = rectangle.shadowBlur
 				userInputRectangle.rectangleShadowColor = rectangle.shadowColor
 				userInputRectangle.rectangleShadowColorOpacity = rectangle.shadowOpacity * 100
+				userInputRectangle.rectangleBorderColor = rectangle.stroke
+				userInputRectangle.rectangleBorder = rectangle.strokeWidth
+				if (rectangle.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
 				if (rectangle.shadowOffsetX > 0 || rectangle.shadowOffsetY > 0 || rectangle.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+				return
+			}
+
+			const circle = circleList.value.find((circle) => {
+				return circle.name === selectedShapeName.value
+			})
+			if (circle) {
+				userInputCircle.circleColor = circle.fill
+				userInputCircle.circleColorOpacity = circle.opacity * 100
+				userInputCircle.circleRadius = circle.radius
+				userInputCircle.circleShadowX = circle.shadowOffsetX
+				userInputCircle.circleShadowY = circle.shadowOffsetY
+				userInputCircle.circleShadowBlur = circle.shadowBlur
+				userInputCircle.circleShadowColor = circle.shadowColor
+				userInputCircle.circleShadowColorOpacity = circle.shadowOpacity * 100
+				userInputCircle.circleBorderColor = circle.stroke
+				userInputCircle.circleBorder = circle.strokeWidth
+				if (circle.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
+				if (circle.shadowOffsetX > 0 || circle.shadowOffsetY > 0 || circle.shadowBlur > 0) {
 					showShadowDetails.value = true
 				} else {
 					showShadowDetails.value = false
@@ -1754,6 +2061,11 @@ export default {
 			userInputRectangle,
 			updateStylingRectangle,
 			handleTransformRectangle,
+			circleList,
+			addCircleToCanvas,
+			circleTransformer,
+			userInputCircle,
+			updateStylingCircle,
 		}
 	},
 }
