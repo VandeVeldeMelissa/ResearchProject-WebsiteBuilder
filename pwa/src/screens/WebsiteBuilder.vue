@@ -144,6 +144,23 @@
 					@touchstart="handleStageMouseDown"
 				>
 					<v-layer ref="layer">
+						<v-regular-polygon
+							v-for="item in polygonList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-regular-polygon>
+						<v-transformer
+							ref="polygonTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+							}"
+						></v-transformer>
 						<v-circle
 							v-for="item in circleList"
 							:key="item.id"
@@ -777,12 +794,7 @@
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
-					>
-						<div class="flex gap-x-2"><Plus />Add triangle</div>
-						<Triangle />
-					</button>
-					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addPolygonToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add polygon</div>
 						<Hexagon />
@@ -1082,6 +1094,155 @@
 						</div>
 					</div>	
 				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Polygon'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Properties</h3>
+					<div class="grid grid-cols-3 gap-y-4 mr-8">
+							<label for="sidesPolygon">Sides</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="3"
+								max="20"
+								id="sidesPolygon"
+								v-model="userInputPolygon.polygonSides"
+								@change="{updateStylingPolygon(); handlePolygonSidesChange()}"
+							/>
+							<label for="radiusPolygon">Radius</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="radiusPolygon"
+								v-model="userInputPolygon.polygonRadius"
+								@change="updateStylingPolygon"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Polygon color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color"
+						v-model="userInputPolygon.polygonColor"
+						@change="updateStylingPolygon"
+						/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputPolygon.polygonColor"
+								@change="updateStylingPolygon"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputPolygon.polygonColorOpacity"
+								@change="updateStylingPolygon"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
+						<input
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInputPolygon.polygonBorder"
+							@change="updateStylingPolygon"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInputPolygon.polygonBorderColor"
+							@change="updateStylingPolygon"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInputPolygon.polygonBorderColor"
+							@change="updateStylingPolygon"
+						/>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputPolygon.polygonShadowX"
+							@change="updateStylingPolygon"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputPolygon.polygonShadowBlur"
+							@change="updateStylingPolygon"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputPolygon.polygonShadowY"
+							@change="updateStylingPolygon"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color" 
+							v-model="userInputPolygon.polygonShadowColor"
+							@change="updateStylingPolygon"
+							/>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputPolygon.polygonShadowColor"
+									@change="updateStylingPolygon"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputPolygon.polygonShadowColorOpacity"
+									@change="updateStylingPolygon"
+								/>
+							</div>
+						</div>
+					</div>	
+				</div>
 			</aside>
 		</main>
 	</div>
@@ -1153,10 +1314,12 @@ export default {
 		const lineList: Ref<any[]> = ref([])
 		const rectangleList: Ref<any[]> = ref([])
 		const circleList: Ref<any[]> = ref([])
+		const polygonList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
 		let rectangleListNumber: Ref<number> = ref(0)
 		let circleListNumber: Ref<number> = ref(0)
+		let polygonListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -1170,6 +1333,7 @@ export default {
 		const imageTransformer = ref()
 		const lineTransformer = ref()
 		const circleTransformer = ref()
+		const polygonTransformer = ref()
 		const fileInput = ref()
 		const rectangleTransformer = ref()
 
@@ -1249,6 +1413,21 @@ export default {
 			circleShadowSpread: 0,
 			circleShadowColor: '#000000',
 			circleShadowColorOpacity: 50,
+		})
+
+		const userInputPolygon = reactive({
+			polygonSides: 3,
+			polygonRadius: 50,
+			polygonColor: '#000000',
+			polygonColorOpacity: 100,
+			polygonBorder: 0,
+			polygonBorderColor: '#000000',
+			polygonShadowX: 0,
+			polygonShadowY: 0,
+			polygonShadowBlur: 0,
+			polygonShadowSpread: 0,
+			polygonShadowColor: '#000000',
+			polygonShadowColorOpacity: 50,
 		})
 
 		const configKonva = ref({
@@ -1377,6 +1556,32 @@ export default {
 			})
 		}
 
+		const addPolygonToCanvas = () => {
+			polygonListNumber.value++
+			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
+			polygonList.value.push({
+				id: polygonListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				sides: 5,
+				radius: 50,
+				fill: '#000000',
+				stroke: '#000000',
+				strokeWidth: 0,
+				draggable: true,
+				name: polygonName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
+			})
+		}
+
 		const updateTextTransformer = () => {
 			const textTransformerNode = textTransformer.value?.getNode()
 			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Text') {
@@ -1492,6 +1697,29 @@ export default {
 			}
 		}
 
+		const updatePolygonTransformer = () => {
+			const polygonTransformerNode = polygonTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Polygon') {
+				const polygonTransformerStage = polygonTransformerNode.getStage()
+				const selectedNode = polygonTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === polygonTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					polygonTransformerNode.nodes([selectedNode])
+				} else {
+					polygonTransformerNode.nodes([])
+				}
+			} else {
+				polygonTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -1502,6 +1730,7 @@ export default {
 				updateLineTransformer()
 				updateRectangleTransformer()
 				updateCircleTransformer()
+				updatePolygonTransformer()
 				return
 			}
 
@@ -1529,10 +1758,13 @@ export default {
 			const circle = circleList.value.find((circle) => {
 				return circle.name === name
 			})
+			const polygon = polygonList.value.find((polygon) => {
+				return polygon.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image || line || rectangle || circle){
+			} else if (image || line || rectangle || circle || polygon){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -1544,6 +1776,7 @@ export default {
 			updateLineTransformer()
 			updateRectangleTransformer()
 			updateCircleTransformer()
+			updatePolygonTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -1599,14 +1832,19 @@ export default {
 			if (circle) {
 				circle.x = e.target.x()
 				circle.y = e.target.y()
-				circle.rotation = e.target.rotation()
 				circle.radius = e.target.width() / 2
 				circle.height = e.target.height()
 				circle.width = e.target.width()
-				// e.target.scaleX(1)
-				// e.target.scaleY(1)
-				// circle.scaleX = e.target.scaleX()
-				// circle.scaleY = e.target.scaleY()
+				return
+			}
+
+			const polygon = polygonList.value.find((r) => r.name === selectedShapeName.value)
+			if (polygon) {
+				polygon.x = e.target.x()
+				polygon.y = e.target.y()
+				polygon.rotation = e.target.rotation()
+				polygon.scaleX = e.target.scaleX()
+				polygon.scaleY = e.target.scaleY()
 				return
 			}
 		}
@@ -1649,6 +1887,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateCircleTransformer()
+					break
+				case 'Polygon':
+					polygonList.value = polygonList.value.filter((polygon) => {
+						return polygon.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updatePolygonTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -1787,6 +2032,25 @@ export default {
 				circle.shadowOpacity = userInputCircle.circleShadowColorOpacity / 100
 				circle.radius = userInputCircle.circleRadius
 				circle.fill = userInputCircle.circleColor
+			}
+		}
+
+		const updateStylingPolygon = () => {
+			const polygon = polygonList.value.find((polygon) => {
+				return polygon.name === selectedShapeName.value
+			})
+			if (polygon) {
+				polygon.stroke = userInputPolygon.polygonBorderColor
+				polygon.strokeWidth = userInputPolygon.polygonBorder
+				polygon.opacity = userInputPolygon.polygonColorOpacity / 100
+				polygon.shadowOffsetX = userInputPolygon.polygonShadowX
+				polygon.shadowOffsetY = userInputPolygon.polygonShadowY
+				polygon.shadowBlur = userInputPolygon.polygonShadowBlur
+				polygon.shadowColor = userInputPolygon.polygonShadowColor
+				polygon.shadowOpacity = userInputPolygon.polygonShadowColorOpacity / 100
+				polygon.radius = userInputPolygon.polygonRadius
+				polygon.fill = userInputPolygon.polygonColor
+				polygon.sides = userInputPolygon.polygonSides
 			}
 		}
 
@@ -1930,6 +2194,32 @@ export default {
 				}
 				return
 			}
+
+			const polygon = polygonList.value.find((polygon) => {
+				return polygon.name === selectedShapeName.value
+			})
+			if (polygon) {
+				userInputPolygon.polygonColor = polygon.fill
+				userInputPolygon.polygonColorOpacity = polygon.opacity * 100
+				userInputPolygon.polygonShadowX = polygon.shadowOffsetX
+				userInputPolygon.polygonShadowY = polygon.shadowOffsetY
+				userInputPolygon.polygonShadowBlur = polygon.shadowBlur
+				userInputPolygon.polygonShadowColor = polygon.shadowColor
+				userInputPolygon.polygonShadowColorOpacity = polygon.shadowOpacity * 100
+				userInputPolygon.polygonBorderColor = polygon.stroke
+				userInputPolygon.polygonBorder = polygon.strokeWidth
+				if (polygon.strokeWidth > 0) {
+					showBorderDetails.value = true
+				} else {
+					showBorderDetails.value = false
+				}
+				if (polygon.shadowOffsetX > 0 || polygon.shadowOffsetY > 0 || polygon.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+				return
+			}
 		})
 
 		const selectImage = () => {
@@ -2017,6 +2307,11 @@ export default {
 			lineTransformerNode?.forceUpdate()
 		}
 
+		const handlePolygonSidesChange = () => {
+			const polygonTransformerNode = polygonTransformer.value?.getNode()
+			polygonTransformerNode?.forceUpdate()
+		}
+
 		return {
 			configKonva,
 			setPage,
@@ -2066,6 +2361,12 @@ export default {
 			circleTransformer,
 			userInputCircle,
 			updateStylingCircle,
+			polygonTransformer,
+			polygonList,
+			addPolygonToCanvas,
+			updateStylingPolygon,
+			userInputPolygon,
+			handlePolygonSidesChange
 		}
 	},
 }
