@@ -144,6 +144,23 @@
 					@touchstart="handleStageMouseDown"
 				>
 					<v-layer ref="layer">
+						<v-rect
+							v-for="item in rectangleList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-rect>
+						<v-transformer
+							ref="rectangleTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+							}"
+							@transform="handleTransformRectangle"
+						></v-transformer>
 						<v-image
 							v-for="item in imageList"
 							:key="item.id"
@@ -221,7 +238,7 @@
 						Templates
 					</button>
 				</div>
-				<div v-if="selectedShapeName == ''">
+				<div v-if="selectedShapeName == '' && showShapesButton == false">
 					<button
 						class="flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addTextElementToCanvas"
@@ -248,6 +265,7 @@
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="showShapesButton = true"
 					>
 						<div class="flex gap-x-2"><Plus />Add shape</div>
 						<Square />
@@ -718,13 +736,204 @@
 						</div>
 					</div>
 				</div>
+				<div v-if="showShapesButton == true && selectedShapeName == ''">
+					<button
+						class="w-full rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="showShapesButton = false"
+					>
+						<div class="flex gap-x-2"><ChevronLeft />Return</div>
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addRectangleToCanvas"
+					>
+						<div class="flex gap-x-2"><Plus />Add rectangle</div>
+						<Square />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add circle</div>
+						<Circle />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add triangle</div>
+						<Triangle />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add polygon</div>
+						<Hexagon />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add arrow</div>
+						<ArrowBigRight />
+					</button>
+					<button
+						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					>
+						<div class="flex gap-x-2"><Plus />Add star</div>
+						<Star />
+					</button>
+				</div>
+				<div v-if="selectedShapeName.split('-')[0] == 'Rectangle'">
+					<h3 class="mb-1 text-base font-semibold flex-wrap">Size</h3>
+					<div class="grid grid-cols-6 items-center gap-y-4 mr-8">
+							<label for="rectangleHeight">Height</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="rectangleHeight"
+								v-model="userInputRectangle.rectangleHeight"
+								@change="updateStylingRectangle"
+							/>
+							<label for="rectangleWidth">Width</label>
+							<input
+								class="w-20 rounded bg-slate-100 px-2 py-1.5 col-span-2"
+								type="number"
+								min="0"
+								max="10000"
+								id="rectangleWidth"
+								v-model="userInputRectangle.rectangleWidth"
+								@change="updateStylingRectangle"
+							/>
+					</div>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Rectangle color</h3>
+					<div class="flex items-center gap-x-1">
+						<input class="bg-white" type="color" v-model="userInputRectangle.rectangleColor" @change="updateStylingRectangle"/>
+						<div>
+							<input
+								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+								type="text"
+								v-model="userInputRectangle.rectangleColor" 
+								@change="updateStylingRectangle"
+							/>
+							<input
+								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+								type="number"
+								min="0"
+								max="100"
+								v-model="userInputRectangle.rectangleColorOpacity"
+								@change="updateStylingRectangle"
+							/>
+						</div>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showBorderDetails = !showBorderDetails"
+					>
+						<ChevronDown
+							:class="showBorderDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Border</h3>
+					</button>
+					<div class="flex items-center gap-x-1 mt-3" v-if="showBorderDetails">
+						<input
+							class="mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							v-model="userInputRectangle.rectangleBorder"
+							@change="updateStylingRectangle"
+						/>
+						<input
+							class="bg-white"
+							type="color"
+							v-model="userInputRectangle.rectangleBorderColor"
+							@change="updateStylingRectangle"
+						/>
+						<input
+							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+							type="text"
+							v-model="userInputRectangle.rectangleBorderColor"
+							@change="updateStylingRectangle"
+						/>
+					</div>
+					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
+					<button
+						class="flex gap-x-1"
+						@click="showShadowDetails = !showShadowDetails"
+					>
+						<ChevronDown
+							:class="showShadowDetails ? 'rotate-0' : '-rotate-90'"
+							class="transition-all ease-in"
+						/>
+						<h3 class="text-base font-semibold">Shadow</h3>
+					</button>
+					<div
+						v-if="showShadowDetails"
+						class="grid grid-cols-6 items-center gap-y-4 mt-3 mr-8"
+					>
+						<label for="x">X</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="x"
+							v-model="userInputRectangle.rectangleShadowX"
+							@change="updateStylingRectangle"
+						/>
+						<label for="Blur">Blur</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="Blur"
+							v-model="userInputRectangle.rectangleShadowBlur"
+							@change="updateStylingRectangle"
+						/>
+						<label for="y">Y</label>
+						<input
+							class="col-span-2 mr-4 w-20 rounded bg-slate-100 px-2 py-1.5"
+							type="number"
+							min="0"
+							max="1000"
+							id="y"
+							v-model="userInputRectangle.rectangleShadowY"
+							@change="updateStylingRectangle"
+						/>
+						<div class="flex items-center gap-x-1 col-span-6">
+							<input class="bg-white" type="color" 
+							v-model="userInputRectangle.rectangleShadowColor"
+							@change="updateStylingRectangle"
+							/>
+							<div>
+								<input
+									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
+									type="text"
+									v-model="userInputRectangle.rectangleShadowColor"
+									@change="updateStylingRectangle"
+								/>
+								<input
+									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
+									type="number"
+									min="0"
+									max="100"
+									v-model="userInputRectangle.rectangleShadowColorOpacity"
+									@change="updateStylingRectangle"
+								/>
+							</div>
+						</div>
+					</div>	
+				</div>
 			</aside>
 		</main>
 	</div>
 </template>
 
 <script lang="ts">
-import { Ref, ref, watch, computed, onMounted, reactive } from 'vue'
+import { Ref, ref, watch, onMounted, reactive } from 'vue'
 import {
 	Plus,
 	Type,
@@ -747,34 +956,39 @@ import {
 	AlignLeft,
 	AlignCenter,
 	AlignRight,
+	ChevronLeft,
+	Star
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
+import { Rect } from 'konva/lib/shapes/Rect'
 
 export default {
 	components: {
-		Plus,
-		Type,
-		Image,
-		Square,
-		Spline,
-		MousePointer2,
-		Triangle,
-		Circle,
-		Hexagon,
-		ArrowBigRight,
-		User,
-		Globe,
-		Eye,
-		ChevronDown,
-		Trash2,
-		Bold,
-		Italic,
-		Underline,
-		AlignLeft,
-		AlignCenter,
-		AlignRight,
-	},
+    Plus,
+    Type,
+    Image,
+    Square,
+    Spline,
+    MousePointer2,
+    Triangle,
+    Circle,
+    Hexagon,
+    ArrowBigRight,
+    User,
+    Globe,
+    Eye,
+    ChevronDown,
+    Trash2,
+    Bold,
+    Italic,
+    Underline,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+    ChevronLeft,
+	Star
+},
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
@@ -782,13 +996,16 @@ export default {
 		const textList: Ref<Text[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
+		const rectangleList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
+		let rectangleListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
 		const showTextEditor: Ref<boolean> = ref(false)
 		const alignText: Ref<string> = ref('left')
+		const showShapesButton: Ref<boolean> = ref(false)
 
 		const layer = ref()
 		const stage = ref()
@@ -796,6 +1013,7 @@ export default {
 		const imageTransformer = ref()
 		const lineTransformer = ref()
 		const fileInput = ref()
+		const rectangleTransformer = ref()
 
 		const userInputText = reactive({
 			fontFamily: 'Arial',
@@ -846,20 +1064,25 @@ export default {
 			lineShadowColorOpacity: 50,
 		})
 
+		const userInputRectangle = reactive({
+			rectangleWidth: 100,
+			rectangleHeight: 100,
+			rectangleColor: '#000000',
+			rectangleColorOpacity: 100,
+			rectangleBorder: 0,
+			rectangleBorderColor: '#000000',
+			rectangleShadowX: 0,
+			rectangleShadowY: 0,
+			rectangleShadowBlur: 0,
+			rectangleShadowSpread: 0,
+			rectangleShadowColor: '#000000',
+			rectangleShadowColorOpacity: 50,
+		})
+
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: window.innerHeight - 72 - 32,
 		})
-
-		const configCircle = {
-			x: 100,
-			y: 100,
-			radius: 70,
-			fill: 'red',
-			stroke: 'black',
-			strokeWidth: 4,
-			draggable: true,
-		}
 
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
@@ -927,6 +1150,34 @@ export default {
 				shadowOffsetX: 0,
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
+			})
+		}
+
+		const addRectangleToCanvas = () => {
+			console.log('addRectangleToCanvas')
+			rectangleListNumber.value++
+			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
+			rectangleList.value.push({
+				id: rectangleListNumber.toString(),
+				x: configKonva.value.width / 2,
+				y: configKonva.value.height / 2,
+				width: 100,
+				height: 100,
+				fill: '#000000',
+				stroke: '#000000',
+				strokeWidth: 0,
+				draggable: true,
+				name: rectangleName,
+				opacity: 1,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1,
+				shadowColor: '#000000',
+				shadowBlur: 0,
+				shadowOffsetX: 0,
+				shadowOffsetY: 0,
+				shadowOpacity: 0.5,
+				cornerRadius: 0,
 			})
 		}
 
@@ -999,6 +1250,29 @@ export default {
 			}
 		}
 
+		const updateRectangleTransformer = () => {
+			const rectangleTransformerNode = rectangleTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Rectangle') {
+				const rectangleTransformerStage = rectangleTransformerNode.getStage()
+				const selectedNode = rectangleTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === rectangleTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					rectangleTransformerNode.nodes([selectedNode])
+				} else {
+					rectangleTransformerNode.nodes([])
+				}
+			} else {
+				rectangleTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -1007,6 +1281,7 @@ export default {
 				updateTextTransformer()
 				updateImageTransformer()
 				updateLineTransformer()
+				updateRectangleTransformer()
 				return
 			}
 
@@ -1018,7 +1293,7 @@ export default {
 
 			const name = e.target.name()
 
-			// find clicked text by its name
+			// find clicked shape by its name
 			const text = textList.value.find((text) => {
 				return text.name === name
 			})
@@ -1028,13 +1303,13 @@ export default {
 			const line = lineList.value.find((line) => {
 				return line.name === name
 			})
+			const rectangle = rectangleList.value.find((rectangle) => {
+				return rectangle.name === name
+			})
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image){
-				selectedShapeName.value = name
-				showTextEditor.value = false
-			} else if(line) {
+			} else if (image || line || rectangle ){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -1044,6 +1319,7 @@ export default {
 			updateTextTransformer()
 			updateImageTransformer()
 			updateLineTransformer()
+			updateRectangleTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -1061,6 +1337,10 @@ export default {
 				image.x = e.target.x()
 				image.y = e.target.y()
 				image.rotation = e.target.rotation()
+				image.width = e.target.width()
+				image.height = e.target.height()
+				e.target.scaleX(1)
+				e.target.scaleY(1)
 				image.scaleX = e.target.scaleX()
 				image.scaleY = e.target.scaleY()
 			}
@@ -1072,6 +1352,20 @@ export default {
 				line.rotation = e.target.rotation()
 				line.scaleX = e.target.scaleX()
 				line.scaleY = e.target.scaleY()
+			}
+
+			const rectangle = rectangleList.value.find((r) => r.name === selectedShapeName.value)
+			if (rectangle) {
+				rectangle.x = e.target.x()
+				rectangle.y = e.target.y()
+				rectangle.rotation = e.target.rotation()
+				rectangle.width = e.target.width()
+				rectangle.height = e.target.height()
+				e.target.scaleX(1)
+				e.target.scaleY(1)
+				rectangle.scaleX = e.target.scaleX()
+				rectangle.scaleY = e.target.scaleY()
+				
 			}
 		}
 
@@ -1099,6 +1393,13 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateLineTransformer()
+					break
+				case 'Rectangle':
+					rectangleList.value = rectangleList.value.filter((rectangle) => {
+						return rectangle.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateRectangleTransformer()
 					break
 				default:
 					console.log('Shape not found')
@@ -1202,6 +1503,26 @@ export default {
 			}
 		}
 
+		const updateStylingRectangle = () => {
+			const rectangle = rectangleList.value.find((rectangle) => {
+				return rectangle.name === selectedShapeName.value
+			})
+			if (rectangle) {
+				rectangle.stroke = userInputRectangle.rectangleBorderColor
+				rectangle.strokeWidth = userInputRectangle.rectangleBorder
+				rectangle.opacity = userInputRectangle.rectangleColorOpacity / 100
+				rectangle.shadowOffsetX = userInputRectangle.rectangleShadowX
+				rectangle.shadowOffsetY = userInputRectangle.rectangleShadowY
+				rectangle.shadowBlur = userInputRectangle.rectangleShadowBlur
+				rectangle.shadowColor = userInputRectangle.rectangleShadowColor
+				rectangle.shadowOpacity =
+					userInputRectangle.rectangleShadowColorOpacity / 100
+				rectangle.width = userInputRectangle.rectangleWidth
+				rectangle.height = userInputRectangle.rectangleHeight
+				rectangle.fill = userInputRectangle.rectangleColor
+			}
+		}
+
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
@@ -1282,6 +1603,26 @@ export default {
 				}
 				return
 			}
+			const rectangle = rectangleList.value.find((rectangle) => {
+				return rectangle.name === selectedShapeName.value
+			})
+			if (rectangle) {
+				userInputRectangle.rectangleColor = rectangle.fill
+				userInputRectangle.rectangleColorOpacity = rectangle.opacity * 100
+				userInputRectangle.rectangleWidth = rectangle.width
+				userInputRectangle.rectangleHeight = rectangle.height
+				userInputRectangle.rectangleShadowX = rectangle.shadowOffsetX
+				userInputRectangle.rectangleShadowY = rectangle.shadowOffsetY
+				userInputRectangle.rectangleShadowBlur = rectangle.shadowBlur
+				userInputRectangle.rectangleShadowColor = rectangle.shadowColor
+				userInputRectangle.rectangleShadowColorOpacity = rectangle.shadowOpacity * 100
+				if (rectangle.shadowOffsetX > 0 || rectangle.shadowOffsetY > 0 || rectangle.shadowBlur > 0) {
+					showShadowDetails.value = true
+				} else {
+					showShadowDetails.value = false
+				}
+				return
+			}
 		})
 
 		const selectImage = () => {
@@ -1350,6 +1691,20 @@ export default {
 			}
 		}
 
+		const handleTransformRectangle = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const rectangle = e.target as Konva.Rect
+			const rectangleName = rectangle.name()
+			const rectangleObject = rectangleList.value.find((rectangle) => {
+				return rectangle.name === rectangleName
+			})
+			if (rectangleObject) {
+				rectangleObject.width = Math.round(rectangle.width() * rectangle.scaleX())
+				rectangleObject.height = Math.round(rectangle.height() * rectangle.scaleY())
+				userInputRectangle.rectangleWidth = Math.round(rectangleObject.width)
+				userInputRectangle.rectangleHeight = Math.round(rectangleObject.height)
+			}
+		}
+
 		const handleLineLengthChange = () => {
 			const lineTransformerNode = lineTransformer.value?.getNode()
 			lineTransformerNode?.forceUpdate()
@@ -1357,7 +1712,6 @@ export default {
 
 		return {
 			configKonva,
-			configCircle,
 			setPage,
 			isPageSelectorOpen,
 			selectedPage,
@@ -1392,7 +1746,14 @@ export default {
 			updateLineTransformer,
 			handleTransformLine,
 			handleLineLengthChange,
-			handleTransformImage
+			handleTransformImage,
+			showShapesButton,
+			addRectangleToCanvas,
+			rectangleList,
+			rectangleTransformer,
+			userInputRectangle,
+			updateStylingRectangle,
+			handleTransformRectangle,
 		}
 	},
 }
