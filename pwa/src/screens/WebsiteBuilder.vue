@@ -143,7 +143,7 @@
 					@mousedown="handleStageMouseDown"
 					@touchstart="handleStageMouseDown"
 				>
-					<v-layer ref="layer">
+					<v-layer ref="layer" @dragmove="showGuidelines" @dragend="handleDragEndLayer">
 						<v-regular-polygon
 							v-for="item in polygonList"
 							:key="item.id"
@@ -2956,6 +2956,258 @@ export default {
 			starTransformerNode?.forceUpdate()
 		}
 
+
+		// ******* Snap with guidelines functions *******
+		//Snap shape positions
+		const getGuidelines = (skipShape: any) => {
+			//Stage borders & center of stage
+			var vertical = [0, stage.value.getNode().width() / 2, stage.value.getNode().width()]
+			var horizontal = [0, stage.value.getNode().height() / 2, stage.value.getNode().height()]
+
+			//Find all objects on stage and skip the current object and transformers
+			stage.value.getNode().children[0].children.forEach((guideItem: any) => {
+				if (guideItem === skipShape || guideItem.className === 'Transformer') {
+					return
+				}
+				var box = guideItem.getClientRect();
+
+				//Object borders & center of object
+				vertical.push([box.x, box.x + box.width, box.x + box.width / 2]);
+		  		horizontal.push([box.y, box.y + box.height, box.y + box.height / 2]);
+			})
+
+			return {
+				vertical: vertical.flat(),
+				horizontal: horizontal.flat(),
+			}
+		}
+
+		//Snap points objects
+		const getObjectSnappingEdges = (node: any) => {
+			var box = node.getClientRect()
+			var absolutePosition = node.getAbsolutePosition()
+
+			return {
+				vertical: [
+					{
+						guide: Math.round(box.x),
+						offset: Math.round(absolutePosition.x - box.x),
+						snap: 'start',
+					},
+					{
+						guide: Math.round(box.x + box.width / 2),
+						offset: Math.round(absolutePosition.x - box.x - box.width / 2),
+						snap: 'center',
+					},
+					{
+						guide: Math.round(box.x + box.width),
+						offset: Math.round(absolutePosition.x - box.x - box.width),
+						snap: 'end',
+					},
+          		],
+				  horizontal: [
+					{
+						guide: Math.round(box.y),
+						offset: Math.round(absolutePosition.y - box.y),
+						snap: 'start',
+					},
+					{
+						guide: Math.round(box.y + box.height / 2),
+						offset: Math.round(absolutePosition.y - box.y - box.height / 2),
+						snap: 'center',
+					},
+					{
+						guide: Math.round(box.y + box.height),
+						offset: Math.round(absolutePosition.y - box.y - box.height),
+						snap: 'end',
+					},
+          		],
+			}
+		}
+
+		//Find all snapping possibilities
+		const getGuides = (lineGuideStops: any, itemBounds: any) => {
+			var resultV: { lineGuide: any; diff: number; snap: any; offset: any }[] = [];
+        	var resultH: { lineGuide: any; diff: number; snap: any; offset: any }[] = [];
+
+			lineGuideStops.vertical.forEach((lineGuide: any) => {
+				itemBounds.vertical.forEach((itemBound: any) => {
+					var diff = Math.abs(lineGuide - itemBound.guide)
+					//Snap if the difference between a guideline and an object is less than 5
+					if (diff < 5) { // 5 = guideline offset
+						resultV.push({
+							lineGuide: lineGuide,
+							diff: diff,
+							snap: itemBound.snap,
+							offset: itemBound.offset,
+						})
+					}
+				})
+			});
+
+			lineGuideStops.horizontal.forEach((lineGuide: any) => {
+				itemBounds.horizontal.forEach((itemBound: any) => {
+					var diff = Math.abs(lineGuide - itemBound.guide)
+					//Snap if the difference between a guideline and an object is less than 5
+					if (diff < 5) { // 5 = guideline offset
+						resultH.push({
+							lineGuide: lineGuide,
+							diff: diff,
+							snap: itemBound.snap,
+							offset: itemBound.offset,
+						})
+					}
+				})
+			});
+
+			var guides = [];
+
+			//Find the closest snap point
+			var closestV = resultV.sort((a: any, b: any) => {
+				return a.diff - b.diff
+			})[0]
+			var closestH = resultH.sort((a: any, b: any) => {
+				return a.diff - b.diff
+			})[0]
+
+			if (closestV) {
+				guides.push({
+					lineGuide: closestV.lineGuide,
+					offset: closestV.offset,
+					snap: closestV.snap,
+					orientation: 'vertical',
+				})
+			}
+			if (closestH) {
+				guides.push({
+					lineGuide: closestH.lineGuide,
+					offset: closestH.offset,
+					snap: closestH.snap,
+					orientation: 'horizontal',
+				})
+			}
+			return guides
+		}
+
+		//Draw the guidelines
+		const drawGuides = (guides: any) => {
+			guides.forEach((lg: any) => {
+				if (lg.orientation === 'horizontal') {
+					//Draw horizontal line
+					var line = new Konva.Line({
+						points: [-6000, 0, 6000, 0],
+						stroke: '#2563EB',
+						strokeWidth: 1,
+						name: 'guideline',
+						dash: [4, 6],
+					})
+					//Add line to layer
+					layer.value.getNode().add(line)
+					//Set position
+					line.position({
+						x: 0,
+						y: lg.lineGuide,
+					})
+				} else if (lg.orientation === 'vertical') {
+					//Draw vertical line
+					var line = new Konva.Line({
+						points: [0, -6000, 0, 6000],
+						stroke: '#2563EB',
+						strokeWidth: 1,
+						name: 'guideline',
+						dash: [4, 6],
+					});
+					//Add line to layer
+					layer.value.getNode().add(line);
+					//Set position
+					line.position({
+						x: lg.lineGuide,
+						y: 0,
+					})
+				}
+			})
+		}
+
+		const showGuidelines = (e: Konva.KonvaEventObject<DragEvent>) => {
+			//Select the shape and not the transformer:
+			if (e.target === rectangleTransformer.value.getNode() || e.target === circleTransformer.value.getNode() || e.target === polygonTransformer.value.getNode() || e.target === arrowTransformer.value.getNode() || e.target === starTransformer.value.getNode() || e.target === lineTransformer.value.getNode() || e.target === imageTransformer.value.getNode() || e.target === textTransformer.value.getNode()) {
+				return
+			}
+
+			//Clear all previous lines on screen
+			layer.value.getNode().find('.guideline').forEach((line: any) => {
+				line.destroy()
+			})
+
+			//Find possible snapping lines
+			var lineGuideStops = getGuidelines(e.target)
+			var itemBounds = getObjectSnappingEdges(e.target)
+
+			//Find the closest snap point
+			var guides = getGuides(lineGuideStops, itemBounds)
+
+			if (!guides.length) {
+				return
+			}
+
+			//Draw the guidelines
+			drawGuides(guides)
+
+			var absolutePosition = e.target.absolutePosition()
+			//Force the object to snap to the closest snap point
+			guides.forEach((lg: any) => {
+				switch (lg.snap) {
+					case 'start': {
+						switch (lg.orientation) {
+							case 'vertical': {
+								absolutePosition.x = lg.lineGuide + lg.offset
+								break
+							}
+							case 'horizontal': {
+								absolutePosition.y = lg.lineGuide + lg.offset
+								break
+							}
+						}
+						break
+					}
+					case 'center': {
+						switch (lg.orientation) {
+							case 'vertical': {
+								absolutePosition.x = lg.lineGuide + lg.offset
+								break
+							}
+							case 'horizontal': {
+								absolutePosition.y = lg.lineGuide + lg.offset
+								break
+							}
+						}
+						break
+					}
+					case 'end': {
+						switch (lg.orientation) {
+							case 'vertical': {
+								absolutePosition.x = lg.lineGuide + lg.offset
+								break
+							}
+							case 'horizontal': {
+								absolutePosition.y = lg.lineGuide + lg.offset
+								break
+							}
+						}
+						break
+					}
+				}
+			})
+			e.target.absolutePosition(absolutePosition)
+		}
+
+		const handleDragEndLayer = (e: Konva.KonvaEventObject<DragEvent>) => {
+			//Clear all previous lines on screen
+			layer.value.getNode().find('.guideline').forEach((line: any) => {
+				line.destroy()
+			})
+		}
+
 		return {
 			configKonva,
 			setPage,
@@ -3026,6 +3278,8 @@ export default {
 			updateStylingStar,
 			handleStarPointsChange,
 			userInputStar,
+			showGuidelines,
+			handleDragEndLayer
 		}
 	},
 }
