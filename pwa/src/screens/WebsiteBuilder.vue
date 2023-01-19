@@ -103,12 +103,6 @@
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-						title="Add triangle"
-					>
-						<Triangle />
-					</button>
-					<button
-						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add circle"
 					>
 						<Circle />
@@ -125,15 +119,35 @@
 					>
 						<ArrowBigRight />
 					</button>
+					<button
+						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						title="Add triangle"
+					>
+						<Star />
+					</button>
 				</div>
-				<button
-					class="relative mt-5 mb-2 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600"
-					@click="deleteShape"
-					v-if="selectedShapeName != ''"
-					title="Delete shape"
-				>
-					<Trash2 />
-				</button>
+				
+				<div v-if="selectedShapeName != ''">
+					<button class="mb-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600" title="Move up" @click="moveUp">
+						<div class="relative">
+							<Layers class="text-neutral-400 mt-2"/>
+							<ArrowUp class="absolute bottom-3"/>
+						</div>
+					</button>
+					<button class="mb-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600" title="Move down" @click="moveDown">
+						<div class="relative">
+							<Layers class="text-neutral-400 mt-2"/>
+							<ArrowDown class="absolute bottom-3"/>
+						</div>
+					</button>
+					<button
+						class="mb-2 rounded p-1 transition-colors hover:bg-red-50 hover:text-red-600"
+						@click="deleteShape"
+						title="Delete shape"
+					>
+						<Trash2 />
+					</button>
+				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
 			<div class="relative h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer">
@@ -151,17 +165,6 @@
 							@transformend="handleTransformEnd"
 							@dragend="handleTransformEnd"
 						></v-regular-polygon>
-						<v-transformer
-							ref="polygonTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-							}"
-							@transform="handleTransformPolygon"
-						></v-transformer>
 						<v-circle
 							v-for="item in circleList"
 							:key="item.id"
@@ -169,6 +172,70 @@
 							@transformend="handleTransformEnd"
 							@dragend="handleTransformEnd"
 						></v-circle>
+						<v-rect
+							v-for="item in rectangleList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-rect>
+						<v-image
+							v-for="item in imageList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-image>
+						<v-star
+							v-for="item in starList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-star>
+						<v-arrow
+							v-for="item in arrowList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						></v-arrow>
+						<v-line
+							v-for="item in lineList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+						/>
+						<v-text
+							v-for="item in textList"
+							:key="item.id"
+							:config="item"
+							@transformend="handleTransformEnd"
+							@dragend="handleTransformEnd"
+							@dblclick="showTextEditor = true"
+						></v-text>
+						<v-transformer
+							ref="starTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: [],
+								borderDash: [3, 3],
+							}"
+						/>
+						<v-transformer
+							ref="rectangleTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+							}"
+							@transform="handleTransformRectangle"
+						></v-transformer>
 						<v-transformer
 							ref="circleTransformer"
 							:config="{
@@ -181,83 +248,17 @@
 							}"
 							@transform="handleTransformCircle"
 						></v-transformer>
-						<v-rect
-							v-for="item in rectangleList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-rect>
 						<v-transformer
-							ref="rectangleTransformer"
+							ref="polygonTransformer"
 							:config="{
 								rotationSnaps: [0, 90, 180, 270],
 								rotationSnapTolerance: 5,
 								anchorStroke: '#2563EB',
 								borderStroke: '#2563EB',
+								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
 							}"
-							@transform="handleTransformRectangle"
+							@transform="handleTransformPolygon"
 						></v-transformer>
-						<v-image
-							v-for="item in imageList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-image>
-						<v-transformer
-							ref="imageTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-							}"
-							@transform="handleTransformImage"
-						/>
-						<v-star
-							v-for="item in starList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-star>
-						<v-transformer
-							ref="starTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: [],
-								borderDash: [3, 3],
-							}"
-						/>
-						<v-arrow
-							v-for="item in arrowList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-arrow>
-						<v-transformer
-							ref="arrowTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['middle-left', 'middle-right'],
-							}"
-							@transform="handleTransformArrow"
-						/>
-						<v-line
-							v-for="item in lineList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						/>
 						<v-transformer
 							ref="lineTransformer"
 							:config="{
@@ -269,14 +270,16 @@
 							}"
 							@transform="handleTransformLine"
 							/>
-						<v-text
-							v-for="item in textList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-							@dblclick="showTextEditor = true"
-						></v-text>
+						<v-transformer
+							ref="imageTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+							}"
+							@transform="handleTransformImage"
+						/>
 						<v-transformer
 							ref="textTransformer"
 							:config="{
@@ -288,6 +291,17 @@
 								enabledAnchors: [],
 								rotateAnchorOffset: 30
 							}"
+						/>
+						<v-transformer
+							ref="arrowTransformer"
+							:config="{
+								rotationSnaps: [0, 90, 180, 270],
+								rotationSnapTolerance: 5,
+								anchorStroke: '#2563EB',
+								borderStroke: '#2563EB',
+								enabledAnchors: ['middle-left', 'middle-right'],
+							}"
+							@transform="handleTransformArrow"
 						/>
 					</v-layer>
 				</v-stage>
@@ -1588,7 +1602,10 @@ import {
 	AlignCenter,
 	AlignRight,
 	ChevronLeft,
-	Star
+	Star,
+	Layers,
+	ArrowUp,
+	ArrowDown
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -1619,7 +1636,10 @@ export default {
     AlignCenter,
     AlignRight,
     ChevronLeft,
-	Star
+	Star,
+	Layers,
+	ArrowUp,
+	ArrowDown
 },
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
@@ -3253,6 +3273,32 @@ export default {
 			})
 		}
 
+		const moveUp = () => {
+			if (selectedShapeName.value !== '') {
+				const shape = layer.value.getNode().findOne('.' + selectedShapeName.value)
+				shape.moveUp()
+				layer.value.getNode().batchDraw()
+
+				//move all transformers to the top
+				rectangleTransformer.value.getNode().moveToTop()
+				circleTransformer.value.getNode().moveToTop()
+				polygonTransformer.value.getNode().moveToTop()
+				arrowTransformer.value.getNode().moveToTop()
+				starTransformer.value.getNode().moveToTop()
+				lineTransformer.value.getNode().moveToTop()
+				imageTransformer.value.getNode().moveToTop()
+				textTransformer.value.getNode().moveToTop()
+			}
+		}
+
+		const moveDown = () => {
+			if (selectedShapeName.value !== '') {
+				const shape = layer.value.getNode().findOne('.' + selectedShapeName.value)
+				shape.moveDown()
+				layer.value.getNode().batchDraw()
+			}
+		}
+
 		return {
 			configKonva,
 			setPage,
@@ -3325,7 +3371,9 @@ export default {
 			userInputStar,
 			showGuidelines,
 			handleDragEndLayer,
-			scrollContainer
+			scrollContainer,
+			moveUp,
+			moveDown
 		}
 	},
 }
