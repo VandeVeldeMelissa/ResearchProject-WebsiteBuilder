@@ -464,13 +464,14 @@
 					</button>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Text color</h3>
 					<div class="flex items-center gap-x-1">
-						<input class="bg-white" type="color" v-model="userInputText.textColor" @change="updateStylingText"/>
+						<input class="bg-white" type="color" v-model="userInputText.textColor" @change="updateStylingText" @input="updateStylingText"/>
 						<div>
 							<input
 								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 								type="text"
 								v-model="userInputText.textColor"
 								@change="updateStylingText"
+								@input="updateStylingText"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -507,12 +508,14 @@
 							type="color"
 							v-model="userInputText.textBorderColor"
 							@change="updateStylingText"
+							@input="updateStylingText"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputText.textBorderColor"
 							@change="updateStylingText"
+							@input="updateStylingText"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -561,13 +564,14 @@
 							@change="updateStylingText"
 						/>
 						<div class="flex items-center gap-x-1 col-span-6">
-							<input class="bg-white" type="color" v-model="userInputText.textShadowColor" @change="updateStylingText"/>
+							<input class="bg-white" type="color" v-model="userInputText.textShadowColor" @change="updateStylingText" @input="updateStylingText"/>
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 									type="text"
 									v-model="userInputText.textShadowColor"
 									@change="updateStylingText"
+									@input="updateStylingText"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -639,12 +643,14 @@
 							type="color"
 							v-model="userInputImage.imageBorderColor"
 							@change="updateStylingImage"
+							@input="updateStylingImage"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputImage.imageBorderColor"
 							@change="updateStylingImage"
+							@input="updateStylingImage"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -693,13 +699,14 @@
 							@change="updateStylingImage"
 						/>
 						<div class="flex items-center gap-x-1 col-span-6">
-							<input class="bg-white" type="color" v-model="userInputImage.imageShadowColor" @change="updateStylingImage"/>
+							<input class="bg-white" type="color" v-model="userInputImage.imageShadowColor" @change="updateStylingImage" @input="updateStylingImage"/>
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 									type="text"
 									v-model="userInputImage.imageShadowColor"
 									@change="updateStylingImage"
+									@input="updateStylingImage"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -739,13 +746,14 @@
 					</div>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Line color</h3>
 					<div class="flex items-center gap-x-1">
-						<input class="bg-white" type="color" v-model="userInputLine.lineColor" @change="updateStylingLine"/>
+						<input class="bg-white" type="color" v-model="userInputLine.lineColor" @change="updateStylingLine" @input="updateStylingLine"/>
 						<div>
 							<input
 								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 								type="text"
 								v-model="userInputLine.lineColor"
 								@change="updateStylingLine"
+								@input="updateStylingLine"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -803,13 +811,14 @@
 							@change="updateStylingLine"
 						/>
 						<div class="flex items-center gap-x-1 col-span-6">
-							<input class="bg-white" type="color" v-model="userInputLine.lineShadowColor" @change="updateStylingLine">
+							<input class="bg-white" type="color" v-model="userInputLine.lineShadowColor" @change="updateStylingLine" @input="updateStylingLine">
 							<div>
 								<input
 									class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 									type="text"
 									v-model="userInputLine.lineShadowColor"
 									@change="updateStylingLine"
+									@input="updateStylingLine"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -892,13 +901,14 @@
 					</div>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Rectangle color</h3>
 					<div class="flex items-center gap-x-1">
-						<input class="bg-white" type="color" v-model="userInputRectangle.rectangleColor" @change="updateStylingRectangle"/>
+						<input class="bg-white" type="color" v-model="userInputRectangle.rectangleColor" @change="updateStylingRectangle" @input="updateStylingRectangle"/>
 						<div>
 							<input
 								class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 								type="text"
 								v-model="userInputRectangle.rectangleColor" 
 								@change="updateStylingRectangle"
+								@input="updateStylingRectangle"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -935,12 +945,14 @@
 							type="color"
 							v-model="userInputRectangle.rectangleBorderColor"
 							@change="updateStylingRectangle"
+							@input="updateStylingRectangle"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputRectangle.rectangleBorderColor"
 							@change="updateStylingRectangle"
+							@input="updateStylingRectangle"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -992,6 +1004,7 @@
 							<input class="bg-white" type="color" 
 							v-model="userInputRectangle.rectangleShadowColor"
 							@change="updateStylingRectangle"
+							@input="updateStylingRectangle"
 							/>
 							<div>
 								<input
@@ -999,6 +1012,7 @@
 									type="text"
 									v-model="userInputRectangle.rectangleShadowColor"
 									@change="updateStylingRectangle"
+									@input="updateStylingRectangle"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1028,6 +1042,7 @@
 						<input class="bg-white" type="color"
 						v-model="userInputCircle.circleColor"
 						@change="updateStylingCircle"
+						@input="updateStylingCircle"
 						/>
 						<div>
 							<input
@@ -1035,6 +1050,7 @@
 								type="text"
 								v-model="userInputCircle.circleColor"
 								@change="updateStylingCircle"
+								@input="updateStylingCircle"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1071,12 +1087,14 @@
 							type="color"
 							v-model="userInputCircle.circleBorderColor"
 							@change="updateStylingCircle"
+							@input="updateStylingCircle"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputCircle.circleBorderColor"
 							@change="updateStylingCircle"
+							@input="updateStylingCircle"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -1128,6 +1146,7 @@
 							<input class="bg-white" type="color"
 							v-model="userInputCircle.circleShadowColor"
 							@change="updateStylingCircle"
+							@input="updateStylingCircle"
 							/>
 							<div>
 								<input
@@ -1135,6 +1154,7 @@
 									type="text"
 									v-model="userInputCircle.circleShadowColor"
 									@change="updateStylingCircle"
+									@input="updateStylingCircle"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1177,6 +1197,7 @@
 						<input class="bg-white" type="color"
 						v-model="userInputPolygon.polygonColor"
 						@change="updateStylingPolygon"
+						@input="updateStylingPolygon"
 						/>
 						<div>
 							<input
@@ -1184,6 +1205,7 @@
 								type="text"
 								v-model="userInputPolygon.polygonColor"
 								@change="updateStylingPolygon"
+								@input="updateStylingPolygon"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1220,12 +1242,14 @@
 							type="color"
 							v-model="userInputPolygon.polygonBorderColor"
 							@change="updateStylingPolygon"
+							@input="updateStylingPolygon"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputPolygon.polygonBorderColor"
 							@change="updateStylingPolygon"
+							@input="updateStylingPolygon"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -1277,6 +1301,7 @@
 							<input class="bg-white" type="color" 
 							v-model="userInputPolygon.polygonShadowColor"
 							@change="updateStylingPolygon"
+							@input="updateStylingPolygon"
 							/>
 							<div>
 								<input
@@ -1284,6 +1309,7 @@
 									type="text"
 									v-model="userInputPolygon.polygonShadowColor"
 									@change="updateStylingPolygon"
+									@input="updateStylingPolygon"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1326,6 +1352,7 @@
 						<input class="bg-white" type="color"
 						v-model="userInputArrow.arrowStrokeColor"
 						@change="updateStylingArrow"
+						@input="updateStylingArrow"
 						/>
 						<div>
 							<input
@@ -1333,6 +1360,7 @@
 								type="text"
 								v-model="userInputArrow.arrowStrokeColor"
 								@change="updateStylingArrow"
+								@input="updateStylingArrow"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1393,6 +1421,7 @@
 							<input class="bg-white" type="color"
 							v-model="userInputArrow.arrowShadowColor"
 							@change="updateStylingArrow"
+							@input="updateStylingArrow"
 							>
 							<div>
 								<input
@@ -1400,6 +1429,7 @@
 									type="text"
 									v-model="userInputArrow.arrowShadowColor"
 									@change="updateStylingArrow"
+									@input="updateStylingArrow"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1452,6 +1482,7 @@
 						<input class="bg-white" type="color"
 						v-model="userInputStar.starColor"
 						@change="updateStylingStar"
+						@input="updateStylingStar"
 						/>
 						<div>
 							<input
@@ -1459,6 +1490,7 @@
 								type="text"
 								v-model="userInputStar.starColor"
 								@change="updateStylingStar"
+								@input="updateStylingStar"
 							/>
 							<input
 								class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
@@ -1495,12 +1527,14 @@
 							type="color"
 							v-model="userInputStar.starBorderColor"
 							@change="updateStylingStar"
+							@input="updateStylingStar"
 						/>
 						<input
 							class="w-30 rounded-l bg-slate-100 px-2 py-1.5"
 							type="text"
 							v-model="userInputStar.starBorderColor"
 							@change="updateStylingStar"
+							@input="updateStylingStar"
 						/>
 					</div>
 					<div class="my-6 h-0.5 w-full bg-slate-300 opacity-50"></div>
@@ -1552,6 +1586,7 @@
 							<input class="bg-white" type="color" 
 							v-model="userInputStar.starShadowColor"
 							@change="updateStylingStar"
+							@input="updateStylingStar"
 							/>
 							<div>
 								<input
@@ -1559,6 +1594,7 @@
 									type="text"
 									v-model="userInputStar.starShadowColor"
 									@change="updateStylingStar"
+									@input="updateStylingStar"
 								/>
 								<input
 									class="border-l-1 col-span-1 rounded-r border-slate-300 bg-slate-100 px-2 py-1.5 pl-3"
