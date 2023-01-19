@@ -136,7 +136,7 @@
 				</button>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="relative">
+			<div class="relative h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer">
 				<v-stage
 					ref="stage"
 					:config="configKonva"
@@ -1658,6 +1658,8 @@ export default {
 		const rectangleTransformer = ref()
 		const starTransformer = ref()
 
+		const scrollContainer = ref()
+
 		const userInputText = reactive({
 			fontFamily: 'Arial',
 			fontSize: 21,
@@ -1786,7 +1788,7 @@ export default {
 
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
-			height: window.innerHeight - 72 - 32,
+			height: (window.innerHeight - 72 - 32) * 2, // *2 to make canvas longer
 		})
 
 		const setPage = (page: string) => {
@@ -1796,7 +1798,7 @@ export default {
 
 		window.addEventListener('resize', () => {
 			configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
-			configKonva.value.height = window.innerHeight - 72 - 32
+			configKonva.value.height = (window.innerHeight - 72 - 32) * 2 // *2 to make canvas longer
 		})
 
 		const toggleIsPageSelectorOpen = () => {
@@ -1806,11 +1808,14 @@ export default {
 		const addTextElementToCanvas = () => {
 			textListNumber.value++
 			const textName = 'Text-' + textListNumber.value.toString()
-			updateTextTransformer()
+
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
+
 			textList.value.push({
 				id: textListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				text: 'Double click to change this text. \nYou can also drag it around.',
 				draggable: true,
 				fontFamily: 'Arial',
@@ -1837,10 +1842,12 @@ export default {
 		const addLineElementToCanvas = () => {
 			lineListNumber.value++
 			const lineName = 'Line-' + lineListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			lineList.value.push({
 				id: textListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				points: [0, 0, 200, 0],
 				stroke: '#000000',
 				strokeWidth: 3,
@@ -1861,10 +1868,12 @@ export default {
 		const addRectangleToCanvas = () => {
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			rectangleList.value.push({
 				id: rectangleListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				width: 100,
 				height: 100,
 				fill: '#000000',
@@ -1888,10 +1897,12 @@ export default {
 		const addCircleToCanvas = () => {
 			circleListNumber.value++
 			const circleName = 'Circle-' + circleListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			circleList.value.push({
 				id: circleListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				radius: 50,
 				fill: '#000000',
 				stroke: '#000000',
@@ -1913,10 +1924,12 @@ export default {
 		const addPolygonToCanvas = () => {
 			polygonListNumber.value++
 			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			polygonList.value.push({
 				id: polygonListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				sides: 5,
 				radius: 50,
 				fill: '#000000',
@@ -1939,10 +1952,12 @@ export default {
 		const addArrowToCanvas = () => {
 			arrowListNumber.value++
 			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			arrowList.value.push({
 				id: arrowListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				points: [0, 0, 100, 0],
 				stroke: '#000000',
 				strokeWidth: 3,
@@ -1966,10 +1981,12 @@ export default {
 		const addStarToCanvas = () => {
 			starListNumber.value++
 			const starName = 'Star-' + starListNumber.value.toString()
+			//Get the scroll position of the canvas:
+			const scrollTop = scrollContainer.value.scrollTop
 			starList.value.push({
 				id: starListNumber.toString(),
-				x: configKonva.value.width / 2,
-				y: configKonva.value.height / 2,
+				x: 100,
+				y: scrollTop + 100,
 				numPoints: 5,
 				innerRadius: 20,
 				outerRadius: 50,
@@ -2825,6 +2842,7 @@ export default {
 		const uploadImage = (e: Event) => {
 			const target = e.target as HTMLInputElement
 			const file = target.files?.[0]
+			const scrollTop = scrollContainer.value.scrollTop
 			if (file) {
 				const reader = new FileReader()
 				reader.onload = (e) => {
@@ -2837,8 +2855,8 @@ export default {
 							imageList.value.push({
 								image,
 								name: fileName,
-								x: configKonva.value.width / 2,
-								y: configKonva.value.height / 2,
+								x: 100,
+								y: scrollTop + 100,
 								width: image.width / 2,
 								height: image.height / 2,
 								draggable: true,
@@ -3279,7 +3297,8 @@ export default {
 			handleStarPointsChange,
 			userInputStar,
 			showGuidelines,
-			handleDragEndLayer
+			handleDragEndLayer,
+			scrollContainer
 		}
 	},
 }
