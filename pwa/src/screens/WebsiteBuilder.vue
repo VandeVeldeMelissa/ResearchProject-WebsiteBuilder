@@ -1593,6 +1593,7 @@ import {
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
 import { Rect } from 'konva/lib/shapes/Rect'
+import { Shape, ShapeConfig } from 'konva/lib/Shape'
 
 export default {
 	components: {
@@ -1786,9 +1787,11 @@ export default {
 			starShadowColorOpacity: 50,
 		})
 
+		const originalHeight = (window.innerHeight - 72 - 32) * 1.5
+
 		const configKonva = ref({
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
-			height: (window.innerHeight - 72 - 32) * 2, // *2 to make canvas longer
+			height: (window.innerHeight - 72 - 32) * 1.5,
 		})
 
 		const setPage = (page: string) => {
@@ -1798,7 +1801,7 @@ export default {
 
 		window.addEventListener('resize', () => {
 			configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
-			configKonva.value.height = (window.innerHeight - 72 - 32) * 2 // *2 to make canvas longer
+			configKonva.value.height = (window.innerHeight - 72 - 32) * 1.5
 		})
 
 		const toggleIsPageSelectorOpen = () => {
@@ -2261,6 +2264,9 @@ export default {
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+			checkShapeLocation(e)
+
+
 			const text = textList.value.find((r) => r.name === selectedShapeName.value)
 			if (text) {
 				text.x = e.target.x()
@@ -2834,6 +2840,27 @@ export default {
 			}
 
 		})
+
+		//Update the height of the canvas if there is any shape at the bottom of the canvas
+		const checkShapeLocation = (e: Konva.KonvaEventObject<DragEvent>) => {
+			const shapeY = e.target.y() + e.target.height() //bottom of the element
+			if (shapeY > (configKonva.value.height - 200)) {
+				//Update height of the canvas
+				configKonva.value.height = configKonva.value.height + 200
+			}
+
+			//check if there is any shape at the bottom of the canvas:
+			const shapeList: any[] = []
+			stage.value.getNode().children[0].children.forEach((shape: Konva.Shape) => {
+				if ((shape.y() + shape.height()) > (configKonva.value.height - 400) && shape.name() !== 'guideline' && shape.className !== 'Transformer') {
+					shapeList.push(shape)
+				}
+			})
+			if (shapeList.length === 0 && configKonva.value.height > originalHeight) {
+				//Update height of the canvas
+				configKonva.value.height = configKonva.value.height - 200
+			}
+		}
 
 		const selectImage = () => {
 			fileInput.value.click()
