@@ -74,54 +74,63 @@
 					<button
 						class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Cursor"
+						:class="selectedShapeName == '' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<MousePointer2 />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add text"
+						:class="selectedShapeName.split('-')[0] == 'Text' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Type />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add image"
+						:class="selectedShapeName.split('-')[0] == 'Image' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Image />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add line"
+						:class="selectedShapeName.split('-')[0] == 'Line' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Spline />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add square"
+						:class="selectedShapeName.split('-')[0] == 'Rectangle' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Square />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add circle"
+						:class="selectedShapeName.split('-')[0] == 'Circle' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Circle />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add hexagon"
+						:class="selectedShapeName.split('-')[0] == 'Polygon' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Hexagon />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add arrow"
+						:class="selectedShapeName.split('-')[0] == 'Arrow' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<ArrowBigRight />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-						title="Add triangle"
+						title="Add star"
+						:class="selectedShapeName.split('-')[0] == 'Star' ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Star />
 					</button>
@@ -2286,7 +2295,6 @@ export default {
 
 			// find clicked shape by its name
 			const text = textList.value.find((text) => {
-				console.log('text.name: ', text.name)
 				return text.name === name
 			})
 			const image = imageList.value.find((image) => {
@@ -3034,7 +3042,6 @@ export default {
 		}
 
 		const handleTransformPolygon = (e: Konva.KonvaEventObject<DragEvent>) => {
-			console.log('transforming polygon')
 			const polygon = e.target as Konva.RegularPolygon
 			const polygonName = polygon.name()
 			const polygonObject = polygonList.value.find((polygon) => {
