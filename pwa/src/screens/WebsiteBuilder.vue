@@ -1871,6 +1871,7 @@ export default {
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 
+			//@ts-ignore
 			textList.value.push({
 				id: textListNumber.toString(),
 				x: 100,
@@ -1896,6 +1897,9 @@ export default {
 				scaleY: 1,
 				name: textName,
 			})
+
+			//Save shape:
+			saveShapesToLocalStorage()
 		}
 
 		const addLineElementToCanvas = () => {
@@ -1922,6 +1926,7 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const addRectangleToCanvas = () => {
@@ -1951,6 +1956,7 @@ export default {
 				shadowOpacity: 0.5,
 				cornerRadius: 0,
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const addCircleToCanvas = () => {
@@ -1978,6 +1984,7 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const addPolygonToCanvas = () => {
@@ -2006,6 +2013,7 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const addArrowToCanvas = () => {
@@ -2035,6 +2043,7 @@ export default {
 				pointerWidth: 10,
 				fill: '#000000'
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const addStarToCanvas = () => {
@@ -2064,6 +2073,7 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			saveShapesToLocalStorage()
 		}
 
 		const updateTextTransformer = () => {
@@ -2276,6 +2286,7 @@ export default {
 
 			// find clicked shape by its name
 			const text = textList.value.find((text) => {
+				console.log('text.name: ', text.name)
 				return text.name === name
 			})
 			const image = imageList.value.find((image) => {
@@ -2330,7 +2341,6 @@ export default {
 				text.rotation = e.target.rotation()
 				text.scaleX = e.target.scaleX()
 				text.scaleY = e.target.scaleY()
-				return
 			}
 
 			const image = imageList.value.find((r) => r.name === selectedShapeName.value)
@@ -2344,7 +2354,6 @@ export default {
 				e.target.scaleY(1)
 				image.scaleX = e.target.scaleX()
 				image.scaleY = e.target.scaleY()
-				return
 			}
 
 			const line = lineList.value.find((r) => r.name === selectedShapeName.value)
@@ -2354,7 +2363,6 @@ export default {
 				line.rotation = e.target.rotation()
 				line.scaleX = e.target.scaleX()
 				line.scaleY = e.target.scaleY()
-				return
 			}
 
 			const rectangle = rectangleList.value.find((r) => r.name === selectedShapeName.value)
@@ -2368,7 +2376,6 @@ export default {
 				e.target.scaleY(1)
 				rectangle.scaleX = e.target.scaleX()
 				rectangle.scaleY = e.target.scaleY()
-				return
 			}
 
 			const circle = circleList.value.find((r) => r.name === selectedShapeName.value)
@@ -2378,7 +2385,6 @@ export default {
 				circle.radius = e.target.width() / 2
 				circle.height = e.target.height()
 				circle.width = e.target.width()
-				return
 			}
 
 			const polygon = polygonList.value.find((r) => r.name === selectedShapeName.value)
@@ -2388,7 +2394,6 @@ export default {
 				polygon.rotation = e.target.rotation()
 				polygon.scaleX = e.target.scaleX()
 				polygon.scaleY = e.target.scaleY()
-				return
 			}
 
 			const arrow = arrowList.value.find((r) => r.name === selectedShapeName.value)
@@ -2400,7 +2405,6 @@ export default {
 				e.target.scaleY(1)
 				arrow.scaleX = e.target.scaleX()
 				arrow.scaleY = e.target.scaleY()
-				return
 			}
 
 			const star = starList.value.find((r) => r.name === selectedShapeName.value)
@@ -2414,8 +2418,8 @@ export default {
 				e.target.scaleY(1)
 				star.scaleX = e.target.scaleX()
 				star.scaleY = e.target.scaleY()
-				return
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const deleteShape = () => {
@@ -2428,6 +2432,7 @@ export default {
 					selectedShapeName.value = ''
 					showTextEditor.value = false
 					updateTextTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Image':
 					imageList.value = imageList.value.filter((image) => {
@@ -2435,6 +2440,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateImageTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Line':
 					lineList.value = lineList.value.filter((line) => {
@@ -2442,6 +2448,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateLineTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Rectangle':
 					rectangleList.value = rectangleList.value.filter((rectangle) => {
@@ -2449,6 +2456,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateRectangleTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Circle':
 					circleList.value = circleList.value.filter((circle) => {
@@ -2456,6 +2464,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateCircleTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Polygon':
 					polygonList.value = polygonList.value.filter((polygon) => {
@@ -2463,6 +2472,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updatePolygonTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Arrow':
 					arrowList.value = arrowList.value.filter((arrow) => {
@@ -2470,6 +2480,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateArrowTransformer()
+					saveShapesToLocalStorage()
 					break
 				case 'Star':
 					starList.value = starList.value.filter((star) => {
@@ -2477,6 +2488,7 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateStarTransformer()
+					saveShapesToLocalStorage()
 					break
 				default:
 					console.log('Shape not found')
@@ -2543,6 +2555,7 @@ export default {
 				text.shadowOpacity = userInputText.textShadowColorOpacity / 100
 				text.text = userInputText.text
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingImage = () => {
@@ -2561,6 +2574,7 @@ export default {
 				image.width = userInputImage.imageWidth
 				image.height = userInputImage.imageHeight
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingLine = () => {
@@ -2578,6 +2592,7 @@ export default {
 				line.shadowOpacity = userInputLine.lineShadowColorOpacity / 100
 				line.points[2] = userInputLine.lineLength
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingRectangle = () => {
@@ -2598,6 +2613,7 @@ export default {
 				rectangle.height = userInputRectangle.rectangleHeight
 				rectangle.fill = userInputRectangle.rectangleColor
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingCircle = () => {
@@ -2616,6 +2632,7 @@ export default {
 				circle.radius = userInputCircle.circleRadius
 				circle.fill = userInputCircle.circleColor
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingPolygon = () => {
@@ -2635,6 +2652,7 @@ export default {
 				polygon.fill = userInputPolygon.polygonColor
 				polygon.sides = userInputPolygon.polygonSides
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingArrow = () => {
@@ -2653,6 +2671,7 @@ export default {
 				arrow.points[2] = userInputArrow.arrowLength
 				arrow.fill = userInputArrow.arrowStrokeColor
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const updateStylingStar = () => {
@@ -2673,6 +2692,7 @@ export default {
 				star.outerRadius = userInputStar.starOuterRadius
 				star.numPoints = userInputStar.starPoints
 			}
+			saveShapesToLocalStorage()
 		}
 
 		watch(selectedShapeName, () => {
@@ -2936,7 +2956,7 @@ export default {
 						const fileName = 'Image-' + file.name
 						image.onload = () => {
 							imageList.value.push({
-								image,
+								image: image,
 								name: fileName,
 								x: 100,
 								y: scrollTop + 100,
@@ -2951,12 +2971,14 @@ export default {
 								shadowBlur: 0,
 								shadowColor: '#000000',
 								shadowOpacity: 0.5,
+								dataURLString: dataURL as string,
 							})
 						}
 					}
 				}
 				reader.readAsDataURL(file)
 			}
+			saveShapesToLocalStorage()
 		}
 
 		const handleTransformLine = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -3335,6 +3357,68 @@ export default {
 			}
 		}
 
+		const saveShapesToLocalStorage = () => {
+			const allShapes: any = []
+			textList.value.forEach((text: any) => {
+				allShapes.push(text)
+			})
+			imageList.value.forEach((image: any) => {
+				allShapes.push(image)
+			})
+			lineList.value.forEach((line: any) => {
+				allShapes.push(line)
+			})
+			rectangleList.value.forEach((rectangle: any) => {
+				allShapes.push(rectangle)
+			})
+			circleList.value.forEach((circle: any) => {
+				allShapes.push(circle)
+			})
+			polygonList.value.forEach((polygon: any) => {
+				allShapes.push(polygon)
+			})
+			arrowList.value.forEach((arrow: any) => {
+				allShapes.push(arrow)
+			})
+			starList.value.forEach((star: any) => {
+				allShapes.push(star)
+			})
+			localStorage.setItem('shapes', JSON.stringify(allShapes))
+		}
+
+		//Load the shapes from local storage on mounted:
+		onMounted(() => {
+			const shapes = localStorage.getItem('shapes') || '[]'
+			if (shapes) {
+				const shapesArray = JSON.parse(shapes)
+				shapesArray.forEach((shape: any) => {
+					if (shape.name.split('-')[0] == 'Text') {
+						textListNumber.value++
+						textList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Image') {
+						const img = new window.Image()
+						img.src = shape.dataURLString
+						img.onload = () => {
+							shape.image = img
+							imageList.value.push(shape)
+						}
+					} else if (shape.name.split('-')[0] == 'Line') {
+						lineList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Arrow') {
+						arrowList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Star') {
+						starList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Circle') {
+						circleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Rectangle') {
+						rectangleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Polygon') {
+						polygonList.value.push(shape)
+					}
+				})
+			}
+		})
+
 		return {
 			configKonva,
 			setPage,
@@ -3409,7 +3493,8 @@ export default {
 			handleDragEndLayer,
 			scrollContainer,
 			moveUp,
-			moveDown
+			moveDown,
+			saveShapesToLocalStorage
 		}
 	},
 }

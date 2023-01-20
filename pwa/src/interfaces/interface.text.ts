@@ -1,4 +1,5 @@
 export default interface Text {
+getLayer(): unknown
 	id: string
 	x: number
 	y: number
