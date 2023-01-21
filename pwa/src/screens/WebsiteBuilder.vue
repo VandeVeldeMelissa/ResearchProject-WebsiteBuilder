@@ -1699,6 +1699,7 @@ export default {
 		const arrowList: Ref<any[]> = ref([])
 		const starList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
+		let imageListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
 		let rectangleListNumber: Ref<number> = ref(0)
 		let circleListNumber: Ref<number> = ref(0)
@@ -2961,7 +2962,8 @@ export default {
 					if (dataURL) {
 						const image = new window.Image()
 						image.src = dataURL as string
-						const fileName = 'Image-' + file.name
+						imageListNumber.value++
+						const fileName = 'Image-' + imageListNumber.value
 						image.onload = () => {
 							imageList.value.push({
 								image: image,
