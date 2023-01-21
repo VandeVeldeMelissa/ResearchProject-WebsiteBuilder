@@ -74,63 +74,65 @@
 					<button
 						class="rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Cursor"
-						:class="selectedShapeName == '' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedPointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<MousePointer2 />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add text"
-						:class="selectedShapeName.split('-')[0] == 'Text' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddTextPointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addTextElementWithPointer"
 					>
 						<Type />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add image"
-						:class="selectedShapeName.split('-')[0] == 'Image' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddImagePointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="selectImage"
 					>
 						<Image />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add line"
-						:class="selectedShapeName.split('-')[0] == 'Line' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddLinePointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Spline />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
-						title="Add square"
-						:class="selectedShapeName.split('-')[0] == 'Rectangle' ? 'bg-blue-50 text-blue-600' : ''"
+						title="Add rectangle"
+						:class="selectedAddRectanglePointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Square />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add circle"
-						:class="selectedShapeName.split('-')[0] == 'Circle' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddCirclePointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Circle />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add hexagon"
-						:class="selectedShapeName.split('-')[0] == 'Polygon' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddPolygonPointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Hexagon />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add arrow"
-						:class="selectedShapeName.split('-')[0] == 'Arrow' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddArrowPointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<ArrowBigRight />
 					</button>
 					<button
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add star"
-						:class="selectedShapeName.split('-')[0] == 'Star' ? 'bg-blue-50 text-blue-600' : ''"
+						:class="selectedAddStarPointer == true ? 'bg-blue-50 text-blue-600' : ''"
 					>
 						<Star />
 					</button>
@@ -159,7 +161,7 @@
 				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="relative h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer">
+			<div class="relative h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer == true ? 'cursor-cell' : ''">
 				<v-stage
 					ref="stage"
 					:config="configKonva"
@@ -1722,10 +1724,21 @@ export default {
 		const polygonTransformer = ref()
 		const arrowTransformer = ref()
 		const fileInput = ref()
+		const fileInputSideBar = ref()
 		const rectangleTransformer = ref()
 		const starTransformer = ref()
 
 		const scrollContainer = ref()
+
+		const selectedPointer: Ref<boolean> = ref(true)
+		const selectedAddTextPointer: Ref<boolean> = ref(false)
+		const selectedAddImagePointer: Ref<boolean> = ref(false)
+		const selectedAddLinePointer: Ref<boolean> = ref(false)
+		const selectedAddRectanglePointer: Ref<boolean> = ref(false)
+		const selectedAddCirclePointer: Ref<boolean> = ref(false)
+		const selectedAddPolygonPointer: Ref<boolean> = ref(false)
+		const selectedAddArrowPointer: Ref<boolean> = ref(false)
+		const selectedAddStarPointer: Ref<boolean> = ref(false)
 
 		const userInputText = reactive({
 			fontFamily: 'Arial',
@@ -1910,6 +1923,51 @@ export default {
 
 			//Save shape:
 			saveShapesToLocalStorage()
+		}
+
+		const addTextElementWithPointer = () => {
+			textListNumber.value++
+			const textName = 'Text-' + textListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddTextPointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				//@ts-ignore
+				textList.value.push({
+					id: textListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					text: 'Double click to change this text. \nYou can also drag it around.',
+					draggable: true,
+					fontFamily: 'Arial',
+					fontSize: 21,
+					fontStyle: 'normal',
+					textDecoration: '',
+					align: 'left',
+					fill: '#000000',
+					stroke: '#000000',
+					strokeWidth: 0,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					name: textName,
+				})
+
+				//Save shape:
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddTextPointer.value = false
+				selectedPointer.value = true
+			})
 		}
 
 		const addLineElementToCanvas = () => {
@@ -3503,7 +3561,18 @@ export default {
 			scrollContainer,
 			moveUp,
 			moveDown,
-			saveShapesToLocalStorage
+			saveShapesToLocalStorage,
+			addTextElementWithPointer,
+			selectedAddTextPointer,
+			selectedAddImagePointer,
+			selectedAddLinePointer,
+			selectedAddRectanglePointer,
+			selectedAddCirclePointer,
+			selectedAddPolygonPointer,
+			selectedAddArrowPointer,
+			selectedAddStarPointer,
+			selectedPointer,
+			fileInputSideBar,
 		}
 	},
 }
