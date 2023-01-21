@@ -98,6 +98,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add line"
 						:class="selectedAddLinePointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addLineElementWithPointer"
 					>
 						<Spline />
 					</button>
@@ -105,6 +106,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add rectangle"
 						:class="selectedAddRectanglePointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addRectangleElementWithPointer"
 					>
 						<Square />
 					</button>
@@ -112,6 +114,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add circle"
 						:class="selectedAddCirclePointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addCircleElementWithPointer"
 					>
 						<Circle />
 					</button>
@@ -119,6 +122,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add hexagon"
 						:class="selectedAddPolygonPointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addPolygonElementWithPointer"
 					>
 						<Hexagon />
 					</button>
@@ -126,6 +130,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add arrow"
 						:class="selectedAddArrowPointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addArrowElementWithPointer"
 					>
 						<ArrowBigRight />
 					</button>
@@ -133,6 +138,7 @@
 						class="mt-5 rounded p-1 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						title="Add star"
 						:class="selectedAddStarPointer == true ? 'bg-blue-50 text-blue-600' : ''"
+						@click="addStarElementWithPointer"
 					>
 						<Star />
 					</button>
@@ -1997,6 +2003,42 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		const addLineElementWithPointer = () => {
+			lineListNumber.value++
+			const lineName = 'Line-' + lineListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddLinePointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				lineList.value.push({
+					id: textListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					points: [0, 0, 200, 0],
+					stroke: '#000000',
+					strokeWidth: 3,
+					draggable: true,
+					name: lineName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddLinePointer.value = false
+				selectedPointer.value = true
+			})
+		}
+
 		const addRectangleToCanvas = () => {
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
@@ -2027,6 +2069,45 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		const addRectangleElementWithPointer = () => {
+			rectangleListNumber.value++
+			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddRectanglePointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				rectangleList.value.push({
+					id: rectangleListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					width: 100,
+					height: 100,
+					fill: '#000000',
+					stroke: '#000000',
+					strokeWidth: 0,
+					draggable: true,
+					name: rectangleName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+					cornerRadius: 0,
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddRectanglePointer.value = false
+				selectedPointer.value = true
+			})
+		}
+
 		const addCircleToCanvas = () => {
 			circleListNumber.value++
 			const circleName = 'Circle-' + circleListNumber.value.toString()
@@ -2053,6 +2134,43 @@ export default {
 				shadowOpacity: 0.5,
 			})
 			saveShapesToLocalStorage()
+		}
+
+		const addCircleElementWithPointer = () => {
+			circleListNumber.value++
+			const circleName = 'Circle-' + circleListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddCirclePointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				circleList.value.push({
+					id: circleListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					radius: 50,
+					fill: '#000000',
+					stroke: '#000000',
+					strokeWidth: 0,
+					draggable: true,
+					name: circleName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddCirclePointer.value = false
+				selectedPointer.value = true
+			})
 		}
 
 		const addPolygonToCanvas = () => {
@@ -2082,6 +2200,44 @@ export default {
 				shadowOpacity: 0.5,
 			})
 			saveShapesToLocalStorage()
+		}
+
+		const addPolygonElementWithPointer = () => {
+			polygonListNumber.value++
+			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddPolygonPointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				polygonList.value.push({
+					id: polygonListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					sides: 5,
+					radius: 50,
+					fill: '#000000',
+					stroke: '#000000',
+					strokeWidth: 0,
+					draggable: true,
+					name: polygonName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddPolygonPointer.value = false
+				selectedPointer.value = true
+			})
 		}
 
 		const addArrowToCanvas = () => {
@@ -2114,6 +2270,45 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		const addArrowElementWithPointer = () => {
+			arrowListNumber.value++
+			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddArrowPointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				arrowList.value.push({
+					id: arrowListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					points: [0, 0, 100, 0],
+					stroke: '#000000',
+					strokeWidth: 3,
+					draggable: true,
+					name: arrowName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+					pointerLength: 10,
+					pointerWidth: 10,
+					fill: '#000000'
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddArrowPointer.value = false
+				selectedPointer.value = true
+			})
+		}
+
 		const addStarToCanvas = () => {
 			starListNumber.value++
 			const starName = 'Star-' + starListNumber.value.toString()
@@ -2142,6 +2337,45 @@ export default {
 				shadowOpacity: 0.5,
 			})
 			saveShapesToLocalStorage()
+		}
+
+		const addStarElementWithPointer = () => {
+			starListNumber.value++
+			const starName = 'Star-' + starListNumber.value.toString()
+
+			selectedPointer.value = false
+			selectedAddStarPointer.value = true
+
+			//Listen to click event on stage: 
+			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
+				starList.value.push({
+					id: starListNumber.toString(),
+					x: e.evt.offsetX,
+					y: e.evt.offsetY,
+					numPoints: 5,
+					innerRadius: 20,
+					outerRadius: 50,
+					fill: '#000000',
+					stroke: '#000000',
+					strokeWidth: 0,
+					draggable: true,
+					name: starName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				})
+				saveShapesToLocalStorage()
+				//Remove event listener:
+				stage.value.getNode().off('click')
+				selectedAddStarPointer.value = false
+				selectedPointer.value = true
+			})
 		}
 
 		const updateTextTransformer = () => {
@@ -3573,6 +3807,12 @@ export default {
 			selectedAddStarPointer,
 			selectedPointer,
 			fileInputSideBar,
+			addLineElementWithPointer,
+			addRectangleElementWithPointer,
+			addCircleElementWithPointer,
+			addPolygonElementWithPointer,
+			addArrowElementWithPointer,
+			addStarElementWithPointer
 		}
 	},
 }
