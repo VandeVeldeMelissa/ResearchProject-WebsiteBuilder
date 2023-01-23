@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-slate-100">
+	<div class="bg-slate-100 relative overflow-hidden">
 		<header
 			class="border-b-0.5 font-poppins h-18 mb-8 flex justify-between border-neutral-300 bg-white"
 		>
@@ -167,7 +167,7 @@
 				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="relative h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer == true ? 'cursor-cell' : ''">
+			<div class="h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
 				<v-stage
 					ref="stage"
 					:config="configKonva"
@@ -322,10 +322,6 @@
 						/>
 					</v-layer>
 				</v-stage>
-				<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(50%-400px)]" v-if="showTextEditor">
-					<label class="font-medium">What do you want this selected text to say?</label>
-					<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
-				</div>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
@@ -1627,6 +1623,15 @@
 				</div>
 			</aside>
 		</main>
+		<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(75%/2-400px+27px)] transition-transform ease-[cubic-bezier(0.25, 1, 0.5, 1)]"
+		:class="showTextEditor ? 'translate-y-0' : 'translate-y-34'">
+		<div class="flex justify-between items-center mb-1">
+			<label class="font-medium">What do you want this selected text to say?</label>
+			<!-- x comopnent lucide -->
+			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded"><X /></button>
+		</div>
+		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
+		</div>
 	</div>
 </template>
 
@@ -1658,7 +1663,8 @@ import {
 	Star,
 	Layers,
 	ArrowUp,
-	ArrowDown
+	ArrowDown,
+	X
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -1692,7 +1698,8 @@ export default {
 	Star,
 	Layers,
 	ArrowUp,
-	ArrowDown
+	ArrowDown,
+	X
 },
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
@@ -1893,9 +1900,10 @@ export default {
 			isPageSelectorOpen.value = !isPageSelectorOpen.value
 		}
 
-		const addTextElementToCanvas = () => {
+		const addTextElementToCanvas = async () => {
 			textListNumber.value++
 			const textName = 'Text-' + textListNumber.value.toString()
+			selectedShapeName.value = textName
 
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
@@ -1926,6 +1934,10 @@ export default {
 				scaleY: 1,
 				name: textName,
 			})
+
+			//Make element selected
+			await Promise.resolve();
+			updateTextTransformer();
 
 			//Save shape:
 			saveShapesToLocalStorage()
@@ -1976,9 +1988,10 @@ export default {
 			})
 		}
 
-		const addLineElementToCanvas = () => {
+		const addLineElementToCanvas = async () => {
 			lineListNumber.value++
 			const lineName = 'Line-' + lineListNumber.value.toString()
+			selectedShapeName.value = lineName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			lineList.value.push({
@@ -2000,6 +2013,8 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			await Promise.resolve();
+			updateLineTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -2039,9 +2054,10 @@ export default {
 			})
 		}
 
-		const addRectangleToCanvas = () => {
+		const addRectangleToCanvas = async () => {
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
+			selectedShapeName.value = rectangleName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			rectangleList.value.push({
@@ -2066,6 +2082,8 @@ export default {
 				shadowOpacity: 0.5,
 				cornerRadius: 0,
 			})
+			await Promise.resolve();
+			updateRectangleTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -2108,9 +2126,10 @@ export default {
 			})
 		}
 
-		const addCircleToCanvas = () => {
+		const addCircleToCanvas = async () => {
 			circleListNumber.value++
 			const circleName = 'Circle-' + circleListNumber.value.toString()
+			selectedShapeName.value = circleName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			circleList.value.push({
@@ -2133,6 +2152,8 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			await Promise.resolve();
+			updateCircleTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -2173,9 +2194,10 @@ export default {
 			})
 		}
 
-		const addPolygonToCanvas = () => {
+		const addPolygonToCanvas = async () => {
 			polygonListNumber.value++
 			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
+			selectedShapeName.value = polygonName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			polygonList.value.push({
@@ -2199,6 +2221,8 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			await Promise.resolve();
+			updatePolygonTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -2240,9 +2264,10 @@ export default {
 			})
 		}
 
-		const addArrowToCanvas = () => {
+		const addArrowToCanvas = async () => {
 			arrowListNumber.value++
 			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
+			selectedShapeName.value = arrowName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			arrowList.value.push({
@@ -2267,6 +2292,8 @@ export default {
 				pointerWidth: 10,
 				fill: '#000000'
 			})
+			await Promise.resolve();
+			updateArrowTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -2309,9 +2336,10 @@ export default {
 			})
 		}
 
-		const addStarToCanvas = () => {
+		const addStarToCanvas = async () => {
 			starListNumber.value++
 			const starName = 'Star-' + starListNumber.value.toString()
+			selectedShapeName.value = starName
 			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			starList.value.push({
@@ -2336,6 +2364,8 @@ export default {
 				shadowOffsetY: 0,
 				shadowOpacity: 0.5,
 			})
+			await Promise.resolve();
+			updateStarTransformer();
 			saveShapesToLocalStorage()
 		}
 
@@ -3694,26 +3724,57 @@ export default {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
 					if (shape.name.split('-')[0] == 'Text') {
-						textListNumber.value++
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > textListNumber.value) {
+							textListNumber.value = parseInt(numberList)
+						}
 						textList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Image') {
 						const img = new window.Image()
 						img.src = shape.dataURLString
 						img.onload = () => {
 							shape.image = img
+							const numberList = shape.name.split('-')[1]
+							if (parseInt(numberList) > imageListNumber.value) {
+								imageListNumber.value = parseInt(numberList)
+							}
 							imageList.value.push(shape)
 						}
 					} else if (shape.name.split('-')[0] == 'Line') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > lineListNumber.value) {
+							lineListNumber.value = parseInt(numberList)
+						}
 						lineList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Arrow') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > arrowListNumber.value) {
+							arrowListNumber.value = parseInt(numberList)
+						}
 						arrowList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Star') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > starListNumber.value) {
+							starListNumber.value = parseInt(numberList)
+						}
 						starList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Circle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > circleListNumber.value) {
+							circleListNumber.value = parseInt(numberList)
+						}
 						circleList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Rectangle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > rectangleListNumber.value) {
+							rectangleListNumber.value = parseInt(numberList)
+						}
 						rectangleList.value.push(shape)
 					} else if (shape.name.split('-')[0] == 'Polygon') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > polygonListNumber.value) {
+							polygonListNumber.value = parseInt(numberList)
+						}
 						polygonList.value.push(shape)
 					}
 				})
