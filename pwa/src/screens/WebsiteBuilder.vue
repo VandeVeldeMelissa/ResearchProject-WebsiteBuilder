@@ -49,6 +49,7 @@
 				</div>
 				<button
 					class="flex items-center gap-x-4 rounded bg-slate-100 px-5 py-2 transition-colors hover:bg-blue-50 hover:text-blue-600"
+					@click="previewPageWebsite"
 				>
 					<Eye />Preview
 				</button>
@@ -167,10 +168,12 @@
 				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="h-[calc(100vh-72px-32px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
+			<div class="h-[calc(100vh-72px-32px)] w-[calc(75vw-56px-64px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
 				<v-stage
 					ref="stage"
 					:config="configKonva"
+					:scaleX="scale" 
+					:scaleY="scale"
 					@mousedown="handleStageMouseDown"
 					@touchstart="handleStageMouseDown"
 				>
@@ -1627,8 +1630,7 @@
 		:class="showTextEditor ? 'translate-y-0' : 'translate-y-34'">
 		<div class="flex justify-between items-center mb-1">
 			<label class="font-medium">What do you want this selected text to say?</label>
-			<!-- x comopnent lucide -->
-			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded"><X /></button>
+			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded" @click="showTextEditor = false"><X /></button>
 		</div>
 		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
 		</div>
@@ -1636,7 +1638,7 @@
 </template>
 
 <script lang="ts">
-import { Ref, ref, watch, onMounted, reactive } from 'vue'
+import { Ref, ref, watch, onMounted, reactive, computed } from 'vue'
 import {
 	Plus,
 	Type,
@@ -1670,6 +1672,7 @@ import Konva from 'konva'
 import Text from '../interfaces/interface.text'
 import { Rect } from 'konva/lib/shapes/Rect'
 import { Shape, ShapeConfig } from 'konva/lib/Shape'
+import router from '../bootstrap/router'
 
 export default {
 	components: {
@@ -1885,6 +1888,11 @@ export default {
 			width: window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: (window.innerHeight - 72 - 32) * 1.5,
 		})
+
+		const scale = computed(() => {
+        	return (configKonva.value.width / 1024)
+    	})
+
 
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
@@ -3267,6 +3275,7 @@ export default {
 				//Update height of the canvas
 				configKonva.value.height = configKonva.value.height - 200
 			}
+			saveShapesToLocalStorage() //Save height to local storage
 		}
 
 		const selectImage = () => {
@@ -3715,6 +3724,7 @@ export default {
 				allShapes.push(star)
 			})
 			localStorage.setItem('shapes', JSON.stringify(allShapes))
+			localStorage.setItem('heightStage', configKonva.value.height.toString())
 		}
 
 		//Load the shapes from local storage on mounted:
@@ -3779,7 +3789,17 @@ export default {
 					}
 				})
 			}
+			const stageHeight = localStorage.getItem('heightStage') || ''
+            if (stageHeight) {
+                configKonva.value.height = parseInt(stageHeight)
+            }
 		})
+
+		const previewPageWebsite = () => {
+			router.replace({
+				path: '/preview',
+			})
+		}
 
 		return {
 			configKonva,
@@ -3873,7 +3893,9 @@ export default {
 			addCircleElementWithPointer,
 			addPolygonElementWithPointer,
 			addArrowElementWithPointer,
-			addStarElementWithPointer
+			addStarElementWithPointer,
+			previewPageWebsite,
+			scale
 		}
 	},
 }

@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
 		component: () => import('../screens/WebsiteBuilder.vue'),
 	},
 	{
+		path: '/preview',
+		name: 'Preview',
+		component: () => import('../screens/Preview.vue'),
+	},
+	{
 		path: '/:pathMatch(.*)*',
 		name: 'ClientError',
 		component: () => import('../screens/generic/ClientError.vue'),
