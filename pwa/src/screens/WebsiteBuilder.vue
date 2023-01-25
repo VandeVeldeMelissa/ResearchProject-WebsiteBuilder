@@ -67,7 +67,7 @@
 				</button>
 			</div>
 		</header>
-		<main class="font-poppins flex bg-white">
+		<main class="font-poppins flex bg-slate-100">
 			<aside
 				class="border-r-0.5 -mt-8 flex w-14 flex-col justify-between border-neutral-300 bg-white p-3"
 			>
@@ -168,161 +168,170 @@
 				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="h-[calc(100vh-72px-32px)] w-[calc(75vw-56px-64px)] overflow-y-scroll" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
-				<v-stage
-					ref="stage"
-					:config="configKonva"
-					@mousedown="handleStageMouseDown"
-					@touchstart="handleStageMouseDown"
-				>
-					<v-layer ref="layer" @dragmove="showGuidelines" @dragend="handleDragEndLayer">
-						<v-regular-polygon
-							v-for="item in polygonList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-regular-polygon>
-						<v-circle
-							v-for="item in circleList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-circle>
-						<v-rect
-							v-for="item in rectangleList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-rect>
-						<v-image
-							v-for="item in imageList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-image>
-						<v-star
-							v-for="item in starList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-star>
-						<v-arrow
-							v-for="item in arrowList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						></v-arrow>
-						<v-line
-							v-for="item in lineList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-						/>
-						<v-text
-							v-for="item in textList"
-							:key="item.id"
-							:config="item"
-							@transformend="handleTransformEnd"
-							@dragend="handleTransformEnd"
-							@dblclick="showTextEditor = true"
-						></v-text>
-						<v-transformer
-							ref="starTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: [],
-								borderDash: [3, 3],
-							}"
-						/>
-						<v-transformer
-							ref="rectangleTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-							}"
-							@transform="handleTransformRectangle"
-						></v-transformer>
-						<v-transformer
-							ref="circleTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-								rotateEnabled: false,
-							}"
-							@transform="handleTransformCircle"
-						></v-transformer>
-						<v-transformer
-							ref="polygonTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-							}"
-							@transform="handleTransformPolygon"
-						></v-transformer>
-						<v-transformer
-							ref="lineTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['middle-left', 'middle-right'],
-							}"
-							@transform="handleTransformLine"
+			<div class="h-[calc(100vh-72px-32px)] w-[1024px] overflow-y-scroll mx-auto" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
+					<v-stage
+						ref="stage"
+						:config="configKonva"
+						@mousedown="handleStageMouseDown"
+						@touchstart="handleStageMouseDown"
+					>
+						<v-layer ref="layer" @dragmove="showGuidelines" @dragend="handleDragEndLayer">
+							<v-rect
+								:config="{
+									x: 0,
+									y: 0,
+									width: configKonva.width,
+									height: configKonva.height,
+									fill: '#FFFFFF',
+								}"
+							></v-rect>
+							<v-regular-polygon
+								v-for="item in polygonList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-regular-polygon>
+							<v-circle
+								v-for="item in circleList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-circle>
+							<v-rect
+								v-for="item in rectangleList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-rect>
+							<v-image
+								v-for="item in imageList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-image>
+							<v-star
+								v-for="item in starList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-star>
+							<v-arrow
+								v-for="item in arrowList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+							></v-arrow>
+							<v-line
+								v-for="item in lineList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
 							/>
-						<v-transformer
-							ref="imageTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-							}"
-							@transform="handleTransformImage"
-						/>
-						<v-transformer
-							ref="textTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								borderDash: [3, 3],
-								enabledAnchors: [],
-								rotateAnchorOffset: 30
-							}"
-						/>
-						<v-transformer
-							ref="arrowTransformer"
-							:config="{
-								rotationSnaps: [0, 90, 180, 270],
-								rotationSnapTolerance: 5,
-								anchorStroke: '#2563EB',
-								borderStroke: '#2563EB',
-								enabledAnchors: ['middle-left', 'middle-right'],
-							}"
-							@transform="handleTransformArrow"
-						/>
-					</v-layer>
-				</v-stage>
+							<v-text
+								v-for="item in textList"
+								:key="item.id"
+								:config="item"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+								@dblclick="showTextEditor = true"
+							></v-text>
+							<v-transformer
+								ref="starTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									enabledAnchors: [],
+									borderDash: [3, 3],
+								}"
+							/>
+							<v-transformer
+								ref="rectangleTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+								}"
+								@transform="handleTransformRectangle"
+							></v-transformer>
+							<v-transformer
+								ref="circleTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+									rotateEnabled: false,
+								}"
+								@transform="handleTransformCircle"
+							></v-transformer>
+							<v-transformer
+								ref="polygonTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+								}"
+								@transform="handleTransformPolygon"
+							></v-transformer>
+							<v-transformer
+								ref="lineTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									enabledAnchors: ['middle-left', 'middle-right'],
+								}"
+								@transform="handleTransformLine"
+								/>
+							<v-transformer
+								ref="imageTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+								}"
+								@transform="handleTransformImage"
+							/>
+							<v-transformer
+								ref="textTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									borderDash: [3, 3],
+									enabledAnchors: [],
+									rotateAnchorOffset: 30
+								}"
+							/>
+							<v-transformer
+								ref="arrowTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									enabledAnchors: ['middle-left', 'middle-right'],
+								}"
+								@transform="handleTransformArrow"
+							/>
+						</v-layer>
+					</v-stage>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
@@ -1904,7 +1913,7 @@ export default {
 		const originalHeight = window.innerHeight - 72 - 32
 
 		const configKonva = ref({
-			width: window.innerWidth * 0.75 - 56 - 2 * 32, //1024??? //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32, //1024??? //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			height: window.innerHeight - 72 - 32,
 		})
 
