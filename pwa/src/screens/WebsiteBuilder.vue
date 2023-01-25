@@ -172,8 +172,6 @@
 				<v-stage
 					ref="stage"
 					:config="configKonva"
-					:scaleX="scale" 
-					:scaleY="scale"
 					@mousedown="handleStageMouseDown"
 					@touchstart="handleStageMouseDown"
 				>
@@ -1885,24 +1883,24 @@ export default {
 		const originalHeight = (window.innerHeight - 72 - 32) * 1.5
 
 		const configKonva = ref({
-			width: window.innerWidth * 0.75 - 56 - 2 * 32,
+			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: (window.innerHeight - 72 - 32) * 1.5,
 		})
 
-		const scale = computed(() => {
-        	return (configKonva.value.width / 1024)
-    	})
-
+		// Show 1024px width in available container (this messes up the guidelines)
+		// const scale = computed(() => {
+		// 	return configKonva.value.height / 1024
+		// })
 
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
 			selectedPage.value = page
 		}
 
-		window.addEventListener('resize', () => {
-			configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
-			configKonva.value.height = (window.innerHeight - 72 - 32) * 1.5
-		})
+		// window.addEventListener('resize', () => {
+		// 	configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
+		// 	configKonva.value.height = (window.innerHeight - 72 - 32) * 1.5
+		// })
 
 		const toggleIsPageSelectorOpen = () => {
 			isPageSelectorOpen.value = !isPageSelectorOpen.value
@@ -3725,6 +3723,7 @@ export default {
 			})
 			localStorage.setItem('shapes', JSON.stringify(allShapes))
 			localStorage.setItem('heightStage', configKonva.value.height.toString())
+			localStorage.setItem('widthStage', configKonva.value.width.toString())
 		}
 
 		//Load the shapes from local storage on mounted:
@@ -3895,7 +3894,6 @@ export default {
 			addArrowElementWithPointer,
 			addStarElementWithPointer,
 			previewPageWebsite,
-			scale
 		}
 	},
 }
