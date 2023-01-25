@@ -442,6 +442,19 @@
 					>
 						<Underline />
 					</button>
+					<h3 class="mb-1 mt-5 text-base font-semibold">Line height</h3>
+					<div class="flex items-center gap-x-1">
+						<MoveVertical/>
+						<input
+								class="col-span-1 rounded bg-slate-100 px-2 py-1.5"
+								type="number"
+								min="0"
+								max="1000"
+								step="0.1"
+								v-model="userInputText.lineHeight"
+								@change="updateStylingText"
+						/>
+					</div>
 					<h3 class="mb-1 mt-5 text-base font-semibold">Align text</h3>
 					<button
 						:class="
@@ -1664,7 +1677,8 @@ import {
 	Layers,
 	ArrowUp,
 	ArrowDown,
-	X
+	X,
+	MoveVertical
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -1700,7 +1714,8 @@ export default {
 	Layers,
 	ArrowUp,
 	ArrowDown,
-	X
+	X,
+	MoveVertical,
 },
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
@@ -1760,6 +1775,7 @@ export default {
 			isFontBold: false,
 			isFontItalic: false,
 			isFontUnderlined: false,
+			lineHeight: 1,
 			textAlign: 'left',
 			textColor: '#000000',
 			textColorOpacity: 100,
@@ -1880,11 +1896,11 @@ export default {
 			starShadowColorOpacity: 50,
 		})
 
-		const originalHeight = (window.innerHeight - 72 - 32) * 1.5
+		const originalHeight = window.innerHeight - 72 - 32
 
 		const configKonva = ref({
 			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32,
-			height: (window.innerHeight - 72 - 32) * 1.5,
+			height: window.innerHeight - 72 - 32,
 		})
 
 		// Show 1024px width in available container (this messes up the guidelines)
@@ -1925,6 +1941,7 @@ export default {
 				fontSize: 21,
 				fontStyle: 'normal',
 				textDecoration: '',
+				lineHeight: 1,
 				align: 'left',
 				fill: '#000000',
 				stroke: '#000000',
@@ -1969,6 +1986,7 @@ export default {
 					fontSize: 21,
 					fontStyle: 'normal',
 					textDecoration: '',
+					lineHeight: 1,
 					align: 'left',
 					fill: '#000000',
 					stroke: '#000000',
@@ -2880,6 +2898,7 @@ export default {
 				} else {
 					text.textDecoration = ''
 				}
+				text.lineHeight = userInputText.lineHeight
 				text.align = userInputText.textAlign
 				text.fill = userInputText.textColor
 				text.opacity = userInputText.textColorOpacity / 100
@@ -3044,6 +3063,7 @@ export default {
 				userInputText.isFontBold = text.fontStyle.includes('bold')
 				userInputText.isFontItalic = text.fontStyle.includes('italic')
 				userInputText.isFontUnderlined = text.textDecoration.includes('underline')
+				userInputText.lineHeight = text.lineHeight
 				userInputText.textColor = text.fill
 				userInputText.textColorOpacity = text.opacity * 100
 				userInputText.textBorderColor = text.stroke
@@ -3795,8 +3815,8 @@ export default {
 		})
 
 		const previewPageWebsite = () => {
-			router.replace({
-				path: '/preview',
+			router.push({
+				path: 'preview',
 			})
 		}
 

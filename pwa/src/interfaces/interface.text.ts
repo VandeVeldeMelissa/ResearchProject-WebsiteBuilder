@@ -9,6 +9,7 @@ getLayer(): unknown
 	fontSize: number
 	fontStyle: string
 	textDecoration: string
+	lineHeight: number
 	align: string
 	fill: string
 	stroke: string

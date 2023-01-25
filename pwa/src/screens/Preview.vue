@@ -21,7 +21,7 @@
     							:config="item"
     						></v-rect>
     						<v-image
-    							v-for="item in imageList"
+    							v-for="item in imageListCanvas"
     							:key="item.id"
     							:config="item"
     						></v-image>
@@ -40,18 +40,35 @@
     							:key="item.id"
     							:config="item"
     						/>
-    						<!-- <v-text
-    							v-for="item in textList"
+    						<v-text
+    							v-for="item in textListCanvas"
     							:key="item.id"
     							:config="item"
-    						></v-text> -->
+    						></v-text>
     					</v-layer>
             </v-stage>
-            <!-- <p v-for="text in textList" class="absolute" :class="`text-[${text.fill}] top-[${text.y}px] left-[${text.x}px]`">{{ text.text }}</p> -->
-
-            <!-- for each text in textList add p with text and text.fill as the text color: -->
-            <pre v-for="text in textList" :key="text.id" class="absolute" :style="[{ color: text.fill, top: text.y + 'px', left: text.x + 'px', fontFamily: text.fontFamily, fontSize: text.fontSize + 'px', lineHeight: 1}]">{{ text.text }}</pre>
-
+            <pre v-for="text in textList" :key="text.id" 
+                class="absolute" 
+                :class="[text.fontStyle == 'bold italic' ? '!font-bold !font-italic' : '', text.fontStyle == 'bold' ? '!font-bold' : '', text.fontStyle == 'italic' ? '!font-italic' : '']"
+                :style="[{ 
+                    color: text.fill, 
+                    top: (text.y-1.5) + 'px', 
+                    left: text.x + 'px', 
+                    fontFamily: text.fontFamily, 
+                    fontSize: text.fontSize + 'px', 
+                    lineHeight: text.lineHeight,
+                    textDecoration: text.textDecoration,
+                    textShadow: text.shadowOffsetX + 'px ' + text.shadowOffsetY + 'px ' + text.shadowBlur + 'px ' + hexToRgbA(text.shadowColor, text.shadowOpacity),
+                }]"
+            >{{ text.text }}</pre>
+            <img v-for="image in imageList" :key="image.id" :src="image.image.src" class="absolute" 
+            :style="[{ 
+                top: image.y + 'px', 
+                left: image.x + 'px', 
+                width: image.width + 'px', 
+                height: image.height + 'px',
+                boxShadow: image.shadowOffsetX + 'px ' + image.shadowOffsetY + 'px ' + image.shadowBlur + 'px ' + hexToRgbA(image.shadowColor, image.shadowOpacity),
+            }]"/>
        </div>
    </main>
 </template>
@@ -63,7 +80,9 @@ import Text from '../interfaces/interface.text';
 
 export default {
     setup() {
+        const textListCanvas: Ref<Text[]> = ref([])
         const textList: Ref<Text[]> = ref([])
+        const imageListCanvas: Ref<any[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
 		const rectangleList: Ref<any[]> = ref([])
@@ -82,9 +101,11 @@ export default {
 			configStagePreview.value.height = window.innerHeight
 		})
 
-        //Add text over canvas element, so its selectable:
-        const addSelectableText = (text: Text) => {
-            console.log('')
+        const hexToRgbA = (hex: string, opacity: number) => {
+            var rgb = hex.replace('#', '').match(/.{1,2}/g)
+            if (rgb) {
+                return 'rgba(' + parseInt(rgb[0], 16) + ', ' + parseInt(rgb[1], 16) + ', ' + parseInt(rgb[2], 16) + ', ' + opacity + ')'
+            }
         }
 
         //Load the shapes from local storage on mounted:
@@ -95,14 +116,28 @@ export default {
 				shapesArray.forEach((shape: any) => {
                     shape.draggable = false
 					if (shape.name.split('-')[0] == 'Text') {
-						textList.value.push(shape)
-                        console.log(shape)
+                        if (shape.strokeWidth > 0) {
+                            shape.strokeWidth = shape.strokeWidth + 1
+                            textListCanvas.value.push(shape)
+                            textList.value.push(shape)
+                        } else if (shape.rotation != 0) {
+                            textListCanvas.value.push(shape)
+                        } else {
+                            textList.value.push(shape)
+                        }
 					} else if (shape.name.split('-')[0] == 'Image') {
 						const img = new window.Image()
 						img.src = shape.dataURLString
 						img.onload = () => {
 							shape.image = img
-							imageList.value.push(shape)
+                            if (shape.rotation != 0) {
+                                imageListCanvas.value.push(shape)
+                            } else if (shape.strokeWidth > 0){
+                                imageListCanvas.value.push(shape)
+                                imageList.value.push(shape)
+                            } else {
+                                imageList.value.push(shape)
+                            }
 						}
 					} else if (shape.name.split('-')[0] == 'Line') {
 						lineList.value.push(shape)
@@ -135,13 +170,16 @@ export default {
         return {
             configStagePreview,
             textList,
+            textListCanvas,
             imageList,
+            imageListCanvas,
             lineList,
             rectangleList,
             circleList,
             polygonList,
             arrowList,
-            starList
+            starList,
+            hexToRgbA
         }
     }  
 }
