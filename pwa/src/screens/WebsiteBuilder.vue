@@ -327,19 +327,23 @@
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
 				<div class="mb-4 flex justify-between rounded">
-					<button class="border-b-2 border-blue-600 px-4 py-1">Elements</button>
+					<button class="border-b-2 px-4 py-1" :class="selectedTab == 'Elements' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'" @click="selectedTab = 'Elements'">Elements</button>
 					<button
-						class="px-4 py-1 text-neutral-600 transition-colors hover:text-blue-600"
+						class="px-4 py-1 transition-colors hover:text-blue-600 border-b-2"
+						:class="selectedTab == 'Blocks' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
+						@click="selectedTab = 'Blocks'"
 					>
 						Blocks
 					</button>
 					<button
-						class="px-4 py-1 text-neutral-600 transition-colors hover:text-blue-600"
+						class="px-4 py-1 text-neutral-600 transition-colors hover:text-blue-600 border-b-2"
+						:class="selectedTab == 'Templates' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
+						@click="selectedTab = 'Templates'"
 					>
 						Templates
 					</button>
 				</div>
-				<div v-if="selectedShapeName == '' && showShapesButton == false">
+				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Elements'">
 					<button
 						class="flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addTextElementToCanvas"
@@ -1758,6 +1762,7 @@ export default {
 		const starTransformer = ref()
 
 		const scrollContainer = ref()
+		const selectedTab: Ref<string> = ref('Elements')
 
 		const selectedPointer: Ref<boolean> = ref(true)
 		const selectedAddTextPointer: Ref<boolean> = ref(false)
@@ -1899,7 +1904,7 @@ export default {
 		const originalHeight = window.innerHeight - 72 - 32
 
 		const configKonva = ref({
-			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32,
+			width: window.innerWidth * 0.75 - 56 - 2 * 32, //1024??? //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			height: window.innerHeight - 72 - 32,
 		})
 
@@ -3914,6 +3919,7 @@ export default {
 			addArrowElementWithPointer,
 			addStarElementWithPointer,
 			previewPageWebsite,
+			selectedTab
 		}
 	},
 }
