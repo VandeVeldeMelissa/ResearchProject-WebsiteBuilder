@@ -47,6 +47,14 @@
     						></v-text>
     					</v-layer>
             </v-stage>
+            <img v-for="image in imageList" :key="image.id" :src="image.image.src" class="absolute" 
+            :style="[{ 
+                top: image.y + 'px', 
+                left: image.x + 'px', 
+                width: image.width + 'px', 
+                height: image.height + 'px',
+                boxShadow: image.shadowOffsetX + 'px ' + image.shadowOffsetY + 'px ' + image.shadowBlur + 'px ' + hexToRgbA(image.shadowColor, image.shadowOpacity),
+            }]"/>
             <pre v-for="text in textList" :key="text.id" 
                 class="absolute" 
                 :class="[text.fontStyle == 'bold italic' ? '!font-bold !font-italic' : '', text.fontStyle == 'bold' ? '!font-bold' : '', text.fontStyle == 'italic' ? '!font-italic' : '']"
@@ -61,14 +69,6 @@
                     textShadow: text.shadowOffsetX + 'px ' + text.shadowOffsetY + 'px ' + text.shadowBlur + 'px ' + hexToRgbA(text.shadowColor, text.shadowOpacity),
                 }]"
             >{{ text.text }}</pre>
-            <img v-for="image in imageList" :key="image.id" :src="image.image.src" class="absolute" 
-            :style="[{ 
-                top: image.y + 'px', 
-                left: image.x + 'px', 
-                width: image.width + 'px', 
-                height: image.height + 'px',
-                boxShadow: image.shadowOffsetX + 'px ' + image.shadowOffsetY + 'px ' + image.shadowBlur + 'px ' + hexToRgbA(image.shadowColor, image.shadowOpacity),
-            }]"/>
        </div>
    </main>
 </template>

@@ -345,7 +345,7 @@
 						Blocks
 					</button>
 					<button
-						class="px-4 py-1 text-neutral-600 transition-colors hover:text-blue-600 border-b-2"
+						class="px-4 py- transition-colors hover:text-blue-600 border-b-2"
 						:class="selectedTab == 'Templates' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
 						@click="selectedTab = 'Templates'"
 					>
