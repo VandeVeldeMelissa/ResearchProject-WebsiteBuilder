@@ -178,11 +178,13 @@
 						<v-layer ref="layer" @dragmove="showGuidelines" @dragend="handleDragEndLayer">
 							<v-rect
 								:config="{
+									id: 'Background',
 									x: 0,
 									y: 0,
 									width: configKonva.width,
 									height: configKonva.height,
 									fill: '#FFFFFF',
+									name: 'Background',
 								}"
 							></v-rect>
 							<v-regular-polygon
@@ -242,6 +244,33 @@
 								@dragend="handleTransformEnd"
 								@dblclick="showTextEditor = true"
 							></v-text>
+							<v-group
+								v-for="item in quoteList"
+								:key="item.id"
+								:config="item.group"
+							>
+								<v-image
+									:config="item.image"
+									@transformend="handleTransformEnd"
+									@dragend="handleTransformEnd"
+								></v-image>
+								<v-rect
+									:config="item.rectangle"
+									@transformend="handleTransformEnd"
+									@dragend="handleTransformEnd"
+								></v-rect>
+								<v-line
+									:config="item.line"
+									@transformend="handleTransformEnd"
+									@dragend="handleTransformEnd"
+								></v-line>
+								<v-text
+									:config="item.text"
+									@transformend="handleTransformEnd"
+									@dragend="handleTransformEnd"
+									@dblclick="showTextEditor = true"
+								></v-text>
+							</v-group>
 							<v-transformer
 								ref="starTransformer"
 								:config="{
@@ -330,6 +359,17 @@
 								}"
 								@transform="handleTransformArrow"
 							/>
+							<v-transformer
+								ref="quoteTransformer"
+								:config="{
+									rotationSnaps: [0, 90, 180, 270],
+									rotationSnapTolerance: 5,
+									anchorStroke: '#2563EB',
+									borderStroke: '#2563EB',
+									borderDash: [3, 3],
+									enabledAnchors: [],
+								}"
+							></v-transformer>
 						</v-layer>
 					</v-stage>
 			</div>
@@ -340,21 +380,21 @@
 					<button
 						class="px-4 py-1 transition-colors hover:text-blue-600 border-b-2"
 						:class="selectedTab == 'Blocks' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
-						@click="selectedTab = 'Blocks'"
+						@click="[selectedTab = 'Blocks', showShapesButton = false]"
 					>
 						Blocks
 					</button>
 					<button
 						class="px-4 py- transition-colors hover:text-blue-600 border-b-2"
 						:class="selectedTab == 'Templates' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
-						@click="selectedTab = 'Templates'"
+						@click="[selectedTab = 'Templates', showShapesButton = false]"
 					>
 						Templates
 					</button>
 				</div>
 				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Elements'">
 					<button
-						class="flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addTextElementToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add text</div>
@@ -362,7 +402,7 @@
 					</button>
 					<div>
 						<button
-							class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+							class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 							@click="selectImage"
 						>
 							<div class="flex gap-x-2"><Plus />Add image</div>
@@ -371,18 +411,27 @@
 						<input type="file" ref="fileInput" @change="uploadImage" class="hidden"/>
 					</div>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addLineElementToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add line</div>
 						<Spline />
 					</button>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="showShapesButton = true"
 					>
 						<div class="flex gap-x-2"><Plus />Add shape</div>
 						<Square />
+					</button>
+				</div>
+				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Blocks'">
+					<button
+						class="flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="addQuoteBlockToCanvas"
+					>
+						<div class="flex gap-x-2"><Plus />Add quote</div>
+						<Quote />
 					</button>
 				</div>
 				<div v-if="selectedShapeName.split('-')[0] == 'Text'">
@@ -877,7 +926,7 @@
 						class="w-full rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="showShapesButton = false"
 					>
-						<div class="flex gap-x-2"><ChevronLeft />Return</div>
+						<div class="flex gap-x-2 items-center"><ChevronLeft />Return</div>
 					</button>
 					<button
 						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -887,28 +936,28 @@
 						<Square />
 					</button>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addCircleToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add circle</div>
 						<Circle />
 					</button>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addPolygonToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add polygon</div>
 						<Hexagon />
 					</button>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addArrowToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add arrow</div>
 						<ArrowBigRight />
 					</button>
 					<button
-						class="mt-4 flex w-full justify-between rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						class="mt-4 flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addStarToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add star</div>
@@ -1691,12 +1740,11 @@ import {
 	ArrowUp,
 	ArrowDown,
 	X,
-	MoveVertical
+	MoveVertical,
+	Quote
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
-import { Rect } from 'konva/lib/shapes/Rect'
-import { Shape, ShapeConfig } from 'konva/lib/Shape'
 import router from '../bootstrap/router'
 
 export default {
@@ -1729,6 +1777,7 @@ export default {
 	ArrowDown,
 	X,
 	MoveVertical,
+	Quote
 },
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
@@ -1742,6 +1791,7 @@ export default {
 		const polygonList: Ref<any[]> = ref([])
 		const arrowList: Ref<any[]> = ref([])
 		const starList: Ref<any[]> = ref([])
+		const quoteList: Ref<any[]> = ref([])
 		let textListNumber: Ref<number> = ref(0)
 		let imageListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
@@ -1750,6 +1800,7 @@ export default {
 		let polygonListNumber: Ref<number> = ref(0)
 		let arrowListNumber: Ref<number> = ref(0)
 		let starListNumber: Ref<number> = ref(0)
+		let quoteListNumber: Ref<number> = ref(0)
 		const selectedShapeName: Ref<string> = ref('')
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
@@ -1769,6 +1820,7 @@ export default {
 		const fileInputSideBar = ref()
 		const rectangleTransformer = ref()
 		const starTransformer = ref()
+		const quoteTransformer = ref()
 
 		const scrollContainer = ref()
 		const selectedTab: Ref<string> = ref('Elements')
@@ -2404,7 +2456,7 @@ export default {
 			})
 			await Promise.resolve();
 			updateStarTransformer();
-			saveShapesToLocalStorage()
+			saveShapesToLocalStorage();
 		}
 
 		const addStarElementWithPointer = () => {
@@ -2444,6 +2496,121 @@ export default {
 				selectedAddStarPointer.value = false
 				selectedPointer.value = true
 			})
+		}
+
+		const addQuoteBlockToCanvas = () => {
+			console.log('addQuoteBlockToCanvas')
+			quoteListNumber.value++
+			const quoteName = 'Quote-' + quoteListNumber.value.toString()
+			//selectedShapeName.value = quoteName
+			const scrollTop = scrollContainer.value.scrollTop
+
+			const image = new window.Image()
+			image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+
+			image.onload = () => {
+				quoteList.value.push({
+				group: {
+					id: quoteName,
+					x: 100,
+					y: scrollTop + 100,
+					draggable: true,
+					name: quoteName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				},
+				image: {
+					id: 'imgQuote-' + quoteListNumber.value.toString(),
+					x: 20,
+					y: 10,
+					width: 30,
+					height: 30,
+					rotation: 0,
+					image: image,
+					draggable: false,
+					name: quoteName,
+					stroke: '#504c4c',
+					strokeWidth: 0,
+					opacity: 1,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				},
+				rectangle: {
+					id: 'rectQuote-' + quoteListNumber.value.toString(),
+					x: 80,
+					y: 0,
+					width: 740,
+					height: 50,
+					fill: '#FFFFFF',
+					stroke: '#b0acac',
+					strokeWidth: 0.5,
+					draggable: false,
+					name: quoteName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				},
+				line: {
+					id: 'lineQuote-' + quoteListNumber.value.toString(),
+					points: [80, 0, 80, 50],
+					stroke: '#504c4c',
+					strokeWidth: 3,
+					draggable: false,
+					name: quoteName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				},
+				text: {
+					id: 'textQuote-' + quoteListNumber.value.toString(),
+					x: 90,
+					y: 17,
+					text: 'Double click to change this quote.',
+					fontSize: 20,
+					fontFamily: 'Arial',
+					fill: '#504c4c',
+					stroke: '#000000',
+					strokeWidth: 0,
+					draggable: false,
+					name: quoteName,
+					opacity: 1,
+					rotation: 0,
+					scaleX: 1,
+					scaleY: 1,
+					shadowColor: '#000000',
+					shadowBlur: 0,
+					shadowOffsetX: 0,
+					shadowOffsetY: 0,
+					shadowOpacity: 0.5,
+				},
+			})
+			}
+			console.log(quoteList.value)
+			saveShapesToLocalStorage()
 		}
 
 		const updateTextTransformer = () => {
@@ -2630,6 +2797,30 @@ export default {
 			}
 		}
 
+		const updateQuoteTransformer = () => {
+			console.log('update group transformer')
+			const groupTransformerNode = quoteTransformer.value?.getNode()
+			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Quote') {
+				const groupTransformerStage = groupTransformerNode.getStage()
+				const selectedNode = groupTransformerStage.findOne(
+					(node: { name: () => string }) => {
+						return node.name() === selectedShapeName.value
+					},
+				)
+				if (selectedNode === groupTransformerNode?.node()) {
+					return
+				}
+
+				if (selectedNode) {
+					groupTransformerNode.nodes([selectedNode])
+				} else {
+					groupTransformerNode.nodes([])
+				}
+			} else {
+				groupTransformerNode.nodes([])
+			}
+		}
+
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -2643,6 +2834,7 @@ export default {
 				updatePolygonTransformer()
 				updateArrowTransformer()
 				updateStarTransformer()
+				updateQuoteTransformer()
 				return
 			}
 
@@ -2679,10 +2871,18 @@ export default {
 			const star = starList.value.find((star) => {
 				return star.name === name
 			})
+			console.log('Selected shape name: ', name)
+			const quote = quoteList.value.find((quote) => {
+				return quote.group.name === name
+			})
+
+			if (quote) {
+				console.log('quote')
+			}
 
 			if (text) {
 				selectedShapeName.value = name
-			} else if (image || line || rectangle || circle || polygon || arrow || star){
+			} else if (image || line || rectangle || circle || polygon || arrow || star || quote){
 				selectedShapeName.value = name
 				showTextEditor.value = false
 			} else {
@@ -2697,11 +2897,11 @@ export default {
 			updatePolygonTransformer()
 			updateArrowTransformer()
 			updateStarTransformer()
+			updateQuoteTransformer()
 		}
 
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
 			checkShapeLocation(e)
-
 
 			const text = textList.value.find((r) => r.name === selectedShapeName.value)
 			if (text) {
@@ -2788,6 +2988,20 @@ export default {
 				star.scaleX = e.target.scaleX()
 				star.scaleY = e.target.scaleY()
 			}
+
+			const quote = quoteList.value.find((r) => r.name === selectedShapeName.value)
+			if (quote) {
+				quote.x = e.target.x()
+				quote.y = e.target.y()
+				quote.rotation = e.target.rotation()
+				quote.width = e.target.width()
+				quote.height = e.target.height()
+				e.target.scaleX(1)
+				e.target.scaleY(1)
+				quote.scaleX = e.target.scaleX()
+				quote.scaleY = e.target.scaleY()
+			}
+
 			saveShapesToLocalStorage()
 		}
 
@@ -2857,6 +3071,14 @@ export default {
 					})
 					selectedShapeName.value = ''
 					updateStarTransformer()
+					saveShapesToLocalStorage()
+					break
+				case 'Quote':
+					quoteList.value = quoteList.value.filter((quote) => {
+						return quote.name !== selectedShapeName.value
+					})
+					selectedShapeName.value = ''
+					updateQuoteTransformer()
 					saveShapesToLocalStorage()
 					break
 				default:
@@ -3461,7 +3683,7 @@ export default {
 
 			//Find all objects on stage and skip the current object and transformers
 			stage.value.getNode().children[0].children.forEach((guideItem: any) => {
-				if (guideItem === skipShape || guideItem.className === 'Transformer') {
+				if (guideItem === skipShape || guideItem.className === 'Transformer' || guideItem.name() === 'Background') {
 					return
 				}
 				var box = guideItem.getClientRect();
@@ -3928,7 +4150,10 @@ export default {
 			addArrowElementWithPointer,
 			addStarElementWithPointer,
 			previewPageWebsite,
-			selectedTab
+			selectedTab,
+			addQuoteBlockToCanvas,
+			quoteList,
+			quoteTransformer,
 		}
 	},
 }
