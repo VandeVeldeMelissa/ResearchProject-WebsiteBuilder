@@ -248,27 +248,21 @@
 								v-for="item in quoteList"
 								:key="item.id"
 								:config="item.group"
+								@transformend="handleTransformEnd"
+								@dragend="handleTransformEnd"
+								@dblclick="showQuoteEditor = true"
 							>
 								<v-image
 									:config="item.image"
-									@transformend="handleTransformEnd"
-									@dragend="handleTransformEnd"
 								></v-image>
 								<v-rect
 									:config="item.rectangle"
-									@transformend="handleTransformEnd"
-									@dragend="handleTransformEnd"
 								></v-rect>
 								<v-line
 									:config="item.line"
-									@transformend="handleTransformEnd"
-									@dragend="handleTransformEnd"
 								></v-line>
 								<v-text
 									:config="item.text"
-									@transformend="handleTransformEnd"
-									@dragend="handleTransformEnd"
-									@dblclick="showTextEditor = true"
 								></v-text>
 							</v-group>
 							<v-transformer
@@ -368,6 +362,7 @@
 									borderStroke: '#2563EB',
 									borderDash: [3, 3],
 									enabledAnchors: [],
+									height: quoteTransformerHeight,
 								}"
 							></v-transformer>
 						</v-layer>
@@ -425,7 +420,7 @@
 						<Square />
 					</button>
 				</div>
-				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Blocks'">
+				<div v-if="(selectedShapeName == '' || selectedShapeName.split('-')[0] == 'Quote') && showShapesButton == false && selectedTab == 'Blocks'">
 					<button
 						class="flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
 						@click="addQuoteBlockToCanvas"
@@ -1707,6 +1702,14 @@
 		</div>
 		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
 		</div>
+		<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(75%/2-400px+27px)] transition-transform ease-[cubic-bezier(0.25, 1, 0.5, 1)]"
+		:class="showQuoteEditor ? 'translate-y-0' : 'translate-y-34'">
+		<div class="flex justify-between items-center mb-1">
+			<label class="font-medium">What do you want this quote to say?</label>
+			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded" @click="showQuoteEditor = false"><X /></button>
+		</div>
+		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputQuote.text" @input="updateTextQuote"></textarea>
+		</div>
 	</div>
 </template>
 
@@ -1805,6 +1808,7 @@ export default {
 		const showBorderDetails: Ref<boolean> = ref(false)
 		const showShadowDetails: Ref<boolean> = ref(false)
 		const showTextEditor: Ref<boolean> = ref(false)
+		const showQuoteEditor: Ref<boolean> = ref(false)
 		const alignText: Ref<string> = ref('left')
 		const showShapesButton: Ref<boolean> = ref(false)
 
@@ -1834,6 +1838,8 @@ export default {
 		const selectedAddPolygonPointer: Ref<boolean> = ref(false)
 		const selectedAddArrowPointer: Ref<boolean> = ref(false)
 		const selectedAddStarPointer: Ref<boolean> = ref(false)
+
+		const quoteTransformerHeight: Ref<number> = ref(50)
 
 		const userInputText = reactive({
 			fontFamily: 'Arial',
@@ -1960,6 +1966,10 @@ export default {
 			starShadowSpread: 0,
 			starShadowColor: '#000000',
 			starShadowColorOpacity: 50,
+		})
+
+		const userInputQuote = reactive({
+			text: ''
 		})
 
 		const originalHeight = window.innerHeight - 72 - 32
@@ -2498,11 +2508,11 @@ export default {
 			})
 		}
 
-		const addQuoteBlockToCanvas = () => {
+		const addQuoteBlockToCanvas = async () => {
 			console.log('addQuoteBlockToCanvas')
 			quoteListNumber.value++
 			const quoteName = 'Quote-' + quoteListNumber.value.toString()
-			//selectedShapeName.value = quoteName
+			selectedShapeName.value = quoteName
 			const scrollTop = scrollContainer.value.scrollTop
 
 			const image = new window.Image()
@@ -2589,6 +2599,7 @@ export default {
 					id: 'textQuote-' + quoteListNumber.value.toString(),
 					x: 90,
 					y: 17,
+					height: 20,
 					text: 'Double click to change this quote.',
 					fontSize: 20,
 					fontFamily: 'Arial',
@@ -2609,8 +2620,9 @@ export default {
 				},
 			})
 			}
-			console.log(quoteList.value)
-			saveShapesToLocalStorage()
+			await Promise.resolve();
+			updateQuoteTransformer();
+			saveShapesToLocalStorage();
 		}
 
 		const updateTextTransformer = () => {
@@ -2826,6 +2838,7 @@ export default {
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
+				showQuoteEditor.value = false
 				updateTextTransformer()
 				updateImageTransformer()
 				updateLineTransformer()
@@ -2885,9 +2898,11 @@ export default {
 			} else if (image || line || rectangle || circle || polygon || arrow || star || quote){
 				selectedShapeName.value = name
 				showTextEditor.value = false
+				showQuoteEditor.value = false
 			} else {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
+				showQuoteEditor.value = false
 			}
 			updateTextTransformer()
 			updateImageTransformer()
@@ -2989,17 +3004,13 @@ export default {
 				star.scaleY = e.target.scaleY()
 			}
 
-			const quote = quoteList.value.find((r) => r.name === selectedShapeName.value)
+			const quote = quoteList.value.find((r) => r.group.name === selectedShapeName.value)
 			if (quote) {
-				quote.x = e.target.x()
-				quote.y = e.target.y()
-				quote.rotation = e.target.rotation()
-				quote.width = e.target.width()
-				quote.height = e.target.height()
-				e.target.scaleX(1)
-				e.target.scaleY(1)
-				quote.scaleX = e.target.scaleX()
-				quote.scaleY = e.target.scaleY()
+				quote.group.x = e.target.x()
+				quote.group.y = e.target.y()
+				quote.group.rotation = e.target.rotation()
+				quote.group.width = e.target.width()
+				quote.group.height = e.target.height()
 			}
 
 			saveShapesToLocalStorage()
@@ -3075,7 +3086,19 @@ export default {
 					break
 				case 'Quote':
 					quoteList.value = quoteList.value.filter((quote) => {
-						return quote.name !== selectedShapeName.value
+						return quote.group.name !== selectedShapeName.value
+					})
+					quoteList.value = quoteList.value.filter((quote) => {
+						return quote.line.name !== selectedShapeName.value
+					})
+					quoteList.value = quoteList.value.filter((quote) => {
+						return quote.rectangle.name !== selectedShapeName.value
+					})
+					quoteList.value = quoteList.value.filter((quote) => {
+						return quote.text.name !== selectedShapeName.value
+					})
+					quoteList.value = quoteList.value.filter((quote) => {
+						return quote.image.name !== selectedShapeName.value
 					})
 					selectedShapeName.value = ''
 					updateQuoteTransformer()
@@ -3287,12 +3310,35 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		const updateTextQuote = () => {
+			console.log('updateTextQuote')
+			const quote = quoteList.value.find((quote) => {
+				return quote.group.name === selectedShapeName.value
+			})
+			if (quote) {
+				quote.text.text = userInputQuote.text
+				//Count the amount of lines:
+				const lines = userInputQuote.text.split('\n')
+				quote.text.height = lines.length * quote.text.fontSize
+
+				//when the height of the text changes, change the height of the rectangle:
+				console.log(quote.text.height)
+				quote.rectangle.height = quote.text.height + 30
+				quote.line.points[3] = quote.text.height + 30
+				console.log(quoteTransformerHeight.value)
+				quoteTransformerHeight.value = quote.text.height + 30
+				console.log(quoteTransformerHeight.value)
+			}
+			saveShapesToLocalStorage()
+		}
+
 		watch(selectedShapeName, () => {
 			console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
 			})
 			if (text) {
+				selectedTab.value = 'Elements'
 				userInputText.fontFamily = text.fontFamily
 				userInputText.fontSize = text.fontSize
 				userInputText.textAlign = text.align
@@ -3326,6 +3372,7 @@ export default {
 				return image.name === selectedShapeName.value
 			})
 			if (image) {
+				selectedTab.value = 'Elements'
 				userInputImage.imageOpacity = image.opacity * 100
 				userInputImage.imageBorderColor = image.stroke
 				userInputImage.imageBorder = image.strokeWidth
@@ -3352,6 +3399,7 @@ export default {
 				return line.name === selectedShapeName.value
 			})
 			if (line) {
+				selectedTab.value = 'Elements'
 				userInputLine.lineLength = line.points[2]
 				userInputLine.lineColor = line.stroke
 				userInputLine.lineWidth = line.strokeWidth
@@ -3377,6 +3425,7 @@ export default {
 				return rectangle.name === selectedShapeName.value
 			})
 			if (rectangle) {
+				selectedTab.value = 'Elements'
 				userInputRectangle.rectangleColor = rectangle.fill
 				userInputRectangle.rectangleColorOpacity = rectangle.opacity * 100
 				userInputRectangle.rectangleWidth = rectangle.width
@@ -3405,6 +3454,7 @@ export default {
 				return circle.name === selectedShapeName.value
 			})
 			if (circle) {
+				selectedTab.value = 'Elements'
 				userInputCircle.circleColor = circle.fill
 				userInputCircle.circleColorOpacity = circle.opacity * 100
 				userInputCircle.circleRadius = circle.radius
@@ -3432,6 +3482,7 @@ export default {
 				return polygon.name === selectedShapeName.value
 			})
 			if (polygon) {
+				selectedTab.value = 'Elements'
 				userInputPolygon.polygonColor = polygon.fill
 				userInputPolygon.polygonColorOpacity = polygon.opacity * 100
 				userInputPolygon.polygonShadowX = polygon.shadowOffsetX
@@ -3459,6 +3510,7 @@ export default {
 				return arrow.name === selectedShapeName.value
 			})
 			if (arrow) {
+				selectedTab.value = 'Elements'
 				userInputArrow.arrowLength = arrow.points[2]
 				userInputArrow.arrowStroke = arrow.strokeWidth
 				userInputArrow.arrowStrokeColor = arrow.stroke
@@ -3483,6 +3535,7 @@ export default {
 			})
 
 			if (star) {
+				selectedTab.value = 'Elements'
 				userInputStar.starColor = star.fill
 				userInputStar.starColorOpacity = star.opacity * 100
 				userInputStar.starShadowX = star.shadowOffsetX
@@ -3506,6 +3559,15 @@ export default {
 					showShadowDetails.value = false
 				}
 				return
+			}
+
+			const quote = quoteList.value.find((quote) => {
+				return quote.group.name === selectedShapeName.value
+			})
+			if (quote) {
+				console.log(quote)
+				selectedTab.value = 'Blocks'
+				userInputQuote.text = quote.text.text
 			}
 
 		})
@@ -3952,6 +4014,7 @@ export default {
 		}
 
 		const saveShapesToLocalStorage = () => {
+			console.log('saveShapesToLocalStorage')
 			const allShapes: any = []
 			textList.value.forEach((text: any) => {
 				allShapes.push(text)
@@ -3977,6 +4040,9 @@ export default {
 			starList.value.forEach((star: any) => {
 				allShapes.push(star)
 			})
+			quoteList.value.forEach((quote: any) => {
+				allShapes.push(quote)
+			})
 			localStorage.setItem('shapes', JSON.stringify(allShapes))
 			localStorage.setItem('heightStage', configKonva.value.height.toString())
 			localStorage.setItem('widthStage', configKonva.value.width.toString())
@@ -3988,6 +4054,19 @@ export default {
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
+					if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
+						const image = new window.Image()
+						image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+						image.onload = () => {
+							shape.image.image = image
+							const numberList = shape.group.name.split('-')[1]
+							if (parseInt(numberList) > quoteListNumber.value) {
+								quoteListNumber.value = parseInt(numberList)
+							}
+							quoteList.value.push(shape)
+						}
+						return
+					}
 					if (shape.name.split('-')[0] == 'Text') {
 						const numberList = shape.name.split('-')[1]
 						if (parseInt(numberList) > textListNumber.value) {
@@ -4154,6 +4233,10 @@ export default {
 			addQuoteBlockToCanvas,
 			quoteList,
 			quoteTransformer,
+			showQuoteEditor,
+			userInputQuote,
+			updateTextQuote,
+			quoteTransformerHeight
 		}
 	},
 }
