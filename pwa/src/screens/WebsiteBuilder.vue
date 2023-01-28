@@ -2518,11 +2518,9 @@ export default {
 			})
 		}
 
-		const addQuoteBlockToCanvas = async () => {
-			console.log('addQuoteBlockToCanvas')
+		const addQuoteBlockToCanvas = () => {
 			quoteListNumber.value++
 			const quoteName = 'Quote-' + quoteListNumber.value.toString()
-			selectedShapeName.value = quoteName
 			const scrollTop = scrollContainer.value.scrollTop
 
 			const image = new window.Image()
@@ -2530,109 +2528,107 @@ export default {
 
 			image.onload = () => {
 				quoteList.value.push({
-				group: {
-					id: quoteName,
-					x: 100,
-					y: scrollTop + 100,
-					draggable: true,
-					name: quoteName,
-					opacity: 1,
-					rotation: 0,
-					scaleX: 1,
-					scaleY: 1,
-					shadowColor: '#000000',
-					shadowBlur: 0,
-					shadowOffsetX: 0,
-					shadowOffsetY: 0,
-					shadowOpacity: 0.5,
-				},
-				image: {
-					id: 'imgQuote-' + quoteListNumber.value.toString(),
-					x: 20,
-					y: 10,
-					width: 30,
-					height: 30,
-					rotation: 0,
-					image: image,
-					draggable: false,
-					name: quoteName,
-					stroke: '#504c4c',
-					strokeWidth: 0,
-					opacity: 1,
-					scaleX: 1,
-					scaleY: 1,
-					shadowColor: '#000000',
-					shadowBlur: 0,
-					shadowOffsetX: 0,
-					shadowOffsetY: 0,
-					shadowOpacity: 0.5,
-				},
-				rectangle: {
-					id: 'rectQuote-' + quoteListNumber.value.toString(),
-					x: 80,
-					y: 0,
-					width: 740,
-					height: 50,
-					fill: '#FFFFFF',
-					stroke: '#b0acac',
-					strokeWidth: 0.5,
-					draggable: false,
-					name: quoteName,
-					opacity: 1,
-					rotation: 0,
-					scaleX: 1,
-					scaleY: 1,
-					shadowColor: '#000000',
-					shadowBlur: 0,
-					shadowOffsetX: 0,
-					shadowOffsetY: 0,
-					shadowOpacity: 0.5,
-				},
-				line: {
-					id: 'lineQuote-' + quoteListNumber.value.toString(),
-					points: [80, 0, 80, 50],
-					stroke: '#504c4c',
-					strokeWidth: 3,
-					draggable: false,
-					name: quoteName,
-					opacity: 1,
-					rotation: 0,
-					scaleX: 1,
-					scaleY: 1,
-					shadowColor: '#000000',
-					shadowBlur: 0,
-					shadowOffsetX: 0,
-					shadowOffsetY: 0,
-					shadowOpacity: 0.5,
-				},
-				text: {
-					id: 'textQuote-' + quoteListNumber.value.toString(),
-					x: 90,
-					y: 17,
-					height: 20,
-					text: 'Double click to change this quote.',
-					fontSize: 20,
-					fontFamily: 'Arial',
-					fill: '#504c4c',
-					stroke: '#000000',
-					strokeWidth: 0,
-					draggable: false,
-					name: quoteName,
-					opacity: 1,
-					rotation: 0,
-					scaleX: 1,
-					scaleY: 1,
-					shadowColor: '#000000',
-					shadowBlur: 0,
-					shadowOffsetX: 0,
-					shadowOffsetY: 0,
-					shadowOpacity: 0.5,
-				},
+					group: {
+						id: quoteName,
+						x: 100,
+						y: scrollTop + 100,
+						draggable: true,
+						name: quoteName,
+						opacity: 1,
+						rotation: 0,
+						scaleX: 1,
+						scaleY: 1,
+						shadowColor: '#000000',
+						shadowBlur: 0,
+						shadowOffsetX: 0,
+						shadowOffsetY: 0,
+						shadowOpacity: 0.5,
+					},
+					image: {
+						id: 'imgQuote-' + quoteListNumber.value.toString(),
+						x: 20,
+						y: 10,
+						width: 30,
+						height: 30,
+						rotation: 0,
+						image: image,
+						draggable: false,
+						name: quoteName,
+						stroke: '#504c4c',
+						strokeWidth: 0,
+						opacity: 1,
+						scaleX: 1,
+						scaleY: 1,
+						shadowColor: '#000000',
+						shadowBlur: 0,
+						shadowOffsetX: 0,
+						shadowOffsetY: 0,
+						shadowOpacity: 0.5,
+					},
+					rectangle: {
+						id: 'rectQuote-' + quoteListNumber.value.toString(),
+						x: 80,
+						y: 0,
+						width: 740,
+						height: 50,
+						fill: '#FFFFFF',
+						stroke: '#b0acac',
+						strokeWidth: 0.5,
+						draggable: false,
+						name: quoteName,
+						opacity: 1,
+						rotation: 0,
+						scaleX: 1,
+						scaleY: 1,
+						shadowColor: '#000000',
+						shadowBlur: 0,
+						shadowOffsetX: 0,
+						shadowOffsetY: 0,
+						shadowOpacity: 0.5,
+					},
+					line: {
+						id: 'lineQuote-' + quoteListNumber.value.toString(),
+						points: [80, 0, 80, 50],
+						stroke: '#504c4c',
+						strokeWidth: 3,
+						draggable: false,
+						name: quoteName,
+						opacity: 1,
+						rotation: 0,
+						scaleX: 1,
+						scaleY: 1,
+						shadowColor: '#000000',
+						shadowBlur: 0,
+						shadowOffsetX: 0,
+						shadowOffsetY: 0,
+						shadowOpacity: 0.5,
+					},
+					text: {
+						id: 'textQuote-' + quoteListNumber.value.toString(),
+						x: 90,
+						y: 17,
+						height: 20,
+						text: 'Double click to change this quote.',
+						fontSize: 20,
+						fontFamily: 'Arial',
+						fill: '#504c4c',
+						stroke: '#000000',
+						strokeWidth: 0,
+						draggable: false,
+						name: quoteName,
+						opacity: 1,
+						rotation: 0,
+						scaleX: 1,
+						scaleY: 1,
+						shadowColor: '#000000',
+						shadowBlur: 0,
+						shadowOffsetX: 0,
+						shadowOffsetY: 0,
+						shadowOpacity: 0.5,
+					},
 			})
-			}
-			await Promise.resolve();
-			updateQuoteTransformer();
 			saveShapesToLocalStorage();
+			}
 		}
 
 		const updateTextTransformer = () => {
@@ -2820,7 +2816,6 @@ export default {
 		}
 
 		const updateQuoteTransformer = () => {
-			console.log('update group transformer')
 			const groupTransformerNode = quoteTransformer.value?.getNode()
 			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Quote') {
 				const groupTransformerStage = groupTransformerNode.getStage()
@@ -2894,14 +2889,9 @@ export default {
 			const star = starList.value.find((star) => {
 				return star.name === name
 			})
-			console.log('Selected shape name: ', name)
 			const quote = quoteList.value.find((quote) => {
 				return quote.group.name === name
 			})
-
-			if (quote) {
-				console.log('quote')
-			}
 
 			if (text) {
 				selectedShapeName.value = name
@@ -3321,7 +3311,6 @@ export default {
 		}
 
 		const updateTextQuote = () => {
-			console.log('updateTextQuote')
 			const quote = quoteList.value.find((quote) => {
 				return quote.group.name === selectedShapeName.value
 			})
@@ -3332,12 +3321,9 @@ export default {
 				quote.text.height = lines.length * quote.text.fontSize
 
 				//when the height of the text changes, change the height of the rectangle:
-				console.log(quote.text.height)
 				quote.rectangle.height = quote.text.height + 30
 				quote.line.points[3] = quote.text.height + 30
-				console.log(quoteTransformerHeight.value)
 				quoteTransformerHeight.value = quote.text.height + 30
-				console.log(quoteTransformerHeight.value)
 			}
 			saveShapesToLocalStorage()
 		}
@@ -3575,7 +3561,6 @@ export default {
 				return quote.group.name === selectedShapeName.value
 			})
 			if (quote) {
-				console.log(quote)
 				selectedTab.value = 'Blocks'
 				userInputQuote.text = quote.text.text
 			}
@@ -3597,7 +3582,6 @@ export default {
 					shapeList.push(shape)
 				}
 			})
-			console.log(shapeList)
 			if (shapeList.length === 0 && configKonva.value.height > originalHeight) {
 				//Update height of the canvas
 				configKonva.value.height = configKonva.value.height - 100
@@ -3641,12 +3625,12 @@ export default {
 								shadowOpacity: 0.5,
 								dataURLString: dataURL as string,
 							})
+							saveShapesToLocalStorage();
 						}
 					}
 				}
 				reader.readAsDataURL(file)
 			}
-			saveShapesToLocalStorage()
 		}
 
 		const handleTransformLine = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -4062,7 +4046,6 @@ export default {
 		//Load the shapes from local storage on mounted:
 		onMounted(() => {
 			const shapes = localStorage.getItem('shapes') || '[]'
-			console.log(shapes)
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
@@ -4250,8 +4233,6 @@ export default {
 					}
 				})
 			}
-			
-			
 			saveShapesToLocalStorage()
 		}
 
