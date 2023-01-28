@@ -429,6 +429,15 @@
 						<Quote />
 					</button>
 				</div>
+				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Templates'" class="grid grid-cols-2 gap-1">
+					<button
+						class="flex flex-col gap-2 w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600"
+						@click="changeToTemplate('template1')"
+					>
+						<img src="../assets/template1.png" class="w-full" />
+						<h6>Template 1</h6>
+					</button>
+				</div>
 				<div v-if="selectedShapeName.split('-')[0] == 'Text'">
 					<h3 class="mb-1 text-base font-semibold">Font</h3>
 					<div class="mb-2.5 grid grid-cols-3 gap-x-2.5 gap-y-2.5">
@@ -1749,6 +1758,7 @@ import {
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
 import router from '../bootstrap/router'
+import template1 from '../assets/template1.json'
 
 export default {
 	components: {
@@ -3575,21 +3585,22 @@ export default {
 		//Update the height of the canvas if there is any shape at the bottom of the canvas
 		const checkShapeLocation = (e: Konva.KonvaEventObject<DragEvent>) => {
 			const shapeY = e.target.y() + e.target.height() //bottom of the element
-			if (shapeY > (configKonva.value.height - 200)) {
+			if (shapeY > (configKonva.value.height - 100)) {
 				//Update height of the canvas
-				configKonva.value.height = configKonva.value.height + 200
+				configKonva.value.height = configKonva.value.height + 100
 			}
 
 			//check if there is any shape at the bottom of the canvas:
 			const shapeList: any[] = []
 			stage.value.getNode().children[0].children.forEach((shape: Konva.Shape) => {
-				if ((shape.y() + shape.height()) > (configKonva.value.height - 400) && shape.name() !== 'guideline' && shape.className !== 'Transformer') {
+				if ((shape.y() + shape.height()) > (configKonva.value.height - 200) && shape.name() !== 'guideline' && shape.className !== 'Transformer' && shape.name() !== 'Background') {
 					shapeList.push(shape)
 				}
 			})
+			console.log(shapeList)
 			if (shapeList.length === 0 && configKonva.value.height > originalHeight) {
 				//Update height of the canvas
-				configKonva.value.height = configKonva.value.height - 200
+				configKonva.value.height = configKonva.value.height - 100
 			}
 			saveShapesToLocalStorage() //Save height to local storage
 		}
@@ -4051,6 +4062,7 @@ export default {
 		//Load the shapes from local storage on mounted:
 		onMounted(() => {
 			const shapes = localStorage.getItem('shapes') || '[]'
+			console.log(shapes)
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
@@ -4133,6 +4145,114 @@ export default {
 			router.push({
 				path: 'preview',
 			})
+		}
+
+		const changeToTemplate = (template: string) => {
+			console.log('change to template')
+			//Template 1: 2335px high, 1024px wide
+			//Empty all lists:
+			textList.value = []
+			imageList.value = []
+			lineList.value = []
+			rectangleList.value = []
+			circleList.value = []
+			polygonList.value = []
+			arrowList.value = []
+			starList.value = []
+			quoteList.value = []
+
+			//Reset all counters:
+			textListNumber.value = 0
+			imageListNumber.value = 0
+			lineListNumber.value = 0
+			rectangleListNumber.value = 0
+			circleListNumber.value = 0
+			polygonListNumber.value = 0
+			arrowListNumber.value = 0
+			starListNumber.value = 0
+			quoteListNumber.value = 0
+
+			configKonva.value.height = 2335
+			localStorage.setItem('heightStage', '2335')
+
+
+			//Add template1 to layer:
+			//Get shapes from template1 json file:
+			const shapesArray = template1
+			if (shapesArray) {
+				shapesArray.forEach((shape: any) => {
+					if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
+						const image = new window.Image()
+						image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+						image.onload = () => {
+							shape.image.image = image
+							const numberList = shape.group.name.split('-')[1]
+							if (parseInt(numberList) > quoteListNumber.value) {
+								quoteListNumber.value = parseInt(numberList)
+							}
+							quoteList.value.push(shape)
+						}
+						return
+					}
+					if (shape.name.split('-')[0] == 'Text') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > textListNumber.value) {
+							textListNumber.value = parseInt(numberList)
+						}
+						textList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Image') {
+						const img = new window.Image()
+						img.src = shape.dataURLString
+						img.onload = () => {
+							shape.image = img
+							const numberList = shape.name.split('-')[1]
+							if (parseInt(numberList) > imageListNumber.value) {
+								imageListNumber.value = parseInt(numberList)
+							}
+							imageList.value.push(shape)
+						}
+					} else if (shape.name.split('-')[0] == 'Line') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > lineListNumber.value) {
+							lineListNumber.value = parseInt(numberList)
+						}
+						lineList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Arrow') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > arrowListNumber.value) {
+							arrowListNumber.value = parseInt(numberList)
+						}
+						arrowList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Star') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > starListNumber.value) {
+							starListNumber.value = parseInt(numberList)
+						}
+						starList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Circle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > circleListNumber.value) {
+							circleListNumber.value = parseInt(numberList)
+						}
+						circleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Rectangle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > rectangleListNumber.value) {
+							rectangleListNumber.value = parseInt(numberList)
+						}
+						rectangleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Polygon') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > polygonListNumber.value) {
+							polygonListNumber.value = parseInt(numberList)
+						}
+						polygonList.value.push(shape)
+					}
+				})
+			}
+			
+			
+			saveShapesToLocalStorage()
 		}
 
 		return {
@@ -4236,7 +4356,8 @@ export default {
 			showQuoteEditor,
 			userInputQuote,
 			updateTextQuote,
-			quoteTransformerHeight
+			quoteTransformerHeight,
+			changeToTemplate,
 		}
 	},
 }

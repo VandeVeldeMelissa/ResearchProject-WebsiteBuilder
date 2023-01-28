@@ -45,6 +45,25 @@
     							:key="item.id"
     							:config="item"
     						></v-text>
+                            <v-group
+                                v-for="item in quoteList"
+                                :key="item.id"
+                                :config="item.group"
+                            >
+                                <v-image
+                                    :config="item.image">
+                                </v-image>
+                                <v-rect
+                                    :config="item.rectangle">
+                                </v-rect>
+                                <v-line
+                                    :config="item.line">
+                                </v-line>
+                                <v-text
+                                    :config="item.text">
+                                </v-text>
+
+                            </v-group>
     					</v-layer>
             </v-stage>
             <img v-for="image in imageList" :key="image.id" :src="image.image.src" class="absolute" 
@@ -90,6 +109,7 @@ export default {
 		const polygonList: Ref<any[]> = ref([])
 		const arrowList: Ref<any[]> = ref([])
 		const starList: Ref<any[]> = ref([])
+        const quoteList: Ref<any[]> = ref([])
         
         const configStagePreview = ref({
             width: window.innerWidth,
@@ -114,6 +134,16 @@ export default {
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
+                    if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
+                        shape.group.draggable = false
+						const image = new window.Image()
+						image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+						image.onload = () => {
+							shape.image.image = image
+							quoteList.value.push(shape)
+						}
+						return
+					}
                     shape.draggable = false
 					if (shape.name.split('-')[0] == 'Text') {
                         if (shape.strokeWidth > 0) {
@@ -179,7 +209,8 @@ export default {
             polygonList,
             arrowList,
             starList,
-            hexToRgbA
+            hexToRgbA,
+            quoteList
         }
     }  
 }
