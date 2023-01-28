@@ -11,7 +11,7 @@
 			<div class="flex items-center gap-x-4 p-4">
 				<div class="relative w-[16rem]">
 					<button
-						@click="toggleIsPageSelectorOpen"
+						@click="[toggleIsPageSelectorOpen(), showAddPage = false]"
 						class="ring- flex w-full items-center justify-between rounded bg-slate-100 p-2 transition-colors hover:bg-blue-50 hover:text-blue-600"
 					>
 						<span>Page: {{ selectedPage }}</span>
@@ -26,24 +26,24 @@
 						class="z-2 absolute mt-2 w-full rounded bg-white ring-1 ring-gray-300 drop-shadow-sm"
 						v-if="isPageSelectorOpen"
 					>
-						<li
+						<li v-for="page in pagesBuilder"
 							class="cursor-pointer select-none p-2 hover:bg-blue-50"
-							@click="setPage('Home')"
+							@click="[setPage(page), selectedPage = page]"
 						>
-							Home
+							{{page}}
 						</li>
-						<li
-							class="cursor-pointer select-none p-2 hover:bg-blue-50"
-							@click="setPage('Contact')"
-						>
-							Contact
-						</li>
-						<li
+						<li v-if="showAddPage == false"
 							class="flex cursor-pointer select-none items-center gap-x-2 p-2 hover:bg-blue-50"
-							@click="setPage('Add page')"
+							@click="showAddPage = true"
 						>
 							<Plus />
 							Add page
+						</li>
+						<li v-if="showAddPage == true"
+							class="flex gap-x-2 items-center cursor-pointer select-none p-2 hover:bg-blue-50"
+						>
+							<Plus />
+							<input ref="inputPageTitle" type="text" class="bg-transparent outline-none" placeholder="Page title" v-model="userInputPageName.name" @keyup.enter="createNewPage"/>
 						</li>
 					</ul>
 				</div>
@@ -367,27 +367,36 @@
 							></v-transformer>
 						</v-layer>
 					</v-stage>
-					<div v-if="showContextMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 5 + 'px'}]" ref="contextMenu">
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm" @click="[moveUp(), showContextMenu = false]">Move up</button>
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveDown(), showContextMenu = false]">Move down</button>
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-b-sm" @click="[deleteShape(), showContextMenu = false]">Delete</button>
+					<div v-if="showContextMenu" class="absolute flex flex-col drop-shadow-md w-37" :style="[{top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px'}]" ref="contextMenu">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @mouseover="showEventsMenu = true">Add event <ChevronRight/></button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false]" @mouseover="[showEventsMenu = false, showPagesAvailable = false]">Move up</button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveDown(), showContextMenu = false]" @mouseover="[showEventsMenu = false, showPagesAvailable = false]">Move down</button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-b-sm" @click="[deleteShape(), showContextMenu = false]" @mouseover="[showEventsMenu = false, showPagesAvailable = false]">Delete</button>
+					</div>
+					<div v-if="showEventsMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148) + 'px'}]" ref="contextMenu">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = true">Click <ChevronRight/></button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = false">Hover</button>
+					</div>
+					<div v-if="showPagesAvailable" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148 + 102) + 'px'}]" ref="contextMenu">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]">Go to page 1</button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]">Go to page 2</button>
 					</div>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
 				<div class="mb-4 flex justify-between rounded">
-					<button class="border-b-2 px-4 py-1" :class="selectedTab == 'Elements' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'" @click="selectedTab = 'Elements'">Elements</button>
+					<button class="border-b-2 px-4 py-1" :class="selectedTab == 'Elements' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'" @click="[selectedTab = 'Elements', showShapesButton = false, selectedShapeName = '']">Elements</button>
 					<button
 						class="px-4 py-1 transition-colors hover:text-blue-600 border-b-2"
 						:class="selectedTab == 'Blocks' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
-						@click="[selectedTab = 'Blocks', showShapesButton = false]"
+						@click="[selectedTab = 'Blocks', showShapesButton = false, selectedShapeName = '']"
 					>
 						Blocks
 					</button>
 					<button
 						class="px-4 py- transition-colors hover:text-blue-600 border-b-2"
 						:class="selectedTab == 'Templates' ? 'border-blue-600 text-black' : 'border-white text-neutral-600'"
-						@click="[selectedTab = 'Templates', showShapesButton = false]"
+						@click="[selectedTab = 'Templates', showShapesButton = false, selectedShapeName = '']"
 					>
 						Templates
 					</button>
@@ -432,6 +441,13 @@
 					>
 						<div class="flex gap-x-2"><Plus />Add quote</div>
 						<Quote />
+					</button>
+					<button
+						class="flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600 mt-4"
+						@click="addQuoteBlockToCanvas"
+					>
+						<div class="flex gap-x-2"><Plus />Add button</div>
+						<Inspect />
 					</button>
 				</div>
 				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Templates'" class="grid grid-cols-2 gap-1">
@@ -1758,7 +1774,9 @@ import {
 	ArrowDown,
 	X,
 	MoveVertical,
-	Quote
+	Quote,
+	Inspect,
+	ChevronRight
 } from 'lucide-vue-next'
 import Konva from 'konva'
 import Text from '../interfaces/interface.text'
@@ -1795,7 +1813,9 @@ export default {
 	ArrowDown,
 	X,
 	MoveVertical,
-	Quote
+	Quote,
+	Inspect,
+	ChevronRight
 },
 	setup() {
 		const isUserTyping: Ref<boolean> = ref(false)
@@ -1844,6 +1864,9 @@ export default {
 		const scrollContainer = ref()
 		const contextMenu = ref()
 		const showContextMenu: Ref<boolean> = ref(false)
+		const showEventsMenu: Ref<boolean> = ref(false)
+		const showPagesAvailable: Ref<boolean> = ref(false)
+		const showAddPage: Ref<boolean> = ref(false)
 		const contextMenuPosition: Ref<any> = ref({ x: 0, y: 0 })
 		const selectedTab: Ref<string> = ref('Elements')
 
@@ -1858,6 +1881,8 @@ export default {
 		const selectedAddStarPointer: Ref<boolean> = ref(false)
 
 		const quoteTransformerHeight: Ref<number> = ref(50)
+		const pagesBuilder: Ref<any[]> = ref(['Home'])
+		const inputPageTitle = ref()
 
 		const userInputText = reactive({
 			fontFamily: 'Arial',
@@ -1990,27 +2015,127 @@ export default {
 			text: ''
 		})
 
+		const userInputPageName = reactive({
+			name: ''
+		})
+
 		const originalHeight = window.innerHeight - 72 - 32
 
 		const configKonva = ref({
-			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32, //1024??? //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32,
 			height: window.innerHeight - 72 - 32,
 		})
-
-		// Show 1024px width in available container (this messes up the guidelines)
-		// const scale = computed(() => {
-		// 	return configKonva.value.height / 1024
-		// })
 
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
 			selectedPage.value = page
-		}
+			localStorage.setItem('selectedPage', selectedPage.value)
+			//1. Remove all shapes from the canvas
+			//Empty all lists:
+			textList.value = []
+			imageList.value = []
+			lineList.value = []
+			rectangleList.value = []
+			circleList.value = []
+			polygonList.value = []
+			arrowList.value = []
+			starList.value = []
+			quoteList.value = []
 
-		// window.addEventListener('resize', () => {
-		// 	configKonva.value.width = window.innerWidth * 0.75 - 56 - 2 * 32,
-		// 	configKonva.value.height = (window.innerHeight - 72 - 32) * 1.5
-		// })
+			//Reset all counters:
+			textListNumber.value = 0
+			imageListNumber.value = 0
+			lineListNumber.value = 0
+			rectangleListNumber.value = 0
+			circleListNumber.value = 0
+			polygonListNumber.value = 0
+			arrowListNumber.value = 0
+			starListNumber.value = 0
+			quoteListNumber.value = 0
+
+			//2. Add all shapes from the selected page to the canvas
+			//Get the shapes from the local storage:
+			const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
+            if (stageHeight) {
+                configKonva.value.height = parseInt(stageHeight)
+            } else {
+				configKonva.value.height = originalHeight
+			}
+
+			const shapes = localStorage.getItem(selectedPage.value) || '[]'
+			if (shapes) {
+				const shapesArray = JSON.parse(shapes)
+				shapesArray.forEach((shape: any) => {
+					if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
+						const image = new window.Image()
+						image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+						image.onload = () => {
+							shape.image.image = image
+							const numberList = shape.group.name.split('-')[1]
+							if (parseInt(numberList) > quoteListNumber.value) {
+								quoteListNumber.value = parseInt(numberList)
+							}
+							quoteList.value.push(shape)
+						}
+						return
+					}
+					if (shape.name.split('-')[0] == 'Text') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > textListNumber.value) {
+							textListNumber.value = parseInt(numberList)
+						}
+						textList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Image') {
+						const img = new window.Image()
+						img.src = shape.dataURLString
+						img.onload = () => {
+							shape.image = img
+							const numberList = shape.name.split('-')[1]
+							if (parseInt(numberList) > imageListNumber.value) {
+								imageListNumber.value = parseInt(numberList)
+							}
+							imageList.value.push(shape)
+						}
+					} else if (shape.name.split('-')[0] == 'Line') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > lineListNumber.value) {
+							lineListNumber.value = parseInt(numberList)
+						}
+						lineList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Arrow') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > arrowListNumber.value) {
+							arrowListNumber.value = parseInt(numberList)
+						}
+						arrowList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Star') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > starListNumber.value) {
+							starListNumber.value = parseInt(numberList)
+						}
+						starList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Circle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > circleListNumber.value) {
+							circleListNumber.value = parseInt(numberList)
+						}
+						circleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Rectangle') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > rectangleListNumber.value) {
+							rectangleListNumber.value = parseInt(numberList)
+						}
+						rectangleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Polygon') {
+						const numberList = shape.name.split('-')[1]
+						if (parseInt(numberList) > polygonListNumber.value) {
+							polygonListNumber.value = parseInt(numberList)
+						}
+						polygonList.value.push(shape)
+					}
+				})
+			}
+		}
 
 		const toggleIsPageSelectorOpen = () => {
 			isPageSelectorOpen.value = !isPageSelectorOpen.value
@@ -2848,6 +2973,8 @@ export default {
 
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			showContextMenu.value = false
+			showEventsMenu.value = false
+			showPagesAvailable.value = false
 
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
@@ -4048,14 +4175,21 @@ export default {
 			quoteList.value.forEach((quote: any) => {
 				allShapes.push(quote)
 			})
-			localStorage.setItem('shapes', JSON.stringify(allShapes))
-			localStorage.setItem('heightStage', configKonva.value.height.toString())
+			localStorage.setItem(selectedPage.value, JSON.stringify(allShapes))
+			localStorage.setItem('heightStage-' + selectedPage.value, configKonva.value.height.toString())
 			localStorage.setItem('widthStage', configKonva.value.width.toString())
+			localStorage.setItem('pages', JSON.stringify(pagesBuilder.value))
 		}
 
 		//Load the shapes from local storage on mounted:
 		onMounted(() => {
-			const shapes = localStorage.getItem('shapes') || '[]'
+			if (localStorage.getItem('pages') == null || localStorage.getItem('pages') === undefined) {
+				pagesBuilder.value = ['Home']
+			} else (
+				pagesBuilder.value = JSON.parse(localStorage.getItem('pages') || '')
+			)
+			selectedPage.value = localStorage.getItem('selectedPage') || 'Home'
+			const shapes = localStorage.getItem(selectedPage.value) || '[]'
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
@@ -4128,7 +4262,7 @@ export default {
 					}
 				})
 			}
-			const stageHeight = localStorage.getItem('heightStage') || ''
+			const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
             if (stageHeight) {
                 configKonva.value.height = parseInt(stageHeight)
             }
@@ -4141,7 +4275,6 @@ export default {
 		}
 
 		const changeToTemplate = (template: string) => {
-			console.log('change to template')
 			//Template 1: 2335px high, 1024px wide
 			//Empty all lists:
 			textList.value = []
@@ -4246,7 +4379,6 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
-		
 		onMounted(() => {
 			//Show ContextMenu on right click
 			stage.value.getNode().on('contextmenu', (e: any) => {
@@ -4281,11 +4413,15 @@ export default {
 				}
 			}
 
-			
 			// show menu
 			showContextMenu.value = true
 			})
 		})
+
+		const createNewPage = () => {
+			pagesBuilder.value.push(userInputPageName.name)
+			userInputPageName.name = ''
+		}
 
 		return {
 			configKonva,
@@ -4392,7 +4528,14 @@ export default {
 			changeToTemplate,
 			contextMenu,
 			showContextMenu,
-			contextMenuPosition
+			contextMenuPosition,
+			showEventsMenu,
+			showPagesAvailable,
+			pagesBuilder,
+			showAddPage,
+			inputPageTitle,
+			createNewPage,
+			userInputPageName
 		}
 	},
 }
