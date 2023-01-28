@@ -168,7 +168,7 @@
 				</div>
 			</aside>
 			<div class="w-8 bg-slate-100"></div>
-			<div class="h-[calc(100vh-72px-32px)] w-[1024px] overflow-y-scroll mx-auto" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
+			<div class="h-[calc(100vh-72px-32px)] w-[1024px] overflow-y-scroll mx-auto relative" ref="scrollContainer" :class="selectedAddTextPointer || selectedAddLinePointer || selectedAddRectanglePointer || selectedAddCirclePointer || selectedAddPolygonPointer || selectedAddArrowPointer || selectedAddStarPointer ? 'cursor-cell' : ''">
 					<v-stage
 						ref="stage"
 						:config="configKonva"
@@ -367,6 +367,11 @@
 							></v-transformer>
 						</v-layer>
 					</v-stage>
+					<div v-if="showContextMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 5 + 'px'}]" ref="contextMenu">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm" @click="[moveUp(), showContextMenu = false]">Move up</button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveDown(), showContextMenu = false]">Move down</button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-b-sm" @click="[deleteShape(), showContextMenu = false]">Delete</button>
+					</div>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
 			<aside class="border-l-0.5 -mt-8 w-3/12 border-neutral-300 bg-white p-4 h-[calc(100vh-72px)] overflow-y-scroll">
@@ -1837,6 +1842,9 @@ export default {
 		const quoteTransformer = ref()
 
 		const scrollContainer = ref()
+		const contextMenu = ref()
+		const showContextMenu: Ref<boolean> = ref(false)
+		const contextMenuPosition: Ref<any> = ref({ x: 0, y: 0 })
 		const selectedTab: Ref<string> = ref('Elements')
 
 		const selectedPointer: Ref<boolean> = ref(true)
@@ -2839,6 +2847,8 @@ export default {
 		}
 
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+			showContextMenu.value = false
+
 			// clicked on stage - clear selection
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
@@ -4236,6 +4246,47 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		
+		onMounted(() => {
+			//Show ContextMenu on right click
+			stage.value.getNode().on('contextmenu', (e: any) => {
+			//Prevent default behavior
+			e.evt.preventDefault()
+			if (e.target === stage.value.getNode()) {
+				// clicked on empty area: do nothing
+				return
+			}
+			// clicked on transformer: do nothing		
+			if (e.target.getParent().className === 'Transformer') {
+				return
+			}
+			// clicked on background: do nothing
+			if (e.target.name() == 'Background') {
+				return
+			}
+
+			//set contextMenu position
+			const pos = stage.value.getNode().getPointerPosition()
+
+			//if pos is on the right side of the screen:
+			if (pos.x > configKonva.value.width - 200) {
+				contextMenuPosition.value = {
+				x: pos.x - 130,
+				y: pos.y,
+				}
+			} else {
+				contextMenuPosition.value = {
+				x: pos.x + 5,
+				y: pos.y + 5,
+				}
+			}
+
+			
+			// show menu
+			showContextMenu.value = true
+			})
+		})
+
 		return {
 			configKonva,
 			setPage,
@@ -4339,6 +4390,9 @@ export default {
 			updateTextQuote,
 			quoteTransformerHeight,
 			changeToTemplate,
+			contextMenu,
+			showContextMenu,
+			contextMenuPosition
 		}
 	},
 }
