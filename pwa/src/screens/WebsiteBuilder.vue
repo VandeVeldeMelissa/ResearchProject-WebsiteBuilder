@@ -373,13 +373,12 @@
 						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveDown(), showContextMenu = false]" @mouseover="[showEventsMenu = false, showPagesAvailable = false]">Move down</button>
 						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-b-sm" @click="[deleteShape(), showContextMenu = false]" @mouseover="[showEventsMenu = false, showPagesAvailable = false]">Delete</button>
 					</div>
-					<div v-if="showEventsMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148) + 'px'}]" ref="contextMenu">
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = true">Click <ChevronRight/></button>
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = false">Hover</button>
+					<div v-if="showEventsMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148) + 'px'}]">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = true">On click <ChevronRight/></button>
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = false">On hover</button>
 					</div>
-					<div v-if="showPagesAvailable" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148 + 102) + 'px'}]" ref="contextMenu">
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]">Go to page 1</button>
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]">Go to page 2</button>
+					<div v-if="showPagesAvailable" class="absolute flex flex-col drop-shadow-md bg-white rounded-sm" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148 + 126) + 'px'}]">
+						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false, showPagesAvailable = false, addClickEventListenerToElement(page)]" v-for="page in pagesBuilder">Go to {{ page }}</button>
 					</div>
 			</div>
 			<div class="w-8 bg-slate-100"></div>
@@ -2760,7 +2759,9 @@ export default {
 						shadowOpacity: 0.5,
 					},
 			})
-			saveShapesToLocalStorage();
+			setTimeout(() => {
+				saveShapesToLocalStorage();
+			}, 100)
 			}
 		}
 
@@ -3762,7 +3763,9 @@ export default {
 								shadowOpacity: 0.5,
 								dataURLString: dataURL as string,
 							})
-							saveShapesToLocalStorage();
+							setTimeout(() => {
+								saveShapesToLocalStorage();
+							}, 100)
 						}
 					}
 				}
@@ -4376,7 +4379,9 @@ export default {
 					}
 				})
 			}
-			saveShapesToLocalStorage()
+			setTimeout(() => {
+				saveShapesToLocalStorage()
+			}, 1000)
 		}
 
 		onMounted(() => {
@@ -4421,6 +4426,18 @@ export default {
 		const createNewPage = () => {
 			pagesBuilder.value.push(userInputPageName.name)
 			userInputPageName.name = ''
+		}
+
+		const addClickEventListenerToElement = (toPage: string) => {
+			//add eventlistener to selectedShapeName:
+			const shape = layer.value.getNode().findOne(`.${selectedShapeName.value}`)
+			//if shape is not null:
+			if (shape) {
+				//add click event listener to shape:
+				shape.on('click', () => {
+					console.log('clicked on shape')
+				})
+			}
 		}
 
 		return {
@@ -4535,7 +4552,8 @@ export default {
 			showAddPage,
 			inputPageTitle,
 			createNewPage,
-			userInputPageName
+			userInputPageName,
+			addClickEventListenerToElement
 		}
 	},
 }

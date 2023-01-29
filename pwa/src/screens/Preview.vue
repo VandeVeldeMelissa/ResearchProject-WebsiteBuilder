@@ -110,6 +110,7 @@ export default {
 		const arrowList: Ref<any[]> = ref([])
 		const starList: Ref<any[]> = ref([])
         const quoteList: Ref<any[]> = ref([])
+        const selectedPage: Ref<string> = ref('')
         
         const configStagePreview = ref({
             width: window.innerWidth,
@@ -130,7 +131,8 @@ export default {
 
         //Load the shapes from local storage on mounted:
 		onMounted(() => {
-			const shapes = localStorage.getItem('shapes') || '[]'
+            selectedPage.value = localStorage.getItem('selectedPage') || 'Home'
+			const shapes = localStorage.getItem(selectedPage.value) || '[]'
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
 				shapesArray.forEach((shape: any) => {
@@ -184,7 +186,7 @@ export default {
 					}
 				})
 			}
-            const stageHeight = localStorage.getItem('heightStage') || ''
+            const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
             if (stageHeight) {
                 configStagePreview.value.height = parseInt(stageHeight)
             }
