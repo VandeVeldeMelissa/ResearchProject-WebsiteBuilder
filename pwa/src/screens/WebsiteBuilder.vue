@@ -375,7 +375,7 @@
 					</div>
 					<div v-if="showEventsMenu" class="absolute flex flex-col drop-shadow-md" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148) + 'px'}]">
 						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = true">On click <ChevronRight/></button>
-						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = false">On hover</button>
+						<!-- <button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors" @click="[moveUp(), showContextMenu = false, showEventsMenu = false]" @mouseover="showPagesAvailable = false">On hover</button> -->
 					</div>
 					<div v-if="showPagesAvailable" class="absolute flex flex-col drop-shadow-md bg-white rounded-sm" :style="[{top: (contextMenuPosition.y) + 'px', left: (contextMenuPosition.x + 148 + 126) + 'px'}]">
 						<button class="px-4 py-2 bg-white hover:bg-slate-200 transition-colors rounded-t-sm flex items-center gap-2" @click="[showContextMenu = false, showEventsMenu = false, showPagesAvailable = false, addClickEventListenerToElement(page)]" v-for="page in pagesBuilder">Go to {{ page }}</button>
@@ -441,13 +441,13 @@
 						<div class="flex gap-x-2"><Plus />Add quote</div>
 						<Quote />
 					</button>
-					<button
+					<!-- <button
 						class="flex w-full justify-between items-center rounded bg-slate-100 p-4 transition-colors hover:bg-blue-50 hover:text-blue-600 mt-4"
 						@click="addQuoteBlockToCanvas"
 					>
 						<div class="flex gap-x-2"><Plus />Add button</div>
 						<Inspect />
-					</button>
+					</button> -->
 				</div>
 				<div v-if="selectedShapeName == '' && showShapesButton == false && selectedTab == 'Templates'" class="grid grid-cols-2 gap-1">
 					<button
@@ -1729,7 +1729,7 @@
 			<label class="font-medium">What do you want this selected text to say?</label>
 			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded" @click="showTextEditor = false"><X /></button>
 		</div>
-		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
+		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600 resize-none" placeholder="Type here your text" v-model="userInputText.text" @input="updateStylingText"></textarea>
 		</div>
 		<div class="absolute bottom-0 bg-blue-100 w-200 mb-6 p-2 rounded-md drop-shadow-md left-[calc(75%/2-400px+27px)] transition-transform ease-[cubic-bezier(0.25, 1, 0.5, 1)]"
 		:class="showQuoteEditor ? 'translate-y-0' : 'translate-y-34'">
@@ -1737,7 +1737,7 @@
 			<label class="font-medium">What do you want this quote to say?</label>
 			<button class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded" @click="showQuoteEditor = false"><X /></button>
 		</div>
-		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600" placeholder="Type here your text" v-model="userInputQuote.text" @input="updateTextQuote"></textarea>
+		<textarea class="block border-1 border-blue-400 rounded w-full p-2 hover:border-blue-600 transition-colors outline-none focus:border-blue-600 focus-visible:ring-2 caret-blue-600 resize-none" placeholder="Type here your text" v-model="userInputQuote.text" @input="updateTextQuote"></textarea>
 		</div>
 	</div>
 </template>
@@ -1817,9 +1817,7 @@ export default {
 	ChevronRight
 },
 	setup() {
-		const isUserTyping: Ref<boolean> = ref(false)
-		const isPageSelectorOpen: Ref<boolean> = ref(false)
-		const selectedPage: Ref<string> = ref('Home')
+		//List with shapes
 		const textList: Ref<any[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
@@ -1829,6 +1827,8 @@ export default {
 		const arrowList: Ref<any[]> = ref([])
 		const starList: Ref<any[]> = ref([])
 		const quoteList: Ref<any[]> = ref([])
+
+		//Counters for shapes
 		let textListNumber: Ref<number> = ref(0)
 		let imageListNumber: Ref<number> = ref(0)
 		let lineListNumber: Ref<number> = ref(0)
@@ -1838,14 +1838,8 @@ export default {
 		let arrowListNumber: Ref<number> = ref(0)
 		let starListNumber: Ref<number> = ref(0)
 		let quoteListNumber: Ref<number> = ref(0)
-		const selectedShapeName: Ref<string> = ref('')
-		const showBorderDetails: Ref<boolean> = ref(false)
-		const showShadowDetails: Ref<boolean> = ref(false)
-		const showTextEditor: Ref<boolean> = ref(false)
-		const showQuoteEditor: Ref<boolean> = ref(false)
-		const alignText: Ref<string> = ref('left')
-		const showShapesButton: Ref<boolean> = ref(false)
 
+		//References to DOM elements
 		const layer = ref()
 		const stage = ref()
 		const textTransformer = ref()
@@ -1859,16 +1853,11 @@ export default {
 		const rectangleTransformer = ref()
 		const starTransformer = ref()
 		const quoteTransformer = ref()
-
 		const scrollContainer = ref()
 		const contextMenu = ref()
-		const showContextMenu: Ref<boolean> = ref(false)
-		const showEventsMenu: Ref<boolean> = ref(false)
-		const showPagesAvailable: Ref<boolean> = ref(false)
-		const showAddPage: Ref<boolean> = ref(false)
-		const contextMenuPosition: Ref<any> = ref({ x: 0, y: 0 })
-		const selectedTab: Ref<string> = ref('Elements')
+		const inputPageTitle = ref()
 
+		//State of selected sidebar buttons
 		const selectedPointer: Ref<boolean> = ref(true)
 		const selectedAddTextPointer: Ref<boolean> = ref(false)
 		const selectedAddImagePointer: Ref<boolean> = ref(false)
@@ -1879,10 +1868,43 @@ export default {
 		const selectedAddArrowPointer: Ref<boolean> = ref(false)
 		const selectedAddStarPointer: Ref<boolean> = ref(false)
 
-		const quoteTransformerHeight: Ref<number> = ref(50)
-		const pagesBuilder: Ref<any[]> = ref(['Home'])
-		const inputPageTitle = ref()
+		//Styling text & shapes
+		const showBorderDetails: Ref<boolean> = ref(false)
+		const showShadowDetails: Ref<boolean> = ref(false)
+		const showTextEditor: Ref<boolean> = ref(false)
+		const showQuoteEditor: Ref<boolean> = ref(false)
+		const alignText: Ref<string> = ref('left')
 
+		//Context menu
+		const contextMenuPosition: Ref<any> = ref({ x: 0, y: 0 })
+		const showContextMenu: Ref<boolean> = ref(false)
+		const showEventsMenu: Ref<boolean> = ref(false)
+		const showPagesAvailable: Ref<boolean> = ref(false)
+
+		//Page selector
+		const isPageSelectorOpen: Ref<boolean> = ref(false)
+		const pagesBuilder: Ref<any[]> = ref(['Home'])
+		const selectedPage: Ref<string> = ref('Home')
+		const showAddPage: Ref<boolean> = ref(false)
+
+		//Toolbar
+		const selectedTab: Ref<string> = ref('Elements')
+		const showShapesButton: Ref<boolean> = ref(false)
+
+		//Other
+		const isUserTyping: Ref<boolean> = ref(false)
+		const selectedShapeName: Ref<string> = ref('')
+		const quoteTransformerHeight: Ref<number> = ref(50)
+
+		//Configuration for the Konva stage
+		const originalHeight = window.innerHeight - 72 - 32
+
+		const configKonva = ref({
+			width: 1024, //width of a small computer screen (1024px)
+			height: window.innerHeight - 72 - 32,
+		})
+
+		//User inputs for the styling of text & shapes
 		const userInputText = reactive({
 			fontFamily: 'Arial',
 			fontSize: 21,
@@ -2018,13 +2040,7 @@ export default {
 			name: ''
 		})
 
-		const originalHeight = window.innerHeight - 72 - 32
-
-		const configKonva = ref({
-			width: 1024, //window.innerWidth * 0.75 - 56 - 2 * 32,
-			height: window.innerHeight - 72 - 32,
-		})
-
+		//Function to change the current page visible on the canvas
 		const setPage = (page: string) => {
 			isPageSelectorOpen.value = false
 			selectedPage.value = page
@@ -2053,7 +2069,7 @@ export default {
 			quoteListNumber.value = 0
 
 			//2. Add all shapes from the selected page to the canvas
-			//Get the shapes from the local storage:
+			//Get the shapes & height of the canvas from the local storage if this page already exists:
 			const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
             if (stageHeight) {
                 configKonva.value.height = parseInt(stageHeight)
@@ -2140,6 +2156,7 @@ export default {
 			isPageSelectorOpen.value = !isPageSelectorOpen.value
 		}
 
+		//Functions that add text & shape elements to the canvas
 		const addTextElementToCanvas = async () => {
 			textListNumber.value++
 			const textName = 'Text-' + textListNumber.value.toString()
@@ -2176,11 +2193,12 @@ export default {
 				name: textName,
 			})
 
-			//Make element selected
+			//Wait to until the element is added
 			await Promise.resolve();
+			//Select the element
 			updateTextTransformer();
 
-			//Save shape:
+			//Save the text to the local storage
 			saveShapesToLocalStorage()
 		}
 
@@ -2221,8 +2239,9 @@ export default {
 					name: textName,
 				})
 
-				//Save shape:
+				//Save text to local storage
 				saveShapesToLocalStorage()
+
 				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddTextPointer.value = false
@@ -2234,7 +2253,6 @@ export default {
 			lineListNumber.value++
 			const lineName = 'Line-' + lineListNumber.value.toString()
 			selectedShapeName.value = lineName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			lineList.value.push({
 				id: textListNumber.toString(),
@@ -2263,11 +2281,9 @@ export default {
 		const addLineElementWithPointer = () => {
 			lineListNumber.value++
 			const lineName = 'Line-' + lineListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddLinePointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				lineList.value.push({
 					id: textListNumber.toString(),
@@ -2289,7 +2305,6 @@ export default {
 					shadowOpacity: 0.5,
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddLinePointer.value = false
 				selectedPointer.value = true
@@ -2300,8 +2315,8 @@ export default {
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
 			selectedShapeName.value = rectangleName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
+
 			rectangleList.value.push({
 				id: rectangleListNumber.toString(),
 				x: 100,
@@ -2332,11 +2347,9 @@ export default {
 		const addRectangleElementWithPointer = () => {
 			rectangleListNumber.value++
 			const rectangleName = 'Rectangle-' + rectangleListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddRectanglePointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				rectangleList.value.push({
 					id: rectangleListNumber.toString(),
@@ -2361,7 +2374,6 @@ export default {
 					cornerRadius: 0,
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddRectanglePointer.value = false
 				selectedPointer.value = true
@@ -2372,8 +2384,8 @@ export default {
 			circleListNumber.value++
 			const circleName = 'Circle-' + circleListNumber.value.toString()
 			selectedShapeName.value = circleName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
+
 			circleList.value.push({
 				id: circleListNumber.toString(),
 				x: 100,
@@ -2402,11 +2414,9 @@ export default {
 		const addCircleElementWithPointer = () => {
 			circleListNumber.value++
 			const circleName = 'Circle-' + circleListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddCirclePointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				circleList.value.push({
 					id: circleListNumber.toString(),
@@ -2429,7 +2439,6 @@ export default {
 					shadowOpacity: 0.5,
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddCirclePointer.value = false
 				selectedPointer.value = true
@@ -2440,8 +2449,8 @@ export default {
 			polygonListNumber.value++
 			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
 			selectedShapeName.value = polygonName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
+
 			polygonList.value.push({
 				id: polygonListNumber.toString(),
 				x: 100,
@@ -2471,11 +2480,9 @@ export default {
 		const addPolygonElementWithPointer = () => {
 			polygonListNumber.value++
 			const polygonName = 'Polygon-' + polygonListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddPolygonPointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				polygonList.value.push({
 					id: polygonListNumber.toString(),
@@ -2499,7 +2506,6 @@ export default {
 					shadowOpacity: 0.5,
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddPolygonPointer.value = false
 				selectedPointer.value = true
@@ -2510,8 +2516,8 @@ export default {
 			arrowListNumber.value++
 			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
 			selectedShapeName.value = arrowName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
+
 			arrowList.value.push({
 				id: arrowListNumber.toString(),
 				x: 100,
@@ -2542,11 +2548,9 @@ export default {
 		const addArrowElementWithPointer = () => {
 			arrowListNumber.value++
 			const arrowName = 'Arrow-' + arrowListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddArrowPointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				arrowList.value.push({
 					id: arrowListNumber.toString(),
@@ -2571,7 +2575,6 @@ export default {
 					fill: '#000000'
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddArrowPointer.value = false
 				selectedPointer.value = true
@@ -2582,7 +2585,6 @@ export default {
 			starListNumber.value++
 			const starName = 'Star-' + starListNumber.value.toString()
 			selectedShapeName.value = starName
-			//Get the scroll position of the canvas:
 			const scrollTop = scrollContainer.value.scrollTop
 			starList.value.push({
 				id: starListNumber.toString(),
@@ -2614,11 +2616,9 @@ export default {
 		const addStarElementWithPointer = () => {
 			starListNumber.value++
 			const starName = 'Star-' + starListNumber.value.toString()
-
 			selectedPointer.value = false
 			selectedAddStarPointer.value = true
 
-			//Listen to click event on stage: 
 			stage.value.getNode().on('click', (e: Konva.KonvaEventObject<MouseEvent>) => {
 				starList.value.push({
 					id: starListNumber.toString(),
@@ -2643,7 +2643,6 @@ export default {
 					shadowOpacity: 0.5,
 				})
 				saveShapesToLocalStorage()
-				//Remove event listener:
 				stage.value.getNode().off('click')
 				selectedAddStarPointer.value = false
 				selectedPointer.value = true
@@ -2654,10 +2653,10 @@ export default {
 			quoteListNumber.value++
 			const quoteName = 'Quote-' + quoteListNumber.value.toString()
 			const scrollTop = scrollContainer.value.scrollTop
-
 			const image = new window.Image()
 			image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
 
+			//Wait until the image is loaded before adding it to the canvas
 			image.onload = () => {
 				quoteList.value.push({
 					group: {
@@ -2765,6 +2764,56 @@ export default {
 			}
 		}
 
+		//Import image
+		const selectImage = () => {
+			fileInput.value.click()
+		}
+
+		//Add an image to the canvas
+		const uploadImage = (e: Event) => {
+			const target = e.target as HTMLInputElement
+			const file = target.files?.[0]
+			const scrollTop = scrollContainer.value.scrollTop
+			if (file) {
+				const reader = new FileReader()
+				reader.onload = (e) => {
+					const dataURL = e.target?.result
+					if (dataURL) {
+						const image = new window.Image()
+						image.src = dataURL as string
+						imageListNumber.value++
+						const fileName = 'Image-' + imageListNumber.value
+						//Wait until the image is loaded before adding it to the canvas
+						image.onload = () => {
+							imageList.value.push({
+								image: image,
+								name: fileName,
+								x: 100,
+								y: scrollTop + 100,
+								width: image.width / 2,
+								height: image.height / 2,
+								draggable: true,
+								opacity: 1,
+								stroke: '#000000',
+								strokeWidth: 0,
+								shadowOffsetX: 0,
+								shadowOffsetY: 0,
+								shadowBlur: 0,
+								shadowColor: '#000000',
+								shadowOpacity: 0.5,
+								dataURLString: dataURL as string,
+							})
+							setTimeout(() => {
+								saveShapesToLocalStorage();
+							}, 100)
+						}
+					}
+				}
+				reader.readAsDataURL(file)
+			}
+		}
+
+		//Update the transformers of the shapes
 		const updateTextTransformer = () => {
 			const textTransformerNode = textTransformer.value?.getNode()
 			if (selectedShapeName.value !== '' && selectedShapeName.value.split('-')[0] === 'Text') {
@@ -2972,12 +3021,13 @@ export default {
 			}
 		}
 
+		//Handle a click on the canvas
 		const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
 			showContextMenu.value = false
 			showEventsMenu.value = false
 			showPagesAvailable.value = false
 
-			// clicked on stage - clear selection
+			//Clicked on stage => clear the selection
 			if (e.target === e.target.getStage()) {
 				selectedShapeName.value = ''
 				showTextEditor.value = false
@@ -2994,7 +3044,7 @@ export default {
 				return
 			}
 
-			// clicked on transformer - do nothing
+			//Clicked on transformer => do nothing
 			const clickedOnTransformer = e.target.getParent().className === 'Transformer'
 			if (clickedOnTransformer) {
 				return
@@ -3002,7 +3052,7 @@ export default {
 
 			const name = e.target.name()
 
-			// find clicked shape by its name
+			//Find the clicked shape by its name
 			const text = textList.value.find((text) => {
 				return text.name === name
 			})
@@ -3053,8 +3103,9 @@ export default {
 			updateQuoteTransformer()
 		}
 
+		//Handle a transformation of a shape
 		const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
-			checkShapeLocation(e)
+			checkShapeLocation(e) //Check if the shape is at the bottom of the canvas, if so make the canvas bigger
 
 			const text = textList.value.find((r) => r.name === selectedShapeName.value)
 			if (text) {
@@ -3154,6 +3205,7 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		//Delete the selected shape
 		const deleteShape = () => {
 			const shape = selectedShapeName.value.split('-')[0]
 			switch (shape) {
@@ -3239,6 +3291,7 @@ export default {
 						return quote.image.name !== selectedShapeName.value
 					})
 					selectedShapeName.value = ''
+					showQuoteEditor.value = false
 					updateQuoteTransformer()
 					saveShapesToLocalStorage()
 					break
@@ -3247,13 +3300,16 @@ export default {
 			}
 		}
 
+		//Add event listeners to the window
 		onMounted(() => {
 			window.addEventListener('keydown', whickKeyIsBeingPressed)
 			window.addEventListener('mousedown', isCursorInsideInput)
 		})
 
+		//Check wich key is being pressed
 		const whickKeyIsBeingPressed = (e: KeyboardEvent) => {
 			//console.log(e.key)
+			//If the delete button is being pressed => delete selected shape
 			if (
 				e.key === 'Backspace' &&
 				selectedShapeName.value !== '' &&
@@ -3263,6 +3319,7 @@ export default {
 			}
 		}
 
+		//Check if the cursor is inside an input
 		const isCursorInsideInput = (e: MouseEvent) => {
 			const target = e.target as HTMLElement
 			if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
@@ -3274,6 +3331,7 @@ export default {
 			}
 		}
 
+		//Functions to update the styling of the text & shapes
 		const updateStylingText = () => {
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
@@ -3466,8 +3524,9 @@ export default {
 			saveShapesToLocalStorage()
 		}
 
+		//Updatte the user inputs when a shape is selected
 		watch(selectedShapeName, () => {
-			console.log('selectedShapeName: ' + selectedShapeName.value)
+			//console.log('selectedShapeName: ' + selectedShapeName.value)
 			const text = textList.value.find((text) => {
 				return text.name === selectedShapeName.value
 			})
@@ -3705,21 +3764,22 @@ export default {
 
 		})
 
-		//Update the height of the canvas if there is any shape at the bottom of the canvas
+		//Update the height of the canvas if there is any shape at the bottom of the canvas => make the canvas higher
 		const checkShapeLocation = (e: Konva.KonvaEventObject<DragEvent>) => {
-			const shapeY = e.target.y() + e.target.height() //bottom of the element
+			const shapeY = e.target.y() + e.target.height() //Bottom of the element
 			if (shapeY > (configKonva.value.height - 100)) {
 				//Update height of the canvas
 				configKonva.value.height = configKonva.value.height + 100
 			}
 
-			//check if there is any shape at the bottom of the canvas:
+			//Check how many shapes that are at the bottom of the canvas
 			const shapeList: any[] = []
 			stage.value.getNode().children[0].children.forEach((shape: Konva.Shape) => {
 				if ((shape.y() + shape.height()) > (configKonva.value.height - 200) && shape.name() !== 'guideline' && shape.className !== 'Transformer' && shape.name() !== 'Background') {
 					shapeList.push(shape)
 				}
 			})
+			//If there are no shapes at the bottom & it's higher than the original height => make the canvas smaller
 			if (shapeList.length === 0 && configKonva.value.height > originalHeight) {
 				//Update height of the canvas
 				configKonva.value.height = configKonva.value.height - 100
@@ -3727,52 +3787,8 @@ export default {
 			saveShapesToLocalStorage() //Save height to local storage
 		}
 
-		const selectImage = () => {
-			fileInput.value.click()
-		}
 
-		const uploadImage = (e: Event) => {
-			const target = e.target as HTMLInputElement
-			const file = target.files?.[0]
-			const scrollTop = scrollContainer.value.scrollTop
-			if (file) {
-				const reader = new FileReader()
-				reader.onload = (e) => {
-					const dataURL = e.target?.result
-					if (dataURL) {
-						const image = new window.Image()
-						image.src = dataURL as string
-						imageListNumber.value++
-						const fileName = 'Image-' + imageListNumber.value
-						image.onload = () => {
-							imageList.value.push({
-								image: image,
-								name: fileName,
-								x: 100,
-								y: scrollTop + 100,
-								width: image.width / 2,
-								height: image.height / 2,
-								draggable: true,
-								opacity: 1,
-								stroke: '#000000',
-								strokeWidth: 0,
-								shadowOffsetX: 0,
-								shadowOffsetY: 0,
-								shadowBlur: 0,
-								shadowColor: '#000000',
-								shadowOpacity: 0.5,
-								dataURLString: dataURL as string,
-							})
-							setTimeout(() => {
-								saveShapesToLocalStorage();
-							}, 100)
-						}
-					}
-				}
-				reader.readAsDataURL(file)
-			}
-		}
-
+		//Handle live transformations of shapes
 		const handleTransformLine = (e: Konva.KonvaEventObject<DragEvent>) => {
 			const line = e.target as Konva.Line
 			const lineName = line.name()
@@ -3780,6 +3796,7 @@ export default {
 				return line.name === lineName
 			})
 			if (lineObject) {
+				//Update the line length
 				lineObject.points[2] = Math.round(line.points()[2] * line.scaleX())
 				userInputLine.lineLength = Math.round(lineObject.points[2])
 			}
@@ -3792,6 +3809,7 @@ export default {
 				return image.name === imageName
 			})
 			if (imageObject) {
+				//Update the image width & height
 				imageObject.width = Math.round(image.width() * image.scaleX())
 				imageObject.height = Math.round(image.height() * image.scaleY())
 				userInputImage.imageWidth = Math.round(imageObject.width)
@@ -3806,6 +3824,7 @@ export default {
 				return rectangle.name === rectangleName
 			})
 			if (rectangleObject) {
+				//Update the rectangle width & height
 				rectangleObject.width = Math.round(rectangle.width() * rectangle.scaleX())
 				rectangleObject.height = Math.round(rectangle.height() * rectangle.scaleY())
 				userInputRectangle.rectangleWidth = Math.round(rectangleObject.width)
@@ -3820,6 +3839,7 @@ export default {
 				return circle.name === circleName
 			})
 			if (circleObject) {
+				//Update the circle radius
 				circleObject.radius = Math.round(circle.radius() * circle.scaleX())
 				userInputCircle.circleRadius = Math.round(circleObject.radius)
 			}
@@ -3832,6 +3852,7 @@ export default {
 				return polygon.name === polygonName
 			})
 			if (polygonObject) {
+				//Update the polygon radius & sides
 				polygonObject.radius = Math.round(polygon.radius() * polygon.scaleX())
 				userInputPolygon.polygonRadius = Math.round(polygonObject.radius)
 				userInputPolygon.polygonSides = polygonObject.sides
@@ -3845,11 +3866,13 @@ export default {
 				return arrow.name === arrowName
 			})
 			if (arrowObject) {
+				//Update the arrow length
 				arrowObject.points[2] = Math.round(arrow.points()[2] * arrow.scaleX())
 				userInputArrow.arrowLength = Math.round(arrowObject.points[2])
 			}
 		}
 
+		//Update the transformers when the length & height is changed with the styling inputs
 		const handleLineLengthChange = () => {
 			const lineTransformerNode = lineTransformer.value?.getNode()
 			lineTransformerNode?.forceUpdate()
@@ -3871,14 +3894,14 @@ export default {
 		}
 
 
-		// ******* Snap with guidelines functions *******
+		//Snap with guidelines functions
 		//Snap shape positions
 		const getGuidelines = (skipShape: any) => {
 			//Stage borders & center of stage
 			var vertical = [0, stage.value.getNode().width() / 2, stage.value.getNode().width()]
 			var horizontal = [0, stage.value.getNode().height() / 2, stage.value.getNode().height()]
 
-			//Find all objects on stage and skip the current object and transformers
+			//Find all objects on stage and skip the current object, transformers & guidelines
 			stage.value.getNode().children[0].children.forEach((guideItem: any) => {
 				if (guideItem === skipShape || guideItem.className === 'Transformer' || guideItem.name() === 'Background') {
 					return
@@ -4042,6 +4065,7 @@ export default {
 			})
 		}
 
+		//Make the guidelines visible when necessary
 		const showGuidelines = (e: Konva.KonvaEventObject<DragEvent>) => {
 			//Select the shape and not the transformer:
 			if (e.target === rectangleTransformer.value.getNode() || e.target === circleTransformer.value.getNode() || e.target === polygonTransformer.value.getNode() || e.target === arrowTransformer.value.getNode() || e.target === starTransformer.value.getNode() || e.target === lineTransformer.value.getNode() || e.target === imageTransformer.value.getNode() || e.target === textTransformer.value.getNode()) {
@@ -4060,6 +4084,7 @@ export default {
 			//Find the closest snap point
 			var guides = getGuides(lineGuideStops, itemBounds)
 
+			//If there are no snapping points, return
 			if (!guides.length) {
 				return
 			}
@@ -4115,6 +4140,7 @@ export default {
 			e.target.absolutePosition(absolutePosition)
 		}
 
+		//Clear all guidelines when the object is dropped
 		const handleDragEndLayer = (e: Konva.KonvaEventObject<DragEvent>) => {
 			//Clear all previous lines on screen
 			layer.value.getNode().find('.guideline').forEach((line: any) => {
@@ -4122,6 +4148,8 @@ export default {
 			})
 		}
 
+
+		//Move the object one layer up
 		const moveUp = () => {
 			if (selectedShapeName.value !== '') {
 				const shape = layer.value.getNode().findOne('.' + selectedShapeName.value)
@@ -4140,6 +4168,7 @@ export default {
 			}
 		}
 
+		//Move the object one layer down
 		const moveDown = () => {
 			if (selectedShapeName.value !== '') {
 				const shape = layer.value.getNode().findOne('.' + selectedShapeName.value)
@@ -4148,8 +4177,9 @@ export default {
 			}
 		}
 
+
+		//Save the current shapes to the local storage
 		const saveShapesToLocalStorage = () => {
-			console.log('saveShapesToLocalStorage')
 			const allShapes: any = []
 			textList.value.forEach((text: any) => {
 				allShapes.push(text)
@@ -4271,13 +4301,16 @@ export default {
             }
 		})
 
+		//Go to preview page:
 		const previewPageWebsite = () => {
 			router.push({
 				path: 'preview',
 			})
 		}
 
+		//Load a template:
 		const changeToTemplate = (template: string) => {
+			//This function currently only works for template 1 (update this function if you want to add more templates)
 			//Template 1: 2335px high, 1024px wide
 			//Empty all lists:
 			textList.value = []
@@ -4390,22 +4423,22 @@ export default {
 			//Prevent default behavior
 			e.evt.preventDefault()
 			if (e.target === stage.value.getNode()) {
-				// clicked on empty area: do nothing
+				//Clicked on empty area => do nothing
 				return
 			}
-			// clicked on transformer: do nothing		
+			//Clicked on a transformer => do nothing		
 			if (e.target.getParent().className === 'Transformer') {
 				return
 			}
-			// clicked on background: do nothing
+			//Clicked on the background => do nothing
 			if (e.target.name() == 'Background') {
 				return
 			}
 
-			//set contextMenu position
+			//Set the contextMenu position
 			const pos = stage.value.getNode().getPointerPosition()
 
-			//if pos is on the right side of the screen:
+			//If position is on the right side of the screen:
 			if (pos.x > configKonva.value.width - 200) {
 				contextMenuPosition.value = {
 				x: pos.x - 130,
@@ -4418,75 +4451,66 @@ export default {
 				}
 			}
 
-			// show menu
+			//Show context menu
 			showContextMenu.value = true
 			})
 		})
 
+		//Create a new page
 		const createNewPage = () => {
 			pagesBuilder.value.push(userInputPageName.name)
 			userInputPageName.name = ''
 		}
 
+		//Add a click event listener to a shape (add a onClickGoToPage property to the shape)
 		const addClickEventListenerToElement = (toPage: string) => {
-			console.log('addClickEventListenerToElement')
 			//add eventlistener to selectedShapeName:
 			const shape = layer.value.getNode().findOne(`.${selectedShapeName.value}`)
-			console.log(shape)
 			//if selectedShapeName.value.split('-')[0] == 'Text' -> add eventlistener to text:
 			const shapeType = selectedShapeName.value.split('-')[0]
-			console.log(shapeType)
+			
 			switch (shapeType){
 				case 'Text': {
-					//search in textList for the text with the same name as selectedShapeName.value
 					const text = textList.value.find((text) => text.name == selectedShapeName.value)
 					text.onClickGoToPage = toPage
 					break
 				}
 				case 'Image': {
-					//search in imageList for the image with the same name as selectedShapeName.value
 					const image = imageList.value.find((image) => image.name == selectedShapeName.value)
 					image.onClickGoToPage = toPage
 					break
 				}
 				case 'Line': {
-					//search in lineList for the line with the same name as selectedShapeName.value
 					const line = lineList.value.find((line) => line.name == selectedShapeName.value)
 					line.onClickGoToPage = toPage
 					break
 				}
 				case 'Rectangle': {
-					//search in rectangleList for the rectangle with the same name as selectedShapeName.value
 					const rectangle = rectangleList.value.find((rectangle) => rectangle.name == selectedShapeName.value)
 					rectangle.onClickGoToPage = toPage
 					break
 				}
 				case 'Circle': {
-					//search in circleList for the circle with the same name as selectedShapeName.value
 					const circle = circleList.value.find((circle) => circle.name == selectedShapeName.value)
 					circle.onClickGoToPage = toPage
 					break
 				}
 				case 'Polygon': {
-					//search in polygonList for the polygon with the same name as selectedShapeName.value
 					const polygon = polygonList.value.find((polygon) => polygon.name == selectedShapeName.value)
 					polygon.onClickGoToPage = toPage
 					break
 				}
 				case 'Arrow': {
-					//search in arrowList for the arrow with the same name as selectedShapeName.value
 					const arrow = arrowList.value.find((arrow) => arrow.name == selectedShapeName.value)
 					arrow.onClickGoToPage = toPage
 					break
 				}
 				case 'Star': {
-					//search in starList for the star with the same name as selectedShapeName.value
 					const star = starList.value.find((star) => star.name == selectedShapeName.value)
 					star.onClickGoToPage = toPage
 					break
 				}
 				case 'Quote': {
-					//search in quoteList for the quote with the same name as selectedShapeName.value
 					const quote = quoteList.value.find((quote) => quote.group.name == selectedShapeName.value)
 					quote.group.onClickGoToPage = toPage
 					break
@@ -4497,81 +4521,42 @@ export default {
 
 		return {
 			configKonva,
-			setPage,
 			isPageSelectorOpen,
 			selectedPage,
-			toggleIsPageSelectorOpen,
-			addTextElementToCanvas,
 			textList,
-			handleTransformEnd,
-			handleStageMouseDown,
 			textTransformer,
 			layer,
 			stage,
-			deleteShape,
 			selectedShapeName,
 			userInputText,
 			alignText,
 			showBorderDetails,
 			showShadowDetails,
-			updateStylingText,
 			showTextEditor,
-			uploadImage,
-			selectImage,
 			fileInput,
 			imageList,
 			imageTransformer,
 			userInputImage,
-			updateStylingImage, 
 			lineList,
-			addLineElementToCanvas,
 			lineTransformer,
 			userInputLine,
-			updateStylingLine,
-			updateLineTransformer,
-			handleTransformLine,
-			handleLineLengthChange,
-			handleTransformImage,
 			showShapesButton,
-			addRectangleToCanvas,
 			rectangleList,
 			rectangleTransformer,
 			userInputRectangle,
-			updateStylingRectangle,
-			handleTransformRectangle,
 			circleList,
-			addCircleToCanvas,
 			circleTransformer,
 			userInputCircle,
-			updateStylingCircle,
 			polygonTransformer,
 			polygonList,
-			addPolygonToCanvas,
-			updateStylingPolygon,
 			userInputPolygon,
-			handlePolygonSidesChange,
-			handleTransformPolygon,
-			handleTransformCircle,
 			arrowList,
-			addArrowToCanvas,
 			arrowTransformer,
-			updateStylingArrow,
-			handleTransformArrow,
-			handleArrowLengthChange,
 			userInputArrow,
 			starList,
-			addStarToCanvas,
 			starTransformer,
-			updateStylingStar,
-			handleStarPointsChange,
 			userInputStar,
-			showGuidelines,
-			handleDragEndLayer,
 			scrollContainer,
-			moveUp,
-			moveDown,
-			saveShapesToLocalStorage,
-			addTextElementWithPointer,
 			selectedAddTextPointer,
 			selectedAddImagePointer,
 			selectedAddLinePointer,
@@ -4582,22 +4567,6 @@ export default {
 			selectedAddStarPointer,
 			selectedPointer,
 			fileInputSideBar,
-			addLineElementWithPointer,
-			addRectangleElementWithPointer,
-			addCircleElementWithPointer,
-			addPolygonElementWithPointer,
-			addArrowElementWithPointer,
-			addStarElementWithPointer,
-			previewPageWebsite,
-			selectedTab,
-			addQuoteBlockToCanvas,
-			quoteList,
-			quoteTransformer,
-			showQuoteEditor,
-			userInputQuote,
-			updateTextQuote,
-			quoteTransformerHeight,
-			changeToTemplate,
 			contextMenu,
 			showContextMenu,
 			contextMenuPosition,
@@ -4606,8 +4575,63 @@ export default {
 			pagesBuilder,
 			showAddPage,
 			inputPageTitle,
-			createNewPage,
+			quoteList,
+			quoteTransformer,
+			showQuoteEditor,
+			userInputQuote,
+			selectedTab,
+			quoteTransformerHeight,
 			userInputPageName,
+			setPage,
+			toggleIsPageSelectorOpen,
+			addTextElementToCanvas,
+			handleTransformEnd,
+			handleStageMouseDown,
+			deleteShape,
+			updateStylingText,
+			uploadImage,
+			selectImage,
+			updateStylingImage, 
+			addLineElementToCanvas,
+			updateStylingLine,
+			updateLineTransformer,
+			handleTransformLine,
+			handleLineLengthChange,
+			handleTransformImage,
+			addRectangleToCanvas,
+			updateStylingRectangle,
+			handleTransformRectangle,
+			addCircleToCanvas,
+			updateStylingCircle,
+			addPolygonToCanvas,
+			updateStylingPolygon,
+			handlePolygonSidesChange,
+			handleTransformPolygon,
+			handleTransformCircle,
+			addArrowToCanvas,
+			updateStylingArrow,
+			handleTransformArrow,
+			handleArrowLengthChange,
+			addStarToCanvas,
+			updateStylingStar,
+			handleStarPointsChange,
+			showGuidelines,
+			handleDragEndLayer,
+			moveUp,
+			moveDown,
+			saveShapesToLocalStorage,
+			addTextElementWithPointer,
+			addLineElementWithPointer,
+			addRectangleElementWithPointer,
+			addCircleElementWithPointer,
+			addPolygonElementWithPointer,
+			addArrowElementWithPointer,
+			addStarElementWithPointer,
+			previewPageWebsite,
+			addQuoteBlockToCanvas,
+			updateTextQuote,
+			changeToTemplate,
+			createNewPage,
 			addClickEventListenerToElement
 		}
 	},

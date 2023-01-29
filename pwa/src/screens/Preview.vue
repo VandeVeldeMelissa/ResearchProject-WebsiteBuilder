@@ -134,15 +134,10 @@ export default {
 
         const addEventListenerToElement = (element: any) => {
             if (!element.onClickGoToPage) {
-                console.log('No onClickGoToPage')
                 return
             }
-            const shape = previewLayer.value.getNode().findOne(`.${element}`)
-            console.log(previewLayer.value.getNode().children)
-            console.log(previewLayer.value.getNode().children.length)
             previewLayer.value.getNode().children.forEach((child: any) => {
                 child.on('click', () => {
-                    console.log('click')
                     setPage(element.onClickGoToPage)
                 })
                 child.on('mouseenter', () => {
@@ -152,10 +147,6 @@ export default {
                     document.body.style.cursor = 'default'
                 })
             })
-        }
-
-        const addEventListenerToTextElements = () => {
-            //TODO
         }
 
         const setPage = (page: string) => {
@@ -303,7 +294,6 @@ export default {
                     await Promise.resolve()
                     addEventListenerToElement(shape)
 				})
-                addEventListenerToTextElements()
 			}
             const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
             if (stageHeight) {
@@ -313,9 +303,6 @@ export default {
             if (stageWidth) {
                 configStagePreview.value.width = parseInt(stageWidth)
             }
-            console.log('stageHeight', stageHeight)
-            console.log('stageWidth', stageWidth)
-           
 		})
 
 
