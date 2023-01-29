@@ -1820,7 +1820,7 @@ export default {
 		const isUserTyping: Ref<boolean> = ref(false)
 		const isPageSelectorOpen: Ref<boolean> = ref(false)
 		const selectedPage: Ref<string> = ref('Home')
-		const textList: Ref<Text[]> = ref([])
+		const textList: Ref<any[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
 		const rectangleList: Ref<any[]> = ref([])
@@ -4429,15 +4429,70 @@ export default {
 		}
 
 		const addClickEventListenerToElement = (toPage: string) => {
+			console.log('addClickEventListenerToElement')
 			//add eventlistener to selectedShapeName:
 			const shape = layer.value.getNode().findOne(`.${selectedShapeName.value}`)
-			//if shape is not null:
-			if (shape) {
-				//add click event listener to shape:
-				shape.on('click', () => {
-					console.log('clicked on shape')
-				})
+			console.log(shape)
+			//if selectedShapeName.value.split('-')[0] == 'Text' -> add eventlistener to text:
+			const shapeType = selectedShapeName.value.split('-')[0]
+			console.log(shapeType)
+			switch (shapeType){
+				case 'Text': {
+					//search in textList for the text with the same name as selectedShapeName.value
+					const text = textList.value.find((text) => text.name == selectedShapeName.value)
+					text.onClickGoToPage = toPage
+					break
+				}
+				case 'Image': {
+					//search in imageList for the image with the same name as selectedShapeName.value
+					const image = imageList.value.find((image) => image.name == selectedShapeName.value)
+					image.onClickGoToPage = toPage
+					break
+				}
+				case 'Line': {
+					//search in lineList for the line with the same name as selectedShapeName.value
+					const line = lineList.value.find((line) => line.name == selectedShapeName.value)
+					line.onClickGoToPage = toPage
+					break
+				}
+				case 'Rectangle': {
+					//search in rectangleList for the rectangle with the same name as selectedShapeName.value
+					const rectangle = rectangleList.value.find((rectangle) => rectangle.name == selectedShapeName.value)
+					rectangle.onClickGoToPage = toPage
+					break
+				}
+				case 'Circle': {
+					//search in circleList for the circle with the same name as selectedShapeName.value
+					const circle = circleList.value.find((circle) => circle.name == selectedShapeName.value)
+					circle.onClickGoToPage = toPage
+					break
+				}
+				case 'Polygon': {
+					//search in polygonList for the polygon with the same name as selectedShapeName.value
+					const polygon = polygonList.value.find((polygon) => polygon.name == selectedShapeName.value)
+					polygon.onClickGoToPage = toPage
+					break
+				}
+				case 'Arrow': {
+					//search in arrowList for the arrow with the same name as selectedShapeName.value
+					const arrow = arrowList.value.find((arrow) => arrow.name == selectedShapeName.value)
+					arrow.onClickGoToPage = toPage
+					break
+				}
+				case 'Star': {
+					//search in starList for the star with the same name as selectedShapeName.value
+					const star = starList.value.find((star) => star.name == selectedShapeName.value)
+					star.onClickGoToPage = toPage
+					break
+				}
+				case 'Quote': {
+					//search in quoteList for the quote with the same name as selectedShapeName.value
+					const quote = quoteList.value.find((quote) => quote.group.name == selectedShapeName.value)
+					quote.group.onClickGoToPage = toPage
+					break
+				}
 			}
+			saveShapesToLocalStorage()
 		}
 
 		return {

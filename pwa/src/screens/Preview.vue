@@ -1,6 +1,6 @@
 <template>
    <main class="h-screen overflow-y-scroll">
-       <div class="relative w-[1024px]">
+       <div class="relative w-[1024px] mx-auto">
             <v-stage
                 ref="previewStage"
                 :config="configStagePreview">
@@ -66,17 +66,19 @@
                             </v-group>
     					</v-layer>
             </v-stage>
-            <img v-for="image in imageList" :key="image.id" :src="image.image.src" class="absolute" 
-            :style="[{ 
-                top: image.y + 'px', 
-                left: image.x + 'px', 
-                width: image.width + 'px', 
-                height: image.height + 'px',
-                boxShadow: image.shadowOffsetX + 'px ' + image.shadowOffsetY + 'px ' + image.shadowBlur + 'px ' + hexToRgbA(image.shadowColor, image.shadowOpacity),
-            }]"/>
-            <pre v-for="text in textList" :key="text.id" 
+            <img v-for="image in imageList" :src="image.image.src" class="absolute" :class="[image.onClickGoToPage ? 'cursor-pointer' : '']"
+                :style="[{ 
+                    top: image.y + 'px', 
+                    left: image.x + 'px', 
+                    width: image.width + 'px', 
+                    height: image.height + 'px',
+                    boxShadow: image.shadowOffsetX + 'px ' + image.shadowOffsetY + 'px ' + image.shadowBlur + 'px ' + hexToRgbA(image.shadowColor, image.shadowOpacity),
+                }]"
+                @click="setPage(image.onClickGoToPage)"
+            />
+            <pre v-for="text in textList"
                 class="absolute" 
-                :class="[text.fontStyle == 'bold italic' ? '!font-bold !font-italic' : '', text.fontStyle == 'bold' ? '!font-bold' : '', text.fontStyle == 'italic' ? '!font-italic' : '']"
+                :class="[text.fontStyle == 'bold italic' ? '!font-bold !font-italic' : '', text.fontStyle == 'bold' ? '!font-bold' : '', text.fontStyle == 'italic' ? '!font-italic' : '', text.onClickGoToPage ? 'cursor-pointer' : '']"
                 :style="[{ 
                     color: text.fill, 
                     top: (text.y-1.5) + 'px', 
@@ -87,6 +89,7 @@
                     textDecoration: text.textDecoration,
                     textShadow: text.shadowOffsetX + 'px ' + text.shadowOffsetY + 'px ' + text.shadowBlur + 'px ' + hexToRgbA(text.shadowColor, text.shadowOpacity),
                 }]"
+                @click="setPage(text.onClickGoToPage)"
             >{{ text.text }}</pre>
        </div>
    </main>
@@ -94,13 +97,12 @@
 
 <script lang="ts">
 import Konva from 'konva';
-import { onMounted, Ref, ref } from 'vue';
-import Text from '../interfaces/interface.text';
+import { onMounted, Ref, ref, watch } from 'vue';
 
 export default {
     setup() {
-        const textListCanvas: Ref<Text[]> = ref([])
-        const textList: Ref<Text[]> = ref([])
+        const textListCanvas: Ref<any[]> = ref([])
+        const textList: Ref<any[]> = ref([])
         const imageListCanvas: Ref<any[]> = ref([])
 		const imageList: Ref<any[]> = ref([])
 		const lineList: Ref<any[]> = ref([])
@@ -111,6 +113,7 @@ export default {
 		const starList: Ref<any[]> = ref([])
         const quoteList: Ref<any[]> = ref([])
         const selectedPage: Ref<string> = ref('')
+        const previewLayer = ref()
         
         const configStagePreview = ref({
             width: window.innerWidth,
@@ -129,13 +132,59 @@ export default {
             }
         }
 
-        //Load the shapes from local storage on mounted:
-		onMounted(() => {
-            selectedPage.value = localStorage.getItem('selectedPage') || 'Home'
+        const addEventListenerToElement = (element: any) => {
+            if (!element.onClickGoToPage) {
+                console.log('No onClickGoToPage')
+                return
+            }
+            const shape = previewLayer.value.getNode().findOne(`.${element}`)
+            console.log(previewLayer.value.getNode().children)
+            console.log(previewLayer.value.getNode().children.length)
+            previewLayer.value.getNode().children.forEach((child: any) => {
+                child.on('click', () => {
+                    console.log('click')
+                    setPage(element.onClickGoToPage)
+                })
+                child.on('mouseenter', () => {
+                    document.body.style.cursor = 'pointer'
+                })
+                child.on('mouseleave', () => {
+                    document.body.style.cursor = 'default'
+                })
+            })
+        }
+
+        const addEventListenerToTextElements = () => {
+            //TODO
+        }
+
+        const setPage = (page: string) => {
+			selectedPage.value = page
+			localStorage.setItem('selectedPage', selectedPage.value)
+			//1. Remove all shapes from the canvas
+			//Empty all lists:
+			textList.value = []
+            textListCanvas.value = []
+			imageList.value = []
+			lineList.value = []
+			rectangleList.value = []
+			circleList.value = []
+			polygonList.value = []
+			arrowList.value = []
+			starList.value = []
+			quoteList.value = []
+
+			//2. Add all shapes from the selected page to the canvas
+			//Get the shapes from the local storage:
+			const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
+            if (stageHeight) {
+                configStagePreview.value.height = parseInt(stageHeight)
+            } 
+
 			const shapes = localStorage.getItem(selectedPage.value) || '[]'
 			if (shapes) {
 				const shapesArray = JSON.parse(shapes)
-				shapesArray.forEach((shape: any) => {
+				shapesArray.forEach(async (shape: any) => {
                     if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
                         shape.group.draggable = false
 						const image = new window.Image()
@@ -144,6 +193,7 @@ export default {
 							shape.image.image = image
 							quoteList.value.push(shape)
 						}
+                        //add event listener to the group
 						return
 					}
                     shape.draggable = false
@@ -184,7 +234,76 @@ export default {
 					} else if (shape.name.split('-')[0] == 'Polygon') {
 						polygonList.value.push(shape)
 					}
+                    await Promise.resolve()
+                    addEventListenerToElement(shape)
 				})
+			}
+		}
+
+        watch(selectedPage, () => {
+            localStorage.setItem('selectedPage', selectedPage.value)
+        })
+
+        //Load the shapes from local storage on mounted:
+		onMounted(() => {
+            selectedPage.value = localStorage.getItem('selectedPage') || 'Home'
+			const shapes = localStorage.getItem(selectedPage.value) || '[]'
+			if (shapes) {
+				const shapesArray = JSON.parse(shapes)
+				shapesArray.forEach(async (shape: any) => {
+                    if (shape.group && shape.group.name.split('-')[0] == 'Quote') {
+                        shape.group.draggable = false
+						const image = new window.Image()
+						image.src = "https://aux.iconspalace.com/uploads/left-quote-vector-icon-256.png"
+						image.onload = () => {
+							shape.image.image = image
+							quoteList.value.push(shape)
+						}
+                        //add event listener to the group
+						return
+					}
+                    shape.draggable = false
+					if (shape.name.split('-')[0] == 'Text') {
+                        if (shape.strokeWidth > 0) {
+                            shape.strokeWidth = shape.strokeWidth + 1
+                            textListCanvas.value.push(shape)
+                            textList.value.push(shape)
+                        } else if (shape.rotation != 0) {
+                            textListCanvas.value.push(shape)
+                        } else {
+                            textList.value.push(shape)
+                        }
+					} else if (shape.name.split('-')[0] == 'Image') {
+						const img = new window.Image()
+						img.src = shape.dataURLString
+						img.onload = () => {
+							shape.image = img
+                            if (shape.rotation != 0) {
+                                imageListCanvas.value.push(shape)
+                            } else if (shape.strokeWidth > 0){
+                                imageListCanvas.value.push(shape)
+                                imageList.value.push(shape)
+                            } else {
+                                imageList.value.push(shape)
+                            }
+						}
+					} else if (shape.name.split('-')[0] == 'Line') {
+						lineList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Arrow') {
+						arrowList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Star') {
+						starList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Circle') {
+						circleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Rectangle') {
+						rectangleList.value.push(shape)
+					} else if (shape.name.split('-')[0] == 'Polygon') {
+						polygonList.value.push(shape)
+					}
+                    await Promise.resolve()
+                    addEventListenerToElement(shape)
+				})
+                addEventListenerToTextElements()
 			}
             const stageHeight = localStorage.getItem('heightStage-' + selectedPage.value) || ''
             if (stageHeight) {
@@ -196,6 +315,7 @@ export default {
             }
             console.log('stageHeight', stageHeight)
             console.log('stageWidth', stageWidth)
+           
 		})
 
 
@@ -212,7 +332,10 @@ export default {
             arrowList,
             starList,
             hexToRgbA,
-            quoteList
+            quoteList,
+            previewLayer,
+            selectedPage,
+            setPage
         }
     }  
 }
